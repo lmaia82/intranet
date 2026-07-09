@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<parameters>
+	<mode type="module" name="error">
+		<parameter name="type" type="string" status="mandatory"/>
+	</mode>
+</parameters>
