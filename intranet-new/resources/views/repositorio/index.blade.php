@@ -9,6 +9,8 @@
 
         <nav class="text-sm mb-4">
             <a href="{{ route('repositorio.index') }}" class="text-blue-600">Raiz</a>
+            <span class="text-gray-400">|</span>
+            <a href="{{ route('repositorio.meus') }}" class="text-blue-600">📂 Meus Arquivos</a>
             @foreach($breadcrumb as $item)
                 / <a href="{{ route('repositorio.index', ['pasta' => $item->id]) }}" class="text-blue-600">{{ $item->nome }}</a>
             @endforeach
@@ -75,7 +77,12 @@
                     @endforeach
                     @foreach($arquivos as $arquivo)
                         <tr class="border-t">
-                            <td class="p-3"><a href="{{ route('repositorio.download', $arquivo) }}" class="text-blue-700">📄 {{ $arquivo->nome_original }}</a></td>
+                            <td class="p-3">
+                                <a href="{{ route('repositorio.download', $arquivo) }}" class="text-blue-700">📄 {{ $arquivo->nome_original }}</a>
+                                @if(in_array($arquivo->extensao, ['doc','docx','odt','xls','xlsx','ods','ppt','pptx','odp']))
+                                    <a href="{{ route('onlyoffice.editor', $arquivo) }}" class="text-green-700 text-sm ml-2">(abrir no editor)</a>
+                                @endif
+                            </td>
                             <td class="p-3 uppercase">{{ $arquivo->extensao }}</td>
                             <td class="p-3">{{ $arquivo->tamanhoFormatado() }}</td>
                             <td class="p-3 text-right whitespace-nowrap">

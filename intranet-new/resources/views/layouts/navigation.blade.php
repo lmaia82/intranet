@@ -30,9 +30,6 @@
                     <x-nav-link :href="route('repositorio.index')" :active="request()->routeIs('repositorio.*')">
                         {{ __('Repositório') }}
                     </x-nav-link>
-                    <x-nav-link :href="route('repositorio.meus')" :active="false">
-                        {{ __('Meus Arquivos') }}
-                    </x-nav-link>
                 </div>
             </div>
 
@@ -102,9 +99,6 @@
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('repositorio.index')" :active="request()->routeIs('repositorio.*')">
                 {{ __('Repositório') }}
-            </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('repositorio.meus')" :active="false">
-                {{ __('Meus Arquivos') }}
             </x-responsive-nav-link>
         </div>
 

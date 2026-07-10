@@ -65,3 +65,12 @@ Route::middleware('auth')->group(function () {
     Route::put('repositorio/arquivos/{arquivo}', [RepositorioController::class, 'updateArquivo'])->name('repositorio.arquivos.update');
     Route::delete('repositorio/arquivos/{arquivo}', [RepositorioController::class, 'destroyArquivo'])->name('repositorio.arquivos.destroy');
 });
+
+use App\Http\Controllers\OnlyOfficeController;
+
+Route::middleware('auth')->group(function () {
+    Route::get('repositorio/arquivos/{arquivo}/editor', [OnlyOfficeController::class, 'editor'])->name('onlyoffice.editor');
+});
+
+Route::get('onlyoffice/documento/{arquivo}', [OnlyOfficeController::class, 'documento'])->name('onlyoffice.documento')->middleware('signed');
+Route::post('onlyoffice/callback/{arquivo}', [OnlyOfficeController::class, 'callback'])->name('onlyoffice.callback')->middleware('signed');
