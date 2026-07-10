@@ -15,7 +15,7 @@ integração com AD/LDAP fica para o final, depois de todas as telas prontas.
 | Ramais / Telefones | ✅ Pronta (CRUD completo) |
 | Informativos / Mural de Avisos | ✅ Pronta (CRUD + upload de imagem) |
 | Agenda / Eventos | ✅ Pronta (CRUD completo) |
-| Repositório de Arquivos | ⬜ Pendente |
+| Repositório de Arquivos | ✅ Pronta (pastas, upload/download, MinIO) |
 | Artigos | ✅ Pronta (CRUD + busca + cadastro em lote) |
 | Painel de Administração | ⬜ Pendente |
 | Autenticação via AD/LDAP | ⬜ Pendente (substituirá o Breeze) |
