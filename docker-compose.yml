@@ -27,5 +27,29 @@ services:
   redis:
     image: redis:7-alpine
 
+  minio:
+    image: minio/minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin_dev
+    volumes:
+      - minio_data:/data
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+
+  minio-init:
+    image: minio/mc
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+      until (mc alias set local http://minio:9000 minioadmin minioadmin_dev) do echo 'aguardando minio...' && sleep 2; done;
+      mc mb -p local/repositorio;
+      exit 0;
+      "
+
 volumes:
   mysql_data:
+  minio_data:

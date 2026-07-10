@@ -48,3 +48,19 @@ Route::middleware('auth')->group(function () {
     Route::post('artigos-lote', [ArtigoController::class, 'loteImport'])->name('artigos.lote.import');
     Route::get('artigos-lote/template', [ArtigoController::class, 'loteTemplate'])->name('artigos.lote.template');
 });
+
+use App\Http\Controllers\RepositorioController;
+
+Route::middleware('auth')->group(function () {
+    Route::get('repositorio/{pasta?}', [RepositorioController::class, 'index'])->name('repositorio.index');
+    Route::post('repositorio/pastas', [RepositorioController::class, 'storePasta'])->name('repositorio.pastas.store');
+    Route::get('repositorio/pastas/{pasta}/editar', [RepositorioController::class, 'editPasta'])->name('repositorio.pastas.editar');
+    Route::put('repositorio/pastas/{pasta}', [RepositorioController::class, 'updatePasta'])->name('repositorio.pastas.update');
+    Route::delete('repositorio/pastas/{pasta}', [RepositorioController::class, 'destroyPasta'])->name('repositorio.pastas.destroy');
+
+    Route::post('repositorio/arquivos', [RepositorioController::class, 'storeArquivo'])->name('repositorio.arquivos.store');
+    Route::get('repositorio/arquivos/{arquivo}/download', [RepositorioController::class, 'download'])->name('repositorio.download');
+    Route::get('repositorio/arquivos/{arquivo}/editar', [RepositorioController::class, 'editArquivo'])->name('repositorio.arquivos.editar');
+    Route::put('repositorio/arquivos/{arquivo}', [RepositorioController::class, 'updateArquivo'])->name('repositorio.arquivos.update');
+    Route::delete('repositorio/arquivos/{arquivo}', [RepositorioController::class, 'destroyArquivo'])->name('repositorio.arquivos.destroy');
+});

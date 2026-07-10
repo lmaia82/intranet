@@ -60,6 +60,18 @@ return [
             'report' => false,
         ],
 
+        'arquivos' => [
+            'driver' => 's3',
+            'key' => env('ARQUIVOS_ACCESS_KEY_ID'),
+            'secret' => env('ARQUIVOS_SECRET_ACCESS_KEY'),
+            'region' => 'us-east-1',
+            'bucket' => env('ARQUIVOS_BUCKET'),
+            'endpoint' => env('ARQUIVOS_ENDPOINT'),
+            'use_path_style_endpoint' => env('ARQUIVOS_USE_PATH_STYLE_ENDPOINT', true),
+            'throw' => false,
+            'report' => false,
+        ],
+
     ],
 
     /*
