@@ -16,7 +16,7 @@ integração com AD/LDAP fica para o final, depois de todas as telas prontas.
 | Informativos / Mural de Avisos | ✅ Pronta (CRUD + upload de imagem) |
 | Agenda / Eventos | ✅ Pronta (CRUD completo) |
 | Repositório de Arquivos | ⬜ Pendente |
-| Artigos | ⬜ Pendente |
+| Artigos | ✅ Pronta (CRUD + busca + cadastro em lote) |
 | Painel de Administração | ⬜ Pendente |
 | Autenticação via AD/LDAP | ⬜ Pendente (substituirá o Breeze) |
 
