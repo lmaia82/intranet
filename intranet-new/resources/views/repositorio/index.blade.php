@@ -79,7 +79,7 @@
                         <tr class="border-t">
                             <td class="p-3">
                                 <a href="{{ route('repositorio.download', $arquivo) }}" class="text-blue-700">📄 {{ $arquivo->nome_original }}</a>
-                                @if(in_array($arquivo->extensao, ['doc','docx','odt','xls','xlsx','ods','ppt','pptx','odp']))
+                                @if(in_array($arquivo->extensao, ['doc','docx','odt','xls','xlsx','ods','ppt','pptx','odp','pdf']))
                                     <a href="{{ route('onlyoffice.editor', $arquivo) }}" class="text-green-700 text-sm ml-2">(abrir no editor)</a>
                                 @endif
                             </td>

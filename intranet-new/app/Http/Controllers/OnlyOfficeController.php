@@ -3,15 +3,22 @@
 namespace App\Http\Controllers;
 
 use App\Models\Arquivo;
+use App\Models\Pasta;
 use Firebase\JWT\JWT;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
+use PhpOffice\PhpPresentation\IOFactory as PresentationIOFactory;
+use PhpOffice\PhpPresentation\PhpPresentation;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpWord\IOFactory as WordIOFactory;
+use PhpOffice\PhpWord\PhpWord;
 
 class OnlyOfficeController extends Controller
 {
-    private const EXTENSOES_SUPORTADAS = ['doc', 'docx', 'odt', 'xls', 'xlsx', 'ods', 'ppt', 'pptx', 'odp'];
+    private const EXTENSOES_SUPORTADAS = ['doc', 'docx', 'odt', 'xls', 'xlsx', 'ods', 'ppt', 'pptx', 'odp', 'pdf'];
 
     public function editor(Arquivo $arquivo)
     {
@@ -24,7 +31,7 @@ class OnlyOfficeController extends Controller
         URL::forceRootUrl($urlOriginal);
 
         $documentType = match ($arquivo->extensao) {
-            'doc', 'docx', 'odt' => 'word',
+            'doc', 'docx', 'odt', 'pdf' => 'word',
             'xls', 'xlsx', 'ods' => 'cell',
             'ppt', 'pptx', 'odp' => 'slide',
         };
@@ -35,7 +42,7 @@ class OnlyOfficeController extends Controller
                 'key' => md5($arquivo->id . $arquivo->updated_at),
                 'title' => $arquivo->nome_original,
                 'url' => $documentUrl,
-                'permissions' => ['edit' => true, 'download' => true],
+                'permissions' => ['edit' => $arquivo->extensao !== 'pdf', 'download' => true],
             ],
             'documentType' => $documentType,
             'editorConfig' => [
@@ -66,5 +73,67 @@ class OnlyOfficeController extends Controller
         }
 
         return response()->json(['error' => 0]);
+    }
+
+    public function aplicacoes()
+    {
+        $pastaPessoal = Pasta::firstOrCreate(
+            ['user_id' => auth()->id(), 'parent_id' => null],
+            ['nome' => 'Meus Arquivos']
+        );
+
+        $documentos = $pastaPessoal->arquivos()
+            ->whereIn('extensao', self::EXTENSOES_SUPORTADAS)
+            ->latest()
+            ->get();
+
+        return view('repositorio.aplicacoes', compact('documentos'));
+    }
+
+    public function criar(Request $request)
+    {
+        $request->validate([
+            'tipo' => 'required|in:docx,xlsx,pptx',
+            'titulo' => 'nullable|string|max:100',
+        ]);
+
+        $pastaPessoal = Pasta::firstOrCreate(
+            ['user_id' => auth()->id(), 'parent_id' => null],
+            ['nome' => 'Meus Arquivos']
+        );
+
+        $titulo = $request->input('titulo') ?: 'Documento sem título';
+        $nomeArquivo = $titulo . '.' . $request->tipo;
+        $caminhoTemp = sys_get_temp_dir() . '/' . uniqid('doc') . '.' . $request->tipo;
+
+        switch ($request->tipo) {
+            case 'docx':
+                $phpWord = new PhpWord();
+                $phpWord->addSection();
+                WordIOFactory::createWriter($phpWord, 'Word2007')->save($caminhoTemp);
+                break;
+            case 'xlsx':
+                $spreadsheet = new Spreadsheet();
+                (new Xlsx($spreadsheet))->save($caminhoTemp);
+                break;
+            case 'pptx':
+                $presentation = new PhpPresentation();
+                PresentationIOFactory::createWriter($presentation, 'PowerPoint2007')->save($caminhoTemp);
+                break;
+        }
+
+        $caminhoStorage = 'uploads/' . uniqid() . '_' . $nomeArquivo;
+        Storage::disk('arquivos')->put($caminhoStorage, file_get_contents($caminhoTemp));
+        unlink($caminhoTemp);
+
+        $arquivo = Arquivo::create([
+            'pasta_id' => $pastaPessoal->id,
+            'nome_original' => $nomeArquivo,
+            'caminho' => $caminhoStorage,
+            'extensao' => $request->tipo,
+            'tamanho' => Storage::disk('arquivos')->size($caminhoStorage),
+        ]);
+
+        return redirect()->route('onlyoffice.editor', $arquivo);
     }
 }

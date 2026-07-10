@@ -30,6 +30,14 @@
                     <x-nav-link :href="route('repositorio.index')" :active="request()->routeIs('repositorio.*')">
                         {{ __('Repositório') }}
                     </x-nav-link>
+                    <x-nav-link :href="route('onlyoffice.aplicacoes')" :active="request()->routeIs('onlyoffice.aplicacoes')">
+                        {{ __('Aplicações') }}
+                    </x-nav-link>
+                    @if(auth()->user()->is_admin)
+                        <x-nav-link :href="route('admin.index')" :active="request()->routeIs('admin.*')">
+                            {{ __('Administração') }}
+                        </x-nav-link>
+                    @endif
                 </div>
             </div>
 
@@ -99,6 +107,9 @@
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('repositorio.index')" :active="request()->routeIs('repositorio.*')">
                 {{ __('Repositório') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('onlyoffice.aplicacoes')" :active="request()->routeIs('onlyoffice.aplicacoes')">
+                {{ __('Aplicações') }}
             </x-responsive-nav-link>
         </div>
 

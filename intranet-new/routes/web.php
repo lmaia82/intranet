@@ -74,3 +74,28 @@ Route::middleware('auth')->group(function () {
 
 Route::get('onlyoffice/documento/{arquivo}', [OnlyOfficeController::class, 'documento'])->name('onlyoffice.documento')->middleware('signed');
 Route::post('onlyoffice/callback/{arquivo}', [OnlyOfficeController::class, 'callback'])->name('onlyoffice.callback')->middleware('signed');
+
+Route::middleware('auth')->group(function () {
+    Route::get('aplicacoes', [OnlyOfficeController::class, 'aplicacoes'])->name('onlyoffice.aplicacoes');
+    Route::post('aplicacoes/criar', [OnlyOfficeController::class, 'criar'])->name('onlyoffice.criar');
+});
+
+use App\Http\Controllers\AdminController;
+
+Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/', [AdminController::class, 'index'])->name('index');
+
+    Route::get('setores', [AdminController::class, 'setores'])->name('setores');
+    Route::post('setores', [AdminController::class, 'storeSetor'])->name('setores.store');
+    Route::put('setores/{setor}', [AdminController::class, 'updateSetor'])->name('setores.update');
+    Route::delete('setores/{setor}', [AdminController::class, 'destroySetor'])->name('setores.destroy');
+
+    Route::get('usuarios', [AdminController::class, 'usuarios'])->name('usuarios');
+    Route::post('usuarios/{usuario}/toggle-admin', [AdminController::class, 'toggleAdmin'])->name('usuarios.toggle');
+    Route::delete('usuarios/{usuario}', [AdminController::class, 'destroyUsuario'])->name('usuarios.destroy');
+});
+
+Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('usuarios/criar', [AdminController::class, 'criarUsuarioForm'])->name('usuarios.criar');
+    Route::post('usuarios', [AdminController::class, 'storeUsuario'])->name('usuarios.store');
+});
