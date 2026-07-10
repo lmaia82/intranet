@@ -36,3 +36,15 @@ use App\Http\Controllers\EventoController;
 Route::middleware('auth')->group(function () {
     Route::resource('eventos', EventoController::class);
 });
+
+use App\Http\Controllers\ArtigoController;
+
+Route::middleware('auth')->group(function () {
+    Route::resource('artigos', ArtigoController::class);
+});
+
+Route::middleware('auth')->group(function () {
+    Route::get('artigos-lote', [ArtigoController::class, 'loteForm'])->name('artigos.lote.form');
+    Route::post('artigos-lote', [ArtigoController::class, 'loteImport'])->name('artigos.lote.import');
+    Route::get('artigos-lote/template', [ArtigoController::class, 'loteTemplate'])->name('artigos.lote.template');
+});
