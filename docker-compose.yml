@@ -50,6 +50,17 @@ services:
       exit 0;
       "
 
+  onlyoffice:
+    image: onlyoffice/documentserver
+    environment:
+      - JWT_ENABLED=true
+      - JWT_SECRET=troque_essa_chave_super_secreta_onlyoffice
+    volumes:
+      - onlyoffice_data:/var/www/onlyoffice/Data
+    ports:
+      - "8082:80"
+
 volumes:
   mysql_data:
   minio_data:
+  onlyoffice_data:
