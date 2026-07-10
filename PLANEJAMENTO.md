@@ -17,7 +17,7 @@ integração com AD/LDAP fica para o final, depois de todas as telas prontas.
 | Agenda / Eventos | ✅ Pronta (CRUD completo) |
 | Repositório de Arquivos | ✅ Pronta (pastas, upload/download, MinIO) |
 | Artigos | ✅ Pronta (CRUD + busca + cadastro em lote) |
-| Painel de Administração | ⬜ Pendente |
+| Painel de Administração | ✅ Pronta (setores, usuários, estatísticas) |
 | Autenticação via AD/LDAP | ⬜ Pendente (substituirá o Breeze) |
 
 ## Pendências técnicas anotadas
