@@ -52,6 +52,7 @@ Route::middleware('auth')->group(function () {
 use App\Http\Controllers\RepositorioController;
 
 Route::middleware('auth')->group(function () {
+    Route::get('meus-arquivos', [RepositorioController::class, 'meusArquivos'])->name('repositorio.meus');
     Route::get('repositorio/{pasta?}', [RepositorioController::class, 'index'])->name('repositorio.index');
     Route::post('repositorio/pastas', [RepositorioController::class, 'storePasta'])->name('repositorio.pastas.store');
     Route::get('repositorio/pastas/{pasta}/editar', [RepositorioController::class, 'editPasta'])->name('repositorio.pastas.editar');

@@ -15,6 +15,24 @@
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         {{ __('Dashboard') }}
                     </x-nav-link>
+                    <x-nav-link :href="route('telefones.index')" :active="request()->routeIs('telefones.*')">
+                        {{ __('Ramais') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('informativos.index')" :active="request()->routeIs('informativos.*')">
+                        {{ __('Informativos') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('eventos.index')" :active="request()->routeIs('eventos.*')">
+                        {{ __('Agenda') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('artigos.index')" :active="request()->routeIs('artigos.*')">
+                        {{ __('Artigos') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('repositorio.index')" :active="request()->routeIs('repositorio.*')">
+                        {{ __('Repositório') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('repositorio.meus')" :active="false">
+                        {{ __('Meus Arquivos') }}
+                    </x-nav-link>
                 </div>
             </div>
 
@@ -69,6 +87,24 @@
         <div class="pt-2 pb-3 space-y-1">
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 {{ __('Dashboard') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('telefones.index')" :active="request()->routeIs('telefones.*')">
+                {{ __('Ramais') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('informativos.index')" :active="request()->routeIs('informativos.*')">
+                {{ __('Informativos') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('eventos.index')" :active="request()->routeIs('eventos.*')">
+                {{ __('Agenda') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('artigos.index')" :active="request()->routeIs('artigos.*')">
+                {{ __('Artigos') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('repositorio.index')" :active="request()->routeIs('repositorio.*')">
+                {{ __('Repositório') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('repositorio.meus')" :active="false">
+                {{ __('Meus Arquivos') }}
             </x-responsive-nav-link>
         </div>
 

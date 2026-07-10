@@ -10,6 +10,16 @@ use Illuminate\Support\Facades\Storage;
 
 class RepositorioController extends Controller
 {
+    public function meusArquivos()
+    {
+        $pasta = Pasta::firstOrCreate(
+            ['user_id' => auth()->id(), 'parent_id' => null],
+            ['nome' => 'Meus Arquivos']
+        );
+
+        return redirect()->route('repositorio.index', ['pasta' => $pasta->id]);
+    }
+
     public function index(?Pasta $pasta = null)
     {
         $pastaAtual = $pasta;

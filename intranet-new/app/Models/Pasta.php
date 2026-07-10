@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Pasta extends Model
 {
-    protected $fillable = ['nome', 'parent_id', 'sector_id', 'is_private'];
+    protected $fillable = ['nome', 'parent_id', 'sector_id', 'is_private', 'user_id'];
 
     protected $casts = [
         'is_private' => 'boolean',
