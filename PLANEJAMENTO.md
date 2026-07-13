@@ -23,13 +23,14 @@ integração com AD/LDAP fica para o final, depois de todas as telas prontas.
 - **Identidade visual CETEM**: ✅ Aplicada (logo oficial, cores institucionais azul #0052CC/laranja #F4A000, tipografia Calibri/Arial). Falta ainda ajustar telas de login/registro (Breeze padrão).
 
 - **Notificação por e-mail de Informativos**: ✅ Pronta. Ao publicar um
-  Informativo, o sistema envia um e-mail (template com identidade visual
-  CETEM) para todos os usuários ou, se um setor for selecionado, apenas
-  para os usuários daquele setor (campo `sector_id` em `users`, ainda
-  provisório até a integração com AD/LDAP). Cada envio é registrado na
-  tabela `informativo_envios` (e-mail + data/hora), exibido na tela do
-  Informativo, com botão "Reenviar e-mails" para disparar um novo lote.
-  Testado localmente via Mailpit.
+  Informativo, o usuário pode marcar a opção "Enviar notificação por
+  e-mail ao publicar" (não é automático) para disparar um e-mail (template
+  com identidade visual CETEM) para todos os usuários ou, se um setor for
+  selecionado, apenas para os usuários daquele setor (campo `sector_id` em
+  `users`, ainda provisório até a integração com AD/LDAP). Cada envio é
+  registrado na tabela `informativo_envios` (e-mail + data/hora), exibido
+  na tela do Informativo, com botão "Reenviar e-mails" para disparar um
+  novo lote a qualquer momento. Testado localmente via Mailpit.
 
 ## Pendências técnicas anotadas
 

@@ -58,9 +58,14 @@ class InformativoController extends Controller
 
         $informativo = Informativo::create($validated);
 
-        $this->enviarNotificacoes($informativo);
+        $status = 'Informativo publicado com sucesso.';
 
-        return redirect()->route('informativos.index')->with('status', 'Informativo publicado com sucesso.');
+        if ($request->boolean('notificar_email')) {
+            $enviados = $this->enviarNotificacoes($informativo);
+            $status .= " E-mail enviado para {$enviados} destinatário(s).";
+        }
+
+        return redirect()->route('informativos.index')->with('status', $status);
     }
 
     public function edit(Informativo $informativo)

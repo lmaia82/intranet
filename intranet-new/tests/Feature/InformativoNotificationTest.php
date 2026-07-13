@@ -14,7 +14,26 @@ class InformativoNotificationTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_publicar_informativo_geral_notifica_todos_os_usuarios(): void
+    public function test_publicar_sem_marcar_notificacao_nao_envia_email(): void
+    {
+        Mail::fake();
+
+        $admin = User::factory()->create();
+        User::factory()->create();
+
+        $this->actingAs($admin)->post(route('informativos.store'), [
+            'title' => 'Aviso geral',
+            'content' => 'Conteudo',
+            'sector_id' => '',
+            'is_private' => '0',
+        ]);
+
+        $informativo = Informativo::firstOrFail();
+        $this->assertEquals(0, InformativoEnvio::where('informativo_id', $informativo->id)->count());
+        Mail::assertNothingSent();
+    }
+
+    public function test_publicar_com_notificacao_marcada_notifica_todos_os_usuarios(): void
     {
         Mail::fake();
 
@@ -27,6 +46,7 @@ class InformativoNotificationTest extends TestCase
             'content' => 'Conteudo',
             'sector_id' => '',
             'is_private' => '0',
+            'notificar_email' => '1',
         ]);
 
         $response->assertRedirect(route('informativos.index'));
@@ -36,7 +56,7 @@ class InformativoNotificationTest extends TestCase
         Mail::assertSent(\App\Mail\NovoInformativoMail::class, 3);
     }
 
-    public function test_publicar_informativo_de_setor_notifica_apenas_o_setor(): void
+    public function test_publicar_com_notificacao_e_setor_notifica_apenas_o_setor(): void
     {
         Mail::fake();
 
@@ -50,6 +70,7 @@ class InformativoNotificationTest extends TestCase
             'content' => 'Conteudo',
             'sector_id' => $sector->id,
             'is_private' => '1',
+            'notificar_email' => '1',
         ]);
 
         $informativo = Informativo::firstOrFail();
@@ -59,7 +80,7 @@ class InformativoNotificationTest extends TestCase
         $this->assertNotContains($foraDoSetor->email, $envios);
     }
 
-    public function test_reenviar_dispara_novo_lote_de_emails(): void
+    public function test_reenviar_dispara_lote_de_emails_mesmo_sem_notificacao_inicial(): void
     {
         Mail::fake();
 
@@ -74,13 +95,13 @@ class InformativoNotificationTest extends TestCase
         ]);
 
         $informativo = Informativo::firstOrFail();
-        $this->assertEquals(2, InformativoEnvio::count());
+        $this->assertEquals(0, InformativoEnvio::count());
 
         $this->actingAs($admin)->post(route('informativos.reenviar', $informativo))
             ->assertRedirect(route('informativos.show', $informativo));
 
-        $this->assertEquals(4, InformativoEnvio::count());
-        Mail::assertSent(\App\Mail\NovoInformativoMail::class, 4);
+        $this->assertEquals(2, InformativoEnvio::count());
+        Mail::assertSent(\App\Mail\NovoInformativoMail::class, 2);
     }
 
     public function test_pagina_show_exibe_historico_de_envios(): void
@@ -94,6 +115,7 @@ class InformativoNotificationTest extends TestCase
             'content' => 'Conteudo',
             'sector_id' => '',
             'is_private' => '0',
+            'notificar_email' => '1',
         ]);
 
         $informativo = Informativo::firstOrFail();
