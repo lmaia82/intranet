@@ -36,6 +36,17 @@ integração com AD/LDAP fica para o final, depois de todas as telas prontas.
   ou remover linhas antes de confirmar o reenvio. Testado localmente via
   Mailpit.
 
+- **Eventos gravados**: ✅ Pronta. Nova seção na tela de Agenda/Eventos,
+  abaixo dos eventos anteriores, listando gravações (data + título com
+  link direto para o vídeo no YouTube, aberto em nova aba). CRUD próprio
+  (`evento_gravados`) e cadastro em lote via CSV (mesmo padrão do
+  cadastro em lote de Artigos).
+
+- **Cadastro em lote de Ramais**: ✅ Pronta. Tela de Ramais/Telefones
+  ganhou opção "Cadastro em lote" (mesmo padrão de Artigos/Eventos
+  gravados): CSV com nome, telefone, setor (deve bater com um setor já
+  cadastrado), e-mail e cargo.
+
 ## Pendências técnicas anotadas
 
 - **Migração de dados do legado** (Ramais, Eventos, Informativos): existe

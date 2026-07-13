@@ -59,6 +59,45 @@
                 <p class="text-gray-500">Nenhum evento anterior.</p>
             @endforelse
         </div>
-        <div class="mt-4">{{ $anteriores->links() }}</div>
+        <div class="mt-4 mb-8">{{ $anteriores->links() }}</div>
+
+        <div class="flex justify-between items-center mb-2">
+            <h3 class="font-semibold text-lg">Eventos gravados</h3>
+            <div class="flex items-center gap-3">
+                <a href="{{ route('eventos-gravados.lote.form') }}" class="text-blue-600 text-sm">Cadastro em lote</a>
+                <a href="{{ route('eventos-gravados.create') }}" class="px-4 py-2 bg-blue-600 text-white rounded text-sm">Novo evento gravado</a>
+            </div>
+        </div>
+        <div class="bg-white shadow rounded overflow-hidden">
+            <table class="w-full text-left">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="p-3">Data</th>
+                        <th class="p-3">Título</th>
+                        <th class="p-3"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($gravados as $gravado)
+                        <tr class="border-t">
+                            <td class="p-3">{{ $gravado->data->format('d/m/Y') }}</td>
+                            <td class="p-3">
+                                <a href="{{ $gravado->youtube_url }}" target="_blank" rel="noopener" class="text-blue-600 hover:underline">{{ $gravado->titulo }}</a>
+                            </td>
+                            <td class="p-3 text-right whitespace-nowrap">
+                                <a href="{{ route('eventos-gravados.edit', $gravado) }}" class="text-blue-600">Editar</a>
+                                <form action="{{ route('eventos-gravados.destroy', $gravado) }}" method="POST" class="inline" onsubmit="return confirm('Remover este evento gravado?')">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="text-red-600 ml-2">Remover</button>
+                                </form>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr><td colspan="3" class="p-3 text-gray-500">Nenhum evento gravado cadastrado.</td></tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
     </div>
 </x-app-layout>

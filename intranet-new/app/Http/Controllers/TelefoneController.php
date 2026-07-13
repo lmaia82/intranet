@@ -72,4 +72,72 @@ class TelefoneController extends Controller
         $telefone->delete();
         return redirect()->route('telefones.index')->with('status', 'Ramal removido.');
     }
+
+    public function loteForm()
+    {
+        return view('telefones.lote');
+    }
+
+    public function loteTemplate()
+    {
+        $csv = "nome,telefone,setor,email,cargo\n";
+        $csv .= "Fulano de Tal,2222,TI,fulano@cetem.gov.br,Analista\n";
+
+        return response($csv, 200, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="modelo_ramais.csv"',
+        ]);
+    }
+
+    public function loteImport(Request $request)
+    {
+        $request->validate(['csv' => 'required|file|mimes:csv,txt']);
+
+        $conteudo = file_get_contents($request->file('csv')->getRealPath());
+        $conteudo = preg_replace('/^\xEF\xBB\xBF/', '', $conteudo);
+        $linhas = preg_split('/\r\n|\r|\n/', $conteudo);
+        $linhas = array_values(array_filter($linhas, fn($l) => trim($l) !== ''));
+
+        $header = array_map('trim', str_getcsv(array_shift($linhas)));
+
+        $sucesso = 0;
+        $erros = [];
+        $linhaNum = 1;
+
+        foreach ($linhas as $linhaTexto) {
+            $linhaNum++;
+            $row = array_map('trim', str_getcsv($linhaTexto));
+            $dados = array_combine($header, $row);
+
+            $nome = trim($dados['nome'] ?? '');
+            $telefone = trim($dados['telefone'] ?? '');
+            $setorNome = trim($dados['setor'] ?? '');
+
+            if ($nome === '' || $telefone === '' || $setorNome === '') {
+                $erros[] = "Linha {$linhaNum}: campos obrigatórios em branco.";
+                continue;
+            }
+
+            $sector = Sector::whereRaw('LOWER(name) = ?', [mb_strtolower($setorNome)])->first();
+
+            if (!$sector) {
+                $erros[] = "Linha {$linhaNum}: setor '{$setorNome}' não encontrado. Cadastre-o antes em Administração > Setores.";
+                continue;
+            }
+
+            Telefone::create([
+                'nome' => $nome,
+                'telefone' => $telefone,
+                'sector_id' => $sector->id,
+                'email' => trim($dados['email'] ?? '') ?: null,
+                'cargo' => trim($dados['cargo'] ?? '') ?: null,
+            ]);
+
+            $sucesso++;
+        }
+
+        return redirect()->route('telefones.lote.form')
+            ->with('status', "{$sucesso} ramal(is) importado(s) com sucesso.")
+            ->with('erros_lote', $erros);
+    }
 }

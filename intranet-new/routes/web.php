@@ -22,6 +22,9 @@ use App\Http\Controllers\TelefoneController;
 
 Route::middleware('auth')->group(function () {
     Route::resource('telefones', TelefoneController::class);
+    Route::get('telefones-lote', [TelefoneController::class, 'loteForm'])->name('telefones.lote.form');
+    Route::post('telefones-lote', [TelefoneController::class, 'loteImport'])->name('telefones.lote.import');
+    Route::get('telefones-lote/template', [TelefoneController::class, 'loteTemplate'])->name('telefones.lote.template');
 });
 
 use App\Http\Controllers\InformativoController;
@@ -36,6 +39,17 @@ use App\Http\Controllers\EventoController;
 
 Route::middleware('auth')->group(function () {
     Route::resource('eventos', EventoController::class);
+});
+
+use App\Http\Controllers\EventoGravadoController;
+
+Route::middleware('auth')->group(function () {
+    Route::resource('eventos-gravados', EventoGravadoController::class)
+        ->except(['index', 'show'])
+        ->parameters(['eventos-gravados' => 'evento_gravado']);
+    Route::get('eventos-gravados-lote', [EventoGravadoController::class, 'loteForm'])->name('eventos-gravados.lote.form');
+    Route::post('eventos-gravados-lote', [EventoGravadoController::class, 'loteImport'])->name('eventos-gravados.lote.import');
+    Route::get('eventos-gravados-lote/template', [EventoGravadoController::class, 'loteTemplate'])->name('eventos-gravados.lote.template');
 });
 
 use App\Http\Controllers\ArtigoController;

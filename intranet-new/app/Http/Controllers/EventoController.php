@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Evento;
+use App\Models\EventoGravado;
 use Illuminate\Http\Request;
 
 class EventoController extends Controller
@@ -11,8 +12,9 @@ class EventoController extends Controller
     {
         $proximos = Evento::where('dt_start', '>=', now()->toDateString())->orderBy('dt_start')->get();
         $anteriores = Evento::where('dt_start', '<', now()->toDateString())->orderBy('dt_start', 'desc')->paginate(10);
+        $gravados = EventoGravado::orderBy('data', 'desc')->get();
 
-        return view('eventos.index', compact('proximos', 'anteriores'));
+        return view('eventos.index', compact('proximos', 'anteriores', 'gravados'));
     }
 
     public function create()

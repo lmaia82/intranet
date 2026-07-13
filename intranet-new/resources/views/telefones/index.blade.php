@@ -13,7 +13,10 @@
                 <input type="text" name="busca" value="{{ request('busca') }}" placeholder="Buscar por nome..." class="border-gray-300 rounded">
                 <button class="px-3 py-1 bg-gray-200 rounded">Buscar</button>
             </form>
-            <a href="{{ route('telefones.create') }}" class="px-4 py-2 bg-blue-600 text-white rounded">Novo ramal</a>
+            <div class="flex items-center gap-3">
+                <a href="{{ route('telefones.lote.form') }}" class="text-blue-600 text-sm">Cadastro em lote</a>
+                <a href="{{ route('telefones.create') }}" class="px-4 py-2 bg-blue-600 text-white rounded">Novo ramal</a>
+            </div>
         </div>
 
         <div class="mb-4 flex flex-wrap gap-1">
