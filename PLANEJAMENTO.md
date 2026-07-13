@@ -20,6 +20,8 @@ integração com AD/LDAP fica para o final, depois de todas as telas prontas.
 | Painel de Administração | ✅ Pronta (setores, usuários, estatísticas) |
 | Autenticação via AD/LDAP | ⬜ Pendente (substituirá o Breeze) |
 
+- **Identidade visual CETEM**: ✅ Aplicada (logo oficial, cores institucionais azul #0052CC/laranja #F4A000, tipografia Calibri/Arial). Falta ainda ajustar telas de login/registro (Breeze padrão).
+
 ## Pendências técnicas anotadas
 
 - **Migração de dados do legado** (Ramais, Eventos, Informativos): existe
