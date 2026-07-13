@@ -34,6 +34,16 @@
                 </select>
                 @error('sector_id') <p class="text-red-600 text-sm">{{ $message }}</p> @enderror
             </div>
+            <div>
+                <label class="block text-sm font-medium">Grupo</label>
+                <select name="group_id" class="mt-1 block w-full border-gray-300 rounded">
+                    <option value="">(nenhum)</option>
+                    @foreach($grupos as $grupo)
+                        <option value="{{ $grupo->id }}" @selected(old('group_id') == $grupo->id)>{{ $grupo->name }}</option>
+                    @endforeach
+                </select>
+                @error('group_id') <p class="text-red-600 text-sm">{{ $message }}</p> @enderror
+            </div>
             <div class="flex items-center gap-2">
                 <input type="checkbox" name="is_admin" value="1" id="is_admin">
                 <label for="is_admin" class="text-sm">Administrador</label>

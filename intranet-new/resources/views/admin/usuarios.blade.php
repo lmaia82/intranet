@@ -7,7 +7,9 @@
             <div class="mb-4 p-4 bg-green-100 text-green-800 rounded">{{ session('status') }}</div>
         @endif
 
-        <div class="flex justify-end mb-4">
+        <div class="flex justify-end mb-4 gap-3">
+            <a href="{{ route('admin.usuarios.grupo-lote.form') }}" class="px-4 py-2 bg-gray-200 rounded">Associar grupos em lote</a>
+            <a href="{{ route('admin.usuarios.lote.form') }}" class="px-4 py-2 bg-gray-200 rounded">Cadastro em lote</a>
             <a href="{{ route('admin.usuarios.criar') }}" class="px-4 py-2 bg-blue-600 text-white rounded">Novo usuário</a>
         </div>
         <div class="bg-white shadow rounded overflow-hidden">
@@ -17,6 +19,7 @@
                         <th class="p-3">Nome</th>
                         <th class="p-3">E-mail</th>
                         <th class="p-3">Setor</th>
+                        <th class="p-3">Grupo</th>
                         <th class="p-3">Admin</th>
                         <th class="p-3"></th>
                     </tr>
@@ -34,6 +37,18 @@
                                         <option value="">(nenhum)</option>
                                         @foreach($setores as $setor)
                                             <option value="{{ $setor->id }}" @selected($usuario->sector_id == $setor->id)>{{ $setor->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </form>
+                            </td>
+                            <td class="p-3">
+                                <form action="{{ route('admin.usuarios.grupo', $usuario) }}" method="POST">
+                                    @csrf
+                                    @method('PUT')
+                                    <select name="group_id" class="border-gray-300 rounded text-sm" onchange="this.form.submit()">
+                                        <option value="">(nenhum)</option>
+                                        @foreach($grupos as $grupo)
+                                            <option value="{{ $grupo->id }}" @selected($usuario->group_id == $grupo->id)>{{ $grupo->name }}</option>
                                         @endforeach
                                     </select>
                                 </form>

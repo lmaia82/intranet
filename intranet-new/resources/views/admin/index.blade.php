@@ -17,6 +17,10 @@
                 <p class="text-sm text-gray-500">Setores</p>
             </div>
             <div class="bg-white shadow rounded p-4 text-center">
+                <p class="text-3xl font-bold text-blue-600">{{ $stats['grupos'] }}</p>
+                <p class="text-sm text-gray-500">Grupos</p>
+            </div>
+            <div class="bg-white shadow rounded p-4 text-center">
                 <p class="text-3xl font-bold text-blue-600">{{ $stats['ramais'] }}</p>
                 <p class="text-sm text-gray-500">Ramais</p>
             </div>
@@ -45,7 +49,11 @@
             </a>
             <a href="{{ route('admin.usuarios') }}" class="bg-white shadow rounded p-6 hover:bg-gray-50">
                 <p class="font-semibold text-lg">👤 Gerenciar Usuários</p>
-                <p class="text-sm text-gray-500">Promover administradores, remover usuários</p>
+                <p class="text-sm text-gray-500">Promover administradores, remover usuários, cadastro em lote</p>
+            </a>
+            <a href="{{ route('admin.grupos') }}" class="bg-white shadow rounded p-6 hover:bg-gray-50">
+                <p class="font-semibold text-lg">🔐 Gerenciar Grupos</p>
+                <p class="text-sm text-gray-500">Definir grupos com permissões de ver/criar por tela</p>
             </a>
         </div>
     </div>

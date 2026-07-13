@@ -21,24 +21,30 @@ require __DIR__.'/auth.php';
 use App\Http\Controllers\TelefoneController;
 
 Route::middleware('auth')->group(function () {
-    Route::resource('telefones', TelefoneController::class);
-    Route::get('telefones-lote', [TelefoneController::class, 'loteForm'])->name('telefones.lote.form');
-    Route::post('telefones-lote', [TelefoneController::class, 'loteImport'])->name('telefones.lote.import');
-    Route::get('telefones-lote/template', [TelefoneController::class, 'loteTemplate'])->name('telefones.lote.template');
+    Route::resource('telefones', TelefoneController::class)
+        ->middlewareFor(['index', 'show'], 'permission:ramais.ver')
+        ->middlewareFor(['create', 'store', 'edit', 'update', 'destroy'], 'permission:ramais.criar');
+    Route::get('telefones-lote', [TelefoneController::class, 'loteForm'])->name('telefones.lote.form')->middleware('permission:ramais.criar');
+    Route::post('telefones-lote', [TelefoneController::class, 'loteImport'])->name('telefones.lote.import')->middleware('permission:ramais.criar');
+    Route::get('telefones-lote/template', [TelefoneController::class, 'loteTemplate'])->name('telefones.lote.template')->middleware('permission:ramais.criar');
 });
 
 use App\Http\Controllers\InformativoController;
 
 Route::middleware('auth')->group(function () {
-    Route::resource('informativos', InformativoController::class);
-    Route::get('informativos/{informativo}/reenviar', [InformativoController::class, 'reenviarForm'])->name('informativos.reenviar.form');
-    Route::post('informativos/{informativo}/reenviar', [InformativoController::class, 'reenviar'])->name('informativos.reenviar');
+    Route::resource('informativos', InformativoController::class)
+        ->middlewareFor(['index', 'show'], 'permission:informativos.ver')
+        ->middlewareFor(['create', 'store', 'edit', 'update', 'destroy'], 'permission:informativos.criar');
+    Route::get('informativos/{informativo}/reenviar', [InformativoController::class, 'reenviarForm'])->name('informativos.reenviar.form')->middleware('permission:informativos.criar');
+    Route::post('informativos/{informativo}/reenviar', [InformativoController::class, 'reenviar'])->name('informativos.reenviar')->middleware('permission:informativos.criar');
 });
 
 use App\Http\Controllers\EventoController;
 
 Route::middleware('auth')->group(function () {
-    Route::resource('eventos', EventoController::class);
+    Route::resource('eventos', EventoController::class)
+        ->middlewareFor(['index', 'show'], 'permission:eventos.ver')
+        ->middlewareFor(['create', 'store', 'edit', 'update', 'destroy'], 'permission:eventos.criar');
 });
 
 use App\Http\Controllers\EventoGravadoController;
@@ -46,36 +52,42 @@ use App\Http\Controllers\EventoGravadoController;
 Route::middleware('auth')->group(function () {
     Route::resource('eventos-gravados', EventoGravadoController::class)
         ->except(['index', 'show'])
-        ->parameters(['eventos-gravados' => 'evento_gravado']);
-    Route::get('eventos-gravados-lote', [EventoGravadoController::class, 'loteForm'])->name('eventos-gravados.lote.form');
-    Route::post('eventos-gravados-lote', [EventoGravadoController::class, 'loteImport'])->name('eventos-gravados.lote.import');
-    Route::get('eventos-gravados-lote/template', [EventoGravadoController::class, 'loteTemplate'])->name('eventos-gravados.lote.template');
+        ->parameters(['eventos-gravados' => 'evento_gravado'])
+        ->middleware('permission:eventos.criar');
+    Route::get('eventos-gravados-lote', [EventoGravadoController::class, 'loteForm'])->name('eventos-gravados.lote.form')->middleware('permission:eventos.criar');
+    Route::post('eventos-gravados-lote', [EventoGravadoController::class, 'loteImport'])->name('eventos-gravados.lote.import')->middleware('permission:eventos.criar');
+    Route::get('eventos-gravados-lote/template', [EventoGravadoController::class, 'loteTemplate'])->name('eventos-gravados.lote.template')->middleware('permission:eventos.criar');
 });
 
 use App\Http\Controllers\ArtigoController;
 
 Route::middleware('auth')->group(function () {
-    Route::resource('artigos', ArtigoController::class);
+    Route::resource('artigos', ArtigoController::class)
+        ->middlewareFor(['index', 'show'], 'permission:artigos.ver')
+        ->middlewareFor(['create', 'store', 'edit', 'update', 'destroy'], 'permission:artigos.criar');
 });
 
 Route::middleware('auth')->group(function () {
-    Route::get('artigos-lote', [ArtigoController::class, 'loteForm'])->name('artigos.lote.form');
-    Route::post('artigos-lote', [ArtigoController::class, 'loteImport'])->name('artigos.lote.import');
-    Route::get('artigos-lote/template', [ArtigoController::class, 'loteTemplate'])->name('artigos.lote.template');
+    Route::get('artigos-lote', [ArtigoController::class, 'loteForm'])->name('artigos.lote.form')->middleware('permission:artigos.criar');
+    Route::post('artigos-lote', [ArtigoController::class, 'loteImport'])->name('artigos.lote.import')->middleware('permission:artigos.criar');
+    Route::get('artigos-lote/template', [ArtigoController::class, 'loteTemplate'])->name('artigos.lote.template')->middleware('permission:artigos.criar');
 });
 
 use App\Http\Controllers\RepositorioController;
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'permission:repositorio.ver'])->group(function () {
     Route::get('meus-arquivos', [RepositorioController::class, 'meusArquivos'])->name('repositorio.meus');
     Route::get('repositorio/{pasta?}', [RepositorioController::class, 'index'])->name('repositorio.index');
+    Route::get('repositorio/arquivos/{arquivo}/download', [RepositorioController::class, 'download'])->name('repositorio.download');
+});
+
+Route::middleware(['auth', 'permission:repositorio.criar'])->group(function () {
     Route::post('repositorio/pastas', [RepositorioController::class, 'storePasta'])->name('repositorio.pastas.store');
     Route::get('repositorio/pastas/{pasta}/editar', [RepositorioController::class, 'editPasta'])->name('repositorio.pastas.editar');
     Route::put('repositorio/pastas/{pasta}', [RepositorioController::class, 'updatePasta'])->name('repositorio.pastas.update');
     Route::delete('repositorio/pastas/{pasta}', [RepositorioController::class, 'destroyPasta'])->name('repositorio.pastas.destroy');
 
     Route::post('repositorio/arquivos', [RepositorioController::class, 'storeArquivo'])->name('repositorio.arquivos.store');
-    Route::get('repositorio/arquivos/{arquivo}/download', [RepositorioController::class, 'download'])->name('repositorio.download');
     Route::get('repositorio/arquivos/{arquivo}/editar', [RepositorioController::class, 'editArquivo'])->name('repositorio.arquivos.editar');
     Route::put('repositorio/arquivos/{arquivo}', [RepositorioController::class, 'updateArquivo'])->name('repositorio.arquivos.update');
     Route::delete('repositorio/arquivos/{arquivo}', [RepositorioController::class, 'destroyArquivo'])->name('repositorio.arquivos.destroy');
@@ -105,10 +117,26 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::put('setores/{setor}', [AdminController::class, 'updateSetor'])->name('setores.update');
     Route::delete('setores/{setor}', [AdminController::class, 'destroySetor'])->name('setores.destroy');
 
+    Route::get('grupos', [AdminController::class, 'grupos'])->name('grupos');
+    Route::get('grupos/criar', [AdminController::class, 'criarGrupoForm'])->name('grupos.criar');
+    Route::post('grupos', [AdminController::class, 'storeGrupo'])->name('grupos.store');
+    Route::get('grupos/{grupo}/editar', [AdminController::class, 'editarGrupoForm'])->name('grupos.editar');
+    Route::put('grupos/{grupo}', [AdminController::class, 'updateGrupo'])->name('grupos.update');
+    Route::delete('grupos/{grupo}', [AdminController::class, 'destroyGrupo'])->name('grupos.destroy');
+
     Route::get('usuarios', [AdminController::class, 'usuarios'])->name('usuarios');
     Route::post('usuarios/{usuario}/toggle-admin', [AdminController::class, 'toggleAdmin'])->name('usuarios.toggle');
     Route::put('usuarios/{usuario}/setor', [AdminController::class, 'updateUsuarioSetor'])->name('usuarios.setor');
+    Route::put('usuarios/{usuario}/grupo', [AdminController::class, 'updateUsuarioGrupo'])->name('usuarios.grupo');
     Route::delete('usuarios/{usuario}', [AdminController::class, 'destroyUsuario'])->name('usuarios.destroy');
+
+    Route::get('usuarios-lote', [AdminController::class, 'usuariosLoteForm'])->name('usuarios.lote.form');
+    Route::post('usuarios-lote', [AdminController::class, 'usuariosLoteImport'])->name('usuarios.lote.import');
+    Route::get('usuarios-lote/template', [AdminController::class, 'usuariosLoteTemplate'])->name('usuarios.lote.template');
+
+    Route::get('usuarios-grupo-lote', [AdminController::class, 'usuariosGrupoLoteForm'])->name('usuarios.grupo-lote.form');
+    Route::post('usuarios-grupo-lote', [AdminController::class, 'usuariosGrupoLoteImport'])->name('usuarios.grupo-lote.import');
+    Route::get('usuarios-grupo-lote/template', [AdminController::class, 'usuariosGrupoLoteTemplate'])->name('usuarios.grupo-lote.template');
 });
 
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {

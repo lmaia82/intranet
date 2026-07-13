@@ -47,6 +47,19 @@ integração com AD/LDAP fica para o final, depois de todas as telas prontas.
   gravados): CSV com nome, telefone, setor (deve bater com um setor já
   cadastrado), e-mail e cargo.
 
+- **Grupos de permissão**: ✅ Pronta. "Tela Inicial" renomeada (era
+  "Dashboard"). Admin > Grupos permite criar grupos com permissões
+  flexíveis de "Ver" e "Criar/editar" por tela (Ramais, Informativos,
+  Agenda, Artigos, Repositório) — ex.: um grupo só lê Informativos,
+  outro pode publicá-los. Usuário sem grupo não acessa nada (exceto
+  administradores, que ignoram a checagem). Cada usuário tem um único
+  grupo (`users.group_id`), ajustável individualmente ou em lote (CSV
+  e-mail+grupo). Cadastro de usuários também ganhou lote (CSV com
+  nome/e-mail/senha/setor/grupo/admin). A migração cria um grupo
+  padrão "Colaboradores" com acesso total e migra todos os usuários
+  existentes para ele, então nada quebra após o `migrate` — a
+  restrição por grupo é opt-in via a tela de Admin > Grupos.
+
 ## Pendências técnicas anotadas
 
 - **Migração de dados do legado** (Ramais, Eventos, Informativos): existe

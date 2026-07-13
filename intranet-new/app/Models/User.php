@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-#[Fillable(['name', 'email', 'password', 'is_admin', 'sector_id'])]
+#[Fillable(['name', 'email', 'password', 'is_admin', 'sector_id', 'group_id'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -27,11 +27,26 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_admin' => 'boolean',
         ];
     }
 
     public function sector()
     {
         return $this->belongsTo(Sector::class);
+    }
+
+    public function group()
+    {
+        return $this->belongsTo(Group::class);
+    }
+
+    public function hasPermission(string $key): bool
+    {
+        if ($this->is_admin) {
+            return true;
+        }
+
+        return $this->group?->permissions->contains('key', $key) ?? false;
     }
 }
