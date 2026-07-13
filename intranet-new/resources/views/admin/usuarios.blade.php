@@ -16,6 +16,7 @@
                     <tr>
                         <th class="p-3">Nome</th>
                         <th class="p-3">E-mail</th>
+                        <th class="p-3">Setor</th>
                         <th class="p-3">Admin</th>
                         <th class="p-3"></th>
                     </tr>
@@ -25,6 +26,18 @@
                         <tr class="border-t">
                             <td class="p-3">{{ $usuario->name }}</td>
                             <td class="p-3">{{ $usuario->email }}</td>
+                            <td class="p-3">
+                                <form action="{{ route('admin.usuarios.setor', $usuario) }}" method="POST">
+                                    @csrf
+                                    @method('PUT')
+                                    <select name="sector_id" class="border-gray-300 rounded text-sm" onchange="this.form.submit()">
+                                        <option value="">(nenhum)</option>
+                                        @foreach($setores as $setor)
+                                            <option value="{{ $setor->id }}" @selected($usuario->sector_id == $setor->id)>{{ $setor->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </form>
+                            </td>
                             <td class="p-3">{{ $usuario->is_admin ? 'Sim' : 'Não' }}</td>
                             <td class="p-3 text-right whitespace-nowrap">
                                 @if($usuario->id !== auth()->id())

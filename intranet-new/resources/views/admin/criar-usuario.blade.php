@@ -24,6 +24,16 @@
                 <label class="block text-sm font-medium">Confirmar senha</label>
                 <input type="password" name="password_confirmation" class="mt-1 block w-full border-gray-300 rounded">
             </div>
+            <div>
+                <label class="block text-sm font-medium">Setor</label>
+                <select name="sector_id" class="mt-1 block w-full border-gray-300 rounded">
+                    <option value="">(nenhum)</option>
+                    @foreach($setores as $setor)
+                        <option value="{{ $setor->id }}" @selected(old('sector_id') == $setor->id)>{{ $setor->name }}</option>
+                    @endforeach
+                </select>
+                @error('sector_id') <p class="text-red-600 text-sm">{{ $message }}</p> @enderror
+            </div>
             <div class="flex items-center gap-2">
                 <input type="checkbox" name="is_admin" value="1" id="is_admin">
                 <label for="is_admin" class="text-sm">Administrador</label>

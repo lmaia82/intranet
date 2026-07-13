@@ -17,4 +17,9 @@ class Informativo extends Model
     {
         return $this->belongsTo(Sector::class);
     }
+
+    public function envios()
+    {
+        return $this->hasMany(InformativoEnvio::class)->latest('enviado_em');
+    }
 }

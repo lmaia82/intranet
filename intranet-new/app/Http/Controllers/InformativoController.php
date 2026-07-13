@@ -2,9 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\NovoInformativoMail;
 use App\Models\Informativo;
+use App\Models\InformativoEnvio;
 use App\Models\Sector;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 
 class InformativoController extends Controller
 {
@@ -24,6 +28,8 @@ class InformativoController extends Controller
 
     public function show(Informativo $informativo)
     {
+        $informativo->load('sector', 'envios');
+
         return view('informativos.show', compact('informativo'));
     }
 
@@ -50,7 +56,9 @@ class InformativoController extends Controller
             $validated['image'] = $request->file('image')->store('informativos', 'public');
         }
 
-        Informativo::create($validated);
+        $informativo = Informativo::create($validated);
+
+        $this->enviarNotificacoes($informativo);
 
         return redirect()->route('informativos.index')->with('status', 'Informativo publicado com sucesso.');
     }
@@ -86,5 +94,41 @@ class InformativoController extends Controller
     {
         $informativo->delete();
         return redirect()->route('informativos.index')->with('status', 'Informativo removido.');
+    }
+
+    public function reenviar(Informativo $informativo)
+    {
+        $enviados = $this->enviarNotificacoes($informativo);
+
+        return redirect()->route('informativos.show', $informativo)
+            ->with('status', "E-mail reenviado para {$enviados} destinatário(s).");
+    }
+
+    private function enviarNotificacoes(Informativo $informativo): int
+    {
+        $destinatarios = $this->destinatarios($informativo);
+
+        foreach ($destinatarios as $usuario) {
+            Mail::to($usuario->email)->send(new NovoInformativoMail($informativo));
+
+            InformativoEnvio::create([
+                'informativo_id' => $informativo->id,
+                'email' => $usuario->email,
+                'enviado_em' => now(),
+            ]);
+        }
+
+        return $destinatarios->count();
+    }
+
+    private function destinatarios(Informativo $informativo)
+    {
+        $query = User::query();
+
+        if ($informativo->sector_id) {
+            $query->where('sector_id', $informativo->sector_id);
+        }
+
+        return $query->get();
     }
 }

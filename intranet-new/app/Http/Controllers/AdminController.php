@@ -58,12 +58,14 @@ class AdminController extends Controller
     public function usuarios()
     {
         $usuarios = User::orderBy('name')->get();
-        return view('admin.usuarios', compact('usuarios'));
+        $setores = Sector::orderBy('name')->get();
+        return view('admin.usuarios', compact('usuarios', 'setores'));
     }
 
     public function criarUsuarioForm()
     {
-        return view('admin.criar-usuario');
+        $setores = Sector::orderBy('name')->get();
+        return view('admin.criar-usuario', compact('setores'));
     }
 
     public function storeUsuario(Request $request)
@@ -72,6 +74,7 @@ class AdminController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email',
             'password' => 'required|confirmed|min:8',
+            'sector_id' => 'nullable|exists:sectors,id',
         ]);
 
         User::create([
@@ -79,9 +82,17 @@ class AdminController extends Controller
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
             'is_admin' => $request->boolean('is_admin'),
+            'sector_id' => $validated['sector_id'] ?? null,
         ]);
 
         return redirect()->route('admin.usuarios')->with('status', 'Usuário criado com sucesso.');
+    }
+
+    public function updateUsuarioSetor(Request $request, User $usuario)
+    {
+        $validated = $request->validate(['sector_id' => 'nullable|exists:sectors,id']);
+        $usuario->update(['sector_id' => $validated['sector_id'] ?? null]);
+        return redirect()->route('admin.usuarios')->with('status', 'Setor do usuário atualizado.');
     }
 
     public function toggleAdmin(User $usuario)

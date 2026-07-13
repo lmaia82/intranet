@@ -28,6 +28,7 @@ use App\Http\Controllers\InformativoController;
 
 Route::middleware('auth')->group(function () {
     Route::resource('informativos', InformativoController::class);
+    Route::post('informativos/{informativo}/reenviar', [InformativoController::class, 'reenviar'])->name('informativos.reenviar');
 });
 
 use App\Http\Controllers\EventoController;
@@ -91,6 +92,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 
     Route::get('usuarios', [AdminController::class, 'usuarios'])->name('usuarios');
     Route::post('usuarios/{usuario}/toggle-admin', [AdminController::class, 'toggleAdmin'])->name('usuarios.toggle');
+    Route::put('usuarios/{usuario}/setor', [AdminController::class, 'updateUsuarioSetor'])->name('usuarios.setor');
     Route::delete('usuarios/{usuario}', [AdminController::class, 'destroyUsuario'])->name('usuarios.destroy');
 });
 
