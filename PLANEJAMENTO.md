@@ -29,8 +29,12 @@ integração com AD/LDAP fica para o final, depois de todas as telas prontas.
   selecionado, apenas para os usuários daquele setor (campo `sector_id` em
   `users`, ainda provisório até a integração com AD/LDAP). Cada envio é
   registrado na tabela `informativo_envios` (e-mail + data/hora), exibido
-  na tela do Informativo, com botão "Reenviar e-mails" para disparar um
-  novo lote a qualquer momento. Testado localmente via Mailpit.
+  na tela do Informativo. O botão "Reenviar e-mails" leva a uma tela onde
+  a lista de destinatários vem pré-carregada pelo setor do informativo (ou
+  todos os usuários), mas fica num campo de texto totalmente editável —
+  dá pra adicionar e-mails avulsos (mesmo de quem não é usuário cadastrado)
+  ou remover linhas antes de confirmar o reenvio. Testado localmente via
+  Mailpit.
 
 ## Pendências técnicas anotadas
 

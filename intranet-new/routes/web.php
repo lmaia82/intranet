@@ -28,6 +28,7 @@ use App\Http\Controllers\InformativoController;
 
 Route::middleware('auth')->group(function () {
     Route::resource('informativos', InformativoController::class);
+    Route::get('informativos/{informativo}/reenviar', [InformativoController::class, 'reenviarForm'])->name('informativos.reenviar.form');
     Route::post('informativos/{informativo}/reenviar', [InformativoController::class, 'reenviar'])->name('informativos.reenviar');
 });
 

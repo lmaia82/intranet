@@ -22,10 +22,7 @@
         <div class="bg-white shadow rounded p-6 mt-4">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="font-semibold text-gray-800">Envios por e-mail ({{ $informativo->envios->count() }})</h3>
-                <form action="{{ route('informativos.reenviar', $informativo) }}" method="POST" onsubmit="return confirm('Reenviar este informativo por e-mail para os destinatários atuais?')">
-                    @csrf
-                    <button type="submit" class="px-4 py-2 bg-orange-600 text-white rounded text-sm">Reenviar e-mails</button>
-                </form>
+                <a href="{{ route('informativos.reenviar.form', $informativo) }}" class="px-4 py-2 bg-orange-600 text-white rounded text-sm inline-block">Reenviar e-mails</a>
             </div>
 
             @if($informativo->envios->isEmpty())

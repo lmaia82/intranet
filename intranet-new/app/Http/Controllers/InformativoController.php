@@ -101,12 +101,52 @@ class InformativoController extends Controller
         return redirect()->route('informativos.index')->with('status', 'Informativo removido.');
     }
 
-    public function reenviar(Informativo $informativo)
+    public function reenviarForm(Informativo $informativo)
     {
-        $enviados = $this->enviarNotificacoes($informativo);
+        $sectors = Sector::orderBy('name')->get();
+        $sectorId = request()->filled('sector_id') ? request('sector_id') : $informativo->sector_id;
+
+        $query = User::query();
+        if ($sectorId) {
+            $query->where('sector_id', $sectorId);
+        }
+        $emails = $query->orderBy('name')->pluck('email');
+
+        return view('informativos.reenviar', compact('informativo', 'sectors', 'sectorId', 'emails'));
+    }
+
+    public function reenviar(Request $request, Informativo $informativo)
+    {
+        $request->validate(['emails' => 'required|string']);
+
+        $emails = collect(preg_split('/[\r\n,;]+/', $request->input('emails')))
+            ->map(fn ($email) => trim($email))
+            ->filter()
+            ->unique()
+            ->values();
+
+        $invalidos = $emails->reject(fn ($email) => filter_var($email, FILTER_VALIDATE_EMAIL));
+
+        if ($emails->isEmpty() || $invalidos->isNotEmpty()) {
+            return back()->withInput()->withErrors([
+                'emails' => $invalidos->isNotEmpty()
+                    ? 'E-mail(s) inválido(s): ' . $invalidos->implode(', ')
+                    : 'Informe ao menos um e-mail.',
+            ]);
+        }
+
+        foreach ($emails as $email) {
+            Mail::to($email)->send(new NovoInformativoMail($informativo));
+
+            InformativoEnvio::create([
+                'informativo_id' => $informativo->id,
+                'email' => $email,
+                'enviado_em' => now(),
+            ]);
+        }
 
         return redirect()->route('informativos.show', $informativo)
-            ->with('status', "E-mail reenviado para {$enviados} destinatário(s).");
+            ->with('status', "E-mail reenviado para {$emails->count()} destinatário(s).");
     }
 
     private function enviarNotificacoes(Informativo $informativo): int

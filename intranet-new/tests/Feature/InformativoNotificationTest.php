@@ -80,28 +80,72 @@ class InformativoNotificationTest extends TestCase
         $this->assertNotContains($foraDoSetor->email, $envios);
     }
 
-    public function test_reenviar_dispara_lote_de_emails_mesmo_sem_notificacao_inicial(): void
+    public function test_reenviar_formulario_sugere_emails_do_setor_do_informativo(): void
+    {
+        $admin = User::factory()->create();
+        $sector = Sector::create(['name' => 'TI']);
+        $doSetor = User::factory()->create(['sector_id' => $sector->id]);
+        User::factory()->create(['sector_id' => null]);
+
+        $informativo = Informativo::create([
+            'title' => 'Aviso do setor',
+            'content' => 'Conteudo',
+            'sector_id' => $sector->id,
+            'is_private' => true,
+            'published_at' => now(),
+        ]);
+
+        $this->actingAs($admin)->get(route('informativos.reenviar.form', $informativo))
+            ->assertOk()
+            ->assertSee($doSetor->email);
+    }
+
+    public function test_reenviar_permite_editar_lista_de_destinatarios(): void
     {
         Mail::fake();
 
         $admin = User::factory()->create();
-        User::factory()->create();
+        $sector = Sector::create(['name' => 'TI']);
+        $doSetor = User::factory()->create(['sector_id' => $sector->id]);
 
-        $this->actingAs($admin)->post(route('informativos.store'), [
+        $informativo = Informativo::create([
             'title' => 'Aviso',
             'content' => 'Conteudo',
-            'sector_id' => '',
-            'is_private' => '0',
+            'sector_id' => $sector->id,
+            'is_private' => true,
+            'published_at' => now(),
         ]);
 
-        $informativo = Informativo::firstOrFail();
         $this->assertEquals(0, InformativoEnvio::count());
 
-        $this->actingAs($admin)->post(route('informativos.reenviar', $informativo))
-            ->assertRedirect(route('informativos.show', $informativo));
+        $emailsEditados = $doSetor->email . "\nexterno@cetem.gov.br";
 
-        $this->assertEquals(2, InformativoEnvio::count());
+        $this->actingAs($admin)->post(route('informativos.reenviar', $informativo), [
+            'emails' => $emailsEditados,
+        ])->assertRedirect(route('informativos.show', $informativo));
+
+        $enviados = InformativoEnvio::pluck('email')->sort()->values()->all();
+        $this->assertEquals(collect(['externo@cetem.gov.br', $doSetor->email])->sort()->values()->all(), $enviados);
         Mail::assertSent(\App\Mail\NovoInformativoMail::class, 2);
+    }
+
+    public function test_reenviar_rejeita_email_invalido(): void
+    {
+        Mail::fake();
+
+        $admin = User::factory()->create();
+        $informativo = Informativo::create([
+            'title' => 'Aviso',
+            'content' => 'Conteudo',
+            'published_at' => now(),
+        ]);
+
+        $this->actingAs($admin)->post(route('informativos.reenviar', $informativo), [
+            'emails' => "nao-e-email\nvalido@cetem.gov.br",
+        ])->assertSessionHasErrors('emails');
+
+        $this->assertEquals(0, InformativoEnvio::count());
+        Mail::assertNothingSent();
     }
 
     public function test_pagina_show_exibe_historico_de_envios(): void
