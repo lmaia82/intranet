@@ -10,7 +10,7 @@
             <td align="center">
                 <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="background-color:#ffffff; border-radius:8px; overflow:hidden; max-width:600px; width:100%;">
                     <tr>
-                        <td style="background-color:#0052CC; padding:24px 32px;" align="left">
+                        <td style="background-color:#D6E4FF; padding:24px 32px;" align="left">
                             <img src="{{ $message->embed(public_path('images/logo.png')) }}" alt="CETEM" height="40" style="display:block;">
                         </td>
                     </tr>
