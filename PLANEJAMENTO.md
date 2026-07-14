@@ -21,6 +21,9 @@ integração com AD/LDAP fica para o final, depois de todas as telas prontas.
 | Repositório de Arquivos | ✅ Pronta (pastas, upload/download, MinIO) |
 | Publicações (ex-Artigos) | ✅ Pronta (apresentação + links para o Mineralis e o Master) |
 | Painel de Administração | ✅ Pronta (setores, usuários, estatísticas) |
+| Tutoriais | ✅ Pronta (CRUD + cadastro em lote, mesmo padrão de Eventos Gravados) |
+| Destaques | ✅ Pronta (CRUD com upload de imagem + carrossel na Tela Inicial) |
+| Busca unificada | ✅ Pronta (Ramais, Informativos, Agenda, Tutoriais, Repositório) |
 | Autenticação via AD/LDAP | ⬜ Pendente (substituirá o Breeze) |
 
 - **Identidade visual CETEM**: ✅ Aplicada (logo oficial, cores institucionais azul #0052CC/laranja #F4A000, tipografia Calibri/Arial). Falta ainda ajustar telas de login/registro (Breeze padrão).
@@ -108,6 +111,38 @@ integração com AD/LDAP fica para o final, depois de todas as telas prontas.
   aplicada na listagem (`RepositorioController::index`, que filtra
   subpastas/arquivos e bloqueia com 403 o acesso direto a uma pasta
   restrita) e no download (`RepositorioController::download`).
+
+- **Tutoriais**: ✅ Pronta. Tela própria (data, título, link do YouTube),
+  mesmo padrão de Eventos Gravados: permissões `tutoriais.ver`/`tutoriais.criar`,
+  item no menu e cadastro em lote via CSV. Os 5 mais recentes aparecem
+  num card na Tela Inicial (junto com os 5 Eventos Gravados mais recentes
+  e os 5 documentos públicos mais recentes do Repositório, também novos
+  cards da home).
+
+- **Destaques**: ✅ Pronta. Tela de cadastro (permissões
+  `destaques.ver`/`destaques.criar`) com upload de imagem-banner
+  (1600×500px), link opcional ao clicar, ordem de exibição e
+  ativo/inativo. O formulário já disponibiliza um template PPTX pronto
+  para download (`public/templates/destaque-modelo.pptx`, 2 slides: um
+  com o passo a passo, outro já no tamanho exato para o usuário editar
+  e exportar como PNG). A Tela Inicial ganhou um carrossel (Alpine.js)
+  full-width no topo, com rotação automática, setas e indicadores,
+  mostrando só os destaques ativos.
+
+- **Calendário mensal na Tela Inicial**: ✅ Pronta. Grade visual do mês
+  (dom-sáb) com navegação entre meses via query string (`?mes=&ano=`),
+  dia atual destacado e indicador nos dias com evento (`Evento.dt_start`);
+  clicar num dia com evento abre um painel com os títulos e link para a
+  Agenda. Convive com o card "Agenda" (lista dos próximos eventos) já
+  existente.
+
+- **Busca unificada**: ✅ Pronta. Um campo de busca no topo da Tela
+  Inicial leva a `/busca`, que agrega resultados de Ramais, Informativos,
+  Agenda (Eventos + Eventos Gravados), Tutoriais e Repositório
+  (pastas/arquivos). Cada seção só aparece se o usuário tiver a permissão
+  `.ver` daquele módulo (sem permissão nova dedicada à busca em si);
+  Informativos e Repositório também respeitam a visibilidade por setor
+  (`is_private`/`sector_id`), mesma lógica de `Arquivo::visivelPara()`.
 
 ## Pendências técnicas anotadas
 
