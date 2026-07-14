@@ -12,6 +12,19 @@ class Pasta extends Model
         'is_private' => 'boolean',
     ];
 
+    public function visivelPara(User $user): bool
+    {
+        if (!$this->is_private) {
+            return true;
+        }
+
+        if ($user->is_admin) {
+            return true;
+        }
+
+        return $this->sector_id !== null && $this->sector_id === $user->sector_id;
+    }
+
     public function parent()
     {
         return $this->belongsTo(Pasta::class, 'parent_id');

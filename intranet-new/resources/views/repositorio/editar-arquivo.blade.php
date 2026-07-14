@@ -23,6 +23,7 @@
                 <input type="checkbox" name="is_private" value="1" id="is_private" @checked(old('is_private', $arquivo->is_private))>
                 <label for="is_private" class="text-sm">Restrito ao setor (privado)</label>
             </div>
+            <p class="text-xs text-gray-500 -mt-2">Não marcado = arquivo público (visível a todos). Marcado = visível só para usuários do setor selecionado.</p>
             <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded">Atualizar</button>
         </form>
     </div>

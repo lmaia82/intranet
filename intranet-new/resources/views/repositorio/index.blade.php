@@ -29,6 +29,7 @@
                     @endforeach
                 </select>
                 <label class="flex items-center gap-2 text-sm"><input type="checkbox" name="is_private" value="1"> Restrita ao setor</label>
+                <p class="text-xs text-gray-500">Não marcado = pasta pública (visível a todos). Marcado = visível só para usuários do setor selecionado.</p>
                 <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded">Criar pasta</button>
             </form>
 
@@ -45,6 +46,7 @@
                     @endforeach
                 </select>
                 <label class="flex items-center gap-2 text-sm"><input type="checkbox" name="is_private" value="1"> Restrito ao setor</label>
+                <p class="text-xs text-gray-500">Não marcado = arquivo público (visível a todos). Marcado = visível só para usuários do setor selecionado.</p>
                 <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded">Enviar</button>
             </form>
         </div>

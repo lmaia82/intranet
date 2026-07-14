@@ -86,11 +86,6 @@ class SectorQuotaTest extends TestCase
         $this->assertEquals(1, Arquivo::where('sector_id', $sector->id)->count());
     }
 
-    public function test_setor_geral_cetem_e_criado_pela_migracao(): void
-    {
-        $this->assertNotNull(Sector::where('name', 'CETEM')->first());
-    }
-
     public function test_upload_sem_informar_setor_falha_validacao(): void
     {
         $user = User::factory()->create();
@@ -104,24 +99,80 @@ class SectorQuotaTest extends TestCase
         $response->assertSessionHasErrors('sector_id');
     }
 
-    public function test_upload_para_setor_geral_cetem_respeita_cota(): void
+    public function test_pasta_publica_e_visivel_a_qualquer_usuario(): void
+    {
+        $sector = Sector::create(['name' => 'TI']);
+        $outroSetor = Sector::create(['name' => 'RH']);
+        $user = User::factory()->create(['sector_id' => $outroSetor->id]);
+
+        $pasta = \App\Models\Pasta::create(['nome' => 'Pública', 'sector_id' => $sector->id, 'is_private' => false]);
+
+        $this->actingAs($user)->get(route('repositorio.index'))->assertOk()->assertSee('Pública');
+    }
+
+    public function test_pasta_restrita_ao_setor_e_invisivel_para_outro_setor(): void
+    {
+        $sector = Sector::create(['name' => 'TI']);
+        $outroSetor = Sector::create(['name' => 'RH']);
+        $user = User::factory()->create(['sector_id' => $outroSetor->id]);
+
+        $pasta = \App\Models\Pasta::create(['nome' => 'Restrita TI', 'sector_id' => $sector->id, 'is_private' => true]);
+
+        $this->actingAs($user)->get(route('repositorio.index'))->assertOk()->assertDontSee('Restrita TI');
+        $this->actingAs($user)->get(route('repositorio.index', ['pasta' => $pasta->id]))->assertForbidden();
+    }
+
+    public function test_pasta_restrita_ao_setor_e_visivel_para_mesmo_setor(): void
+    {
+        $sector = Sector::create(['name' => 'TI']);
+        $user = User::factory()->create(['sector_id' => $sector->id]);
+
+        \App\Models\Pasta::create(['nome' => 'Restrita TI', 'sector_id' => $sector->id, 'is_private' => true]);
+
+        $this->actingAs($user)->get(route('repositorio.index'))->assertOk()->assertSee('Restrita TI');
+    }
+
+    public function test_admin_ve_pastas_restritas_de_qualquer_setor(): void
+    {
+        $sector = Sector::create(['name' => 'TI']);
+        $admin = User::factory()->create(['is_admin' => true]);
+
+        \App\Models\Pasta::create(['nome' => 'Restrita TI', 'sector_id' => $sector->id, 'is_private' => true]);
+
+        $this->actingAs($admin)->get(route('repositorio.index'))->assertOk()->assertSee('Restrita TI');
+    }
+
+    public function test_download_de_arquivo_restrito_bloqueado_para_outro_setor(): void
     {
         Storage::fake('arquivos');
 
-        $user = User::factory()->create();
-        $cetem = Sector::where('name', 'CETEM')->first();
-        $cetem->update(['quota_bytes' => 1024]);
+        $sector = Sector::create(['name' => 'TI']);
+        $outroSetor = Sector::create(['name' => 'RH']);
+        $user = User::factory()->create(['sector_id' => $outroSetor->id]);
 
-        Arquivo::create(['nome_original' => 'existente.pdf', 'caminho' => 'existente.pdf', 'extensao' => 'pdf', 'tamanho' => 900, 'sector_id' => $cetem->id]);
-
-        $file = UploadedFile::fake()->create('novo.pdf', 200);
-
-        $response = $this->actingAs($user)->post(route('repositorio.arquivos.store'), [
-            'arquivo' => $file,
-            'sector_id' => $cetem->id,
+        Storage::disk('arquivos')->put('uploads/restrito.pdf', 'conteudo');
+        $arquivo = Arquivo::create([
+            'nome_original' => 'restrito.pdf',
+            'caminho' => 'uploads/restrito.pdf',
+            'extensao' => 'pdf',
+            'tamanho' => 8,
+            'sector_id' => $sector->id,
+            'is_private' => true,
         ]);
 
-        $response->assertSessionHasErrors('arquivo');
+        $this->actingAs($user)->get(route('repositorio.download', $arquivo))->assertForbidden();
+    }
+
+    public function test_pasta_meus_arquivos_e_criada_com_o_setor_do_usuario(): void
+    {
+        $sector = Sector::create(['name' => 'TI']);
+        $user = User::factory()->create(['sector_id' => $sector->id]);
+
+        $this->actingAs($user)->get(route('repositorio.meus'));
+
+        $pasta = \App\Models\Pasta::where('user_id', $user->id)->whereNull('parent_id')->first();
+        $this->assertNotNull($pasta);
+        $this->assertEquals($sector->id, $pasta->sector_id);
     }
 
     public function test_dashboard_de_armazenamento_renderiza_para_admin(): void

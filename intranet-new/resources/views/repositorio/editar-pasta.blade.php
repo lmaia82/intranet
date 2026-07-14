@@ -23,6 +23,7 @@
                 <input type="checkbox" name="is_private" value="1" id="is_private" @checked(old('is_private', $pasta->is_private))>
                 <label for="is_private" class="text-sm">Restrita ao setor (privada)</label>
             </div>
+            <p class="text-xs text-gray-500 -mt-2">Não marcado = pasta pública (visível a todos). Marcado = visível só para usuários do setor selecionado.</p>
             <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded">Atualizar</button>
         </form>
     </div>

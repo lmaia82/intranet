@@ -91,14 +91,23 @@ integração com AD/LDAP fica para o final, depois de todas as telas prontas.
   setor com barra de progresso (vermelho ≥90%, laranja ≥70%).
   O setor passou a ser **obrigatório** ao criar pasta/enviar arquivo no
   Repositório (antes existia a opção "Geral, sem setor", que ficava sem
-  cota e sem limite). Uma migração cria automaticamente um setor
-  **"CETEM"**, que cobre os arquivos públicos/institucionais que não
-  pertencem a um setor específico — ele aparece na lista de setores
-  como qualquer outro e tem sua própria cota configurável em Admin >
-  Setores/Armazenamento, eliminando o "buraco" de uso ilimitado. Nos
-  formulários, o setor do usuário logado já vem pré-selecionado (com
-  fallback para o setor gravado no registro, em edições de itens
-  antigos que ainda não tinham setor).
+  cota e sem limite) — todo item pertence a um setor real, para que o
+  consumo sempre entre na conta de alguma cota. Nos formulários, o
+  setor do usuário logado já vem pré-selecionado (com fallback para o
+  setor gravado no registro, em edições de itens antigos que ainda não
+  tinham setor). A pasta "Meus Arquivos", criada automaticamente na
+  primeira visita, também é vinculada ao setor do usuário logado.
+
+- **Visibilidade pública/restrita no Repositório**: ✅ Pronta. O campo
+  "Restrito ao setor" (`is_private`), que já existia na tela mas não
+  tinha efeito nenhum, agora é aplicado de fato: pasta/arquivo
+  **desmarcado** é público (visível a qualquer usuário autenticado,
+  independente do setor); **marcado**, só é visível para usuários do
+  mesmo setor selecionado (administradores sempre veem tudo). A
+  checagem (`Pasta::visivelPara()` / `Arquivo::visivelPara()`) é
+  aplicada na listagem (`RepositorioController::index`, que filtra
+  subpastas/arquivos e bloqueia com 403 o acesso direto a uma pasta
+  restrita) e no download (`RepositorioController::download`).
 
 ## Pendências técnicas anotadas
 

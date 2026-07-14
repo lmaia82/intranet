@@ -12,9 +12,11 @@ class RepositorioController extends Controller
 {
     public function meusArquivos()
     {
+        $user = auth()->user();
+
         $pasta = Pasta::firstOrCreate(
-            ['user_id' => auth()->id(), 'parent_id' => null],
-            ['nome' => 'Meus Arquivos']
+            ['user_id' => $user->id, 'parent_id' => null],
+            ['nome' => 'Meus Arquivos', 'sector_id' => $user->sector_id]
         );
 
         return redirect()->route('repositorio.index', ['pasta' => $pasta->id]);
@@ -22,9 +24,16 @@ class RepositorioController extends Controller
 
     public function index(?Pasta $pasta = null)
     {
+        $user = auth()->user();
+        abort_if($pasta && !$pasta->visivelPara($user), 403, 'Você não tem acesso a esta pasta.');
+
         $pastaAtual = $pasta;
-        $subpastas = $pastaAtual ? $pastaAtual->children : Pasta::whereNull('parent_id')->orderBy('nome')->get();
-        $arquivos = $pastaAtual ? $pastaAtual->arquivos : Arquivo::whereNull('pasta_id')->orderBy('nome_original')->get();
+        $subpastas = ($pastaAtual ? $pastaAtual->children : Pasta::whereNull('parent_id')->orderBy('nome')->get())
+            ->filter(fn (Pasta $p) => $p->visivelPara($user))
+            ->values();
+        $arquivos = ($pastaAtual ? $pastaAtual->arquivos : Arquivo::whereNull('pasta_id')->orderBy('nome_original')->get())
+            ->filter(fn (Arquivo $a) => $a->visivelPara($user))
+            ->values();
         $sectors = Sector::orderBy('name')->get();
         $breadcrumb = $pastaAtual ? $pastaAtual->breadcrumb() : collect();
 
@@ -118,6 +127,8 @@ class RepositorioController extends Controller
 
     public function download(Arquivo $arquivo)
     {
+        abort_unless($arquivo->visivelPara(auth()->user()), 403, 'Você não tem acesso a este arquivo.');
+
         return Storage::disk('arquivos')->download($arquivo->caminho, $arquivo->nome_original);
     }
 
