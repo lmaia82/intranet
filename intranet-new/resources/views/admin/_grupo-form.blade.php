@@ -14,6 +14,7 @@
             'ramais' => 'Ramais',
             'informativos' => 'Informativos',
             'eventos' => 'Agenda / Eventos',
+            'tutoriais' => 'Tutoriais',
             'artigos' => 'Publicações',
             'repositorio' => 'Repositório',
         ];

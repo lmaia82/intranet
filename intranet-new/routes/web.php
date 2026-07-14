@@ -59,6 +59,18 @@ Route::middleware('auth')->group(function () {
     Route::get('eventos-gravados-lote/template', [EventoGravadoController::class, 'loteTemplate'])->name('eventos-gravados.lote.template')->middleware('permission:eventos.criar');
 });
 
+use App\Http\Controllers\TutorialController;
+
+Route::middleware('auth')->group(function () {
+    Route::resource('tutoriais', TutorialController::class)
+        ->parameters(['tutoriais' => 'tutorial'])
+        ->middlewareFor(['index', 'show'], 'permission:tutoriais.ver')
+        ->middlewareFor(['create', 'store', 'edit', 'update', 'destroy'], 'permission:tutoriais.criar');
+    Route::get('tutoriais-lote', [TutorialController::class, 'loteForm'])->name('tutoriais.lote.form')->middleware('permission:tutoriais.criar');
+    Route::post('tutoriais-lote', [TutorialController::class, 'loteImport'])->name('tutoriais.lote.import')->middleware('permission:tutoriais.criar');
+    Route::get('tutoriais-lote/template', [TutorialController::class, 'loteTemplate'])->name('tutoriais.lote.template')->middleware('permission:tutoriais.criar');
+});
+
 use App\Http\Controllers\ArtigoController;
 
 Route::middleware('auth')->group(function () {

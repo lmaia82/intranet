@@ -30,6 +30,11 @@
                             {{ __('Agenda') }}
                         </x-nav-link>
                     @endif
+                    @if(auth()->user()->hasPermission('tutoriais.ver'))
+                        <x-nav-link :href="route('tutoriais.index')" :active="request()->routeIs('tutoriais.*')">
+                            {{ __('Tutoriais') }}
+                        </x-nav-link>
+                    @endif
                     <x-nav-link :href="route('artigos.index')" :active="request()->routeIs('artigos.*')">
                         {{ __('Publicações') }}
                     </x-nav-link>
@@ -114,6 +119,11 @@
             @if(auth()->user()->hasPermission('eventos.ver'))
                 <x-responsive-nav-link :href="route('eventos.index')" :active="request()->routeIs('eventos.*')">
                     {{ __('Agenda') }}
+                </x-responsive-nav-link>
+            @endif
+            @if(auth()->user()->hasPermission('tutoriais.ver'))
+                <x-responsive-nav-link :href="route('tutoriais.index')" :active="request()->routeIs('tutoriais.*')">
+                    {{ __('Tutoriais') }}
                 </x-responsive-nav-link>
             @endif
             <x-responsive-nav-link :href="route('artigos.index')" :active="request()->routeIs('artigos.*')">
