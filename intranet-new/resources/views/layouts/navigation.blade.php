@@ -15,21 +15,31 @@
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         {{ __('Tela Inicial') }}
                     </x-nav-link>
-                    <x-nav-link :href="route('telefones.index')" :active="request()->routeIs('telefones.*')">
-                        {{ __('Ramais') }}
-                    </x-nav-link>
-                    <x-nav-link :href="route('informativos.index')" :active="request()->routeIs('informativos.*')">
-                        {{ __('Informativos') }}
-                    </x-nav-link>
-                    <x-nav-link :href="route('eventos.index')" :active="request()->routeIs('eventos.*')">
-                        {{ __('Agenda') }}
-                    </x-nav-link>
-                    <x-nav-link :href="route('artigos.index')" :active="request()->routeIs('artigos.*')">
-                        {{ __('Artigos') }}
-                    </x-nav-link>
-                    <x-nav-link :href="route('repositorio.index')" :active="request()->routeIs('repositorio.*')">
-                        {{ __('Repositório') }}
-                    </x-nav-link>
+                    @if(auth()->user()->hasPermission('ramais.ver'))
+                        <x-nav-link :href="route('telefones.index')" :active="request()->routeIs('telefones.*')">
+                            {{ __('Ramais') }}
+                        </x-nav-link>
+                    @endif
+                    @if(auth()->user()->hasPermission('informativos.ver'))
+                        <x-nav-link :href="route('informativos.index')" :active="request()->routeIs('informativos.*')">
+                            {{ __('Informativos') }}
+                        </x-nav-link>
+                    @endif
+                    @if(auth()->user()->hasPermission('eventos.ver'))
+                        <x-nav-link :href="route('eventos.index')" :active="request()->routeIs('eventos.*')">
+                            {{ __('Agenda') }}
+                        </x-nav-link>
+                    @endif
+                    @if(auth()->user()->hasPermission('artigos.ver'))
+                        <x-nav-link :href="route('artigos.index')" :active="request()->routeIs('artigos.*')">
+                            {{ __('Artigos') }}
+                        </x-nav-link>
+                    @endif
+                    @if(auth()->user()->hasPermission('repositorio.ver'))
+                        <x-nav-link :href="route('repositorio.index')" :active="request()->routeIs('repositorio.*')">
+                            {{ __('Repositório') }}
+                        </x-nav-link>
+                    @endif
                     <x-nav-link :href="route('onlyoffice.aplicacoes')" :active="request()->routeIs('onlyoffice.aplicacoes')">
                         {{ __('Aplicações') }}
                     </x-nav-link>
@@ -91,23 +101,33 @@
     <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
         <div class="pt-2 pb-3 space-y-1">
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                {{ __('Dashboard') }}
+                {{ __('Tela Inicial') }}
             </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('telefones.index')" :active="request()->routeIs('telefones.*')">
-                {{ __('Ramais') }}
-            </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('informativos.index')" :active="request()->routeIs('informativos.*')">
-                {{ __('Informativos') }}
-            </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('eventos.index')" :active="request()->routeIs('eventos.*')">
-                {{ __('Agenda') }}
-            </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('artigos.index')" :active="request()->routeIs('artigos.*')">
-                {{ __('Artigos') }}
-            </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('repositorio.index')" :active="request()->routeIs('repositorio.*')">
-                {{ __('Repositório') }}
-            </x-responsive-nav-link>
+            @if(auth()->user()->hasPermission('ramais.ver'))
+                <x-responsive-nav-link :href="route('telefones.index')" :active="request()->routeIs('telefones.*')">
+                    {{ __('Ramais') }}
+                </x-responsive-nav-link>
+            @endif
+            @if(auth()->user()->hasPermission('informativos.ver'))
+                <x-responsive-nav-link :href="route('informativos.index')" :active="request()->routeIs('informativos.*')">
+                    {{ __('Informativos') }}
+                </x-responsive-nav-link>
+            @endif
+            @if(auth()->user()->hasPermission('eventos.ver'))
+                <x-responsive-nav-link :href="route('eventos.index')" :active="request()->routeIs('eventos.*')">
+                    {{ __('Agenda') }}
+                </x-responsive-nav-link>
+            @endif
+            @if(auth()->user()->hasPermission('artigos.ver'))
+                <x-responsive-nav-link :href="route('artigos.index')" :active="request()->routeIs('artigos.*')">
+                    {{ __('Artigos') }}
+                </x-responsive-nav-link>
+            @endif
+            @if(auth()->user()->hasPermission('repositorio.ver'))
+                <x-responsive-nav-link :href="route('repositorio.index')" :active="request()->routeIs('repositorio.*')">
+                    {{ __('Repositório') }}
+                </x-responsive-nav-link>
+            @endif
             <x-responsive-nav-link :href="route('onlyoffice.aplicacoes')" :active="request()->routeIs('onlyoffice.aplicacoes')">
                 {{ __('Aplicações') }}
             </x-responsive-nav-link>

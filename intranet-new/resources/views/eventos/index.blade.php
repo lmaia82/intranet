@@ -7,9 +7,11 @@
             <div class="mb-4 p-4 bg-green-100 text-green-800 rounded">{{ session('status') }}</div>
         @endif
 
-        <div class="flex justify-end mb-4">
-            <a href="{{ route('eventos.create') }}" class="px-4 py-2 bg-blue-600 text-white rounded">Novo evento</a>
-        </div>
+        @if(auth()->user()->hasPermission('eventos.criar'))
+            <div class="flex justify-end mb-4">
+                <a href="{{ route('eventos.create') }}" class="px-4 py-2 bg-blue-600 text-white rounded">Novo evento</a>
+            </div>
+        @endif
 
         <h3 class="font-semibold text-lg mb-2">Próximos eventos</h3>
         <div class="space-y-3 mb-8">
@@ -24,14 +26,16 @@
                             — {{ $evento->local }}
                         </p>
                     </div>
-                    <div class="flex gap-2 text-sm">
-                        <a href="{{ route('eventos.edit', $evento) }}" class="text-blue-600">Editar</a>
-                        <form action="{{ route('eventos.destroy', $evento) }}" method="POST" onsubmit="return confirm('Remover este evento?')">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="text-red-600">Remover</button>
-                        </form>
-                    </div>
+                    @if(auth()->user()->hasPermission('eventos.criar'))
+                        <div class="flex gap-2 text-sm">
+                            <a href="{{ route('eventos.edit', $evento) }}" class="text-blue-600">Editar</a>
+                            <form action="{{ route('eventos.destroy', $evento) }}" method="POST" onsubmit="return confirm('Remover este evento?')">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="text-red-600">Remover</button>
+                            </form>
+                        </div>
+                    @endif
                 </div>
             @empty
                 <p class="text-gray-500">Nenhum evento futuro cadastrado.</p>
@@ -46,14 +50,16 @@
                         <p class="font-semibold">{{ $evento->title }}</p>
                         <p class="text-sm text-gray-500">{{ $evento->dt_start->format('d/m/Y') }} — {{ $evento->local }}</p>
                     </div>
-                    <div class="flex gap-2 text-sm">
-                        <a href="{{ route('eventos.edit', $evento) }}" class="text-blue-600">Editar</a>
-                        <form action="{{ route('eventos.destroy', $evento) }}" method="POST" onsubmit="return confirm('Remover este evento?')">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="text-red-600">Remover</button>
-                        </form>
-                    </div>
+                    @if(auth()->user()->hasPermission('eventos.criar'))
+                        <div class="flex gap-2 text-sm">
+                            <a href="{{ route('eventos.edit', $evento) }}" class="text-blue-600">Editar</a>
+                            <form action="{{ route('eventos.destroy', $evento) }}" method="POST" onsubmit="return confirm('Remover este evento?')">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="text-red-600">Remover</button>
+                            </form>
+                        </div>
+                    @endif
                 </div>
             @empty
                 <p class="text-gray-500">Nenhum evento anterior.</p>
@@ -63,10 +69,12 @@
 
         <div class="flex justify-between items-center mb-2">
             <h3 class="font-semibold text-lg">Eventos gravados</h3>
-            <div class="flex items-center gap-3">
-                <a href="{{ route('eventos-gravados.lote.form') }}" class="text-blue-600 text-sm">Cadastro em lote</a>
-                <a href="{{ route('eventos-gravados.create') }}" class="px-4 py-2 bg-blue-600 text-white rounded text-sm">Novo evento gravado</a>
-            </div>
+            @if(auth()->user()->hasPermission('eventos.criar'))
+                <div class="flex items-center gap-3">
+                    <a href="{{ route('eventos-gravados.lote.form') }}" class="text-blue-600 text-sm">Cadastro em lote</a>
+                    <a href="{{ route('eventos-gravados.create') }}" class="px-4 py-2 bg-blue-600 text-white rounded text-sm">Novo evento gravado</a>
+                </div>
+            @endif
         </div>
         <div class="bg-white shadow rounded overflow-hidden">
             <table class="w-full text-left">
@@ -84,14 +92,16 @@
                             <td class="p-3">
                                 <a href="{{ $gravado->youtube_url }}" target="_blank" rel="noopener" class="text-blue-600 hover:underline">{{ $gravado->titulo }}</a>
                             </td>
-                            <td class="p-3 text-right whitespace-nowrap">
-                                <a href="{{ route('eventos-gravados.edit', $gravado) }}" class="text-blue-600">Editar</a>
-                                <form action="{{ route('eventos-gravados.destroy', $gravado) }}" method="POST" class="inline" onsubmit="return confirm('Remover este evento gravado?')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="text-red-600 ml-2">Remover</button>
-                                </form>
-                            </td>
+                            @if(auth()->user()->hasPermission('eventos.criar'))
+                                <td class="p-3 text-right whitespace-nowrap">
+                                    <a href="{{ route('eventos-gravados.edit', $gravado) }}" class="text-blue-600">Editar</a>
+                                    <form action="{{ route('eventos-gravados.destroy', $gravado) }}" method="POST" class="inline" onsubmit="return confirm('Remover este evento gravado?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="text-red-600 ml-2">Remover</button>
+                                    </form>
+                                </td>
+                            @endif
                         </tr>
                     @empty
                         <tr><td colspan="3" class="p-3 text-gray-500">Nenhum evento gravado cadastrado.</td></tr>

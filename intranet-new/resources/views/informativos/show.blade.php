@@ -22,7 +22,9 @@
         <div class="bg-white shadow rounded p-6 mt-4">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="font-semibold text-gray-800">Envios por e-mail ({{ $informativo->envios->count() }})</h3>
-                <a href="{{ route('informativos.reenviar.form', $informativo) }}" class="px-4 py-2 bg-orange-600 text-white rounded text-sm inline-block">Reenviar e-mails</a>
+                @if(auth()->user()->hasPermission('informativos.criar'))
+                    <a href="{{ route('informativos.reenviar.form', $informativo) }}" class="px-4 py-2 bg-orange-600 text-white rounded text-sm inline-block">Reenviar e-mails</a>
+                @endif
             </div>
 
             @if($informativo->envios->isEmpty())

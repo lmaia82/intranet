@@ -16,6 +16,7 @@
             @endforeach
         </nav>
 
+        @if(auth()->user()->hasPermission('repositorio.criar'))
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
             <form method="POST" action="{{ route('repositorio.pastas.store') }}" class="bg-white shadow rounded p-4 space-y-2">
                 @csrf
@@ -48,6 +49,7 @@
                 <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded">Enviar</button>
             </form>
         </div>
+        @endif
 
         <div class="bg-white shadow rounded overflow-hidden">
             <table class="w-full text-left">
@@ -56,7 +58,9 @@
                         <th class="p-3">Nome</th>
                         <th class="p-3">Tipo</th>
                         <th class="p-3">Tamanho</th>
-                        <th class="p-3"></th>
+                        @if(auth()->user()->hasPermission('repositorio.criar'))
+                            <th class="p-3"></th>
+                        @endif
                     </tr>
                 </thead>
                 <tbody>
@@ -65,14 +69,16 @@
                             <td class="p-3"><a href="{{ route('repositorio.index', ['pasta' => $subpasta->id]) }}" class="text-blue-700 font-semibold">📁 {{ $subpasta->nome }}</a></td>
                             <td class="p-3">Pasta</td>
                             <td class="p-3">—</td>
-                            <td class="p-3 text-right whitespace-nowrap">
-                                <a href="{{ route('repositorio.pastas.editar', $subpasta) }}" class="text-blue-600">Editar</a>
-                                <form action="{{ route('repositorio.pastas.destroy', $subpasta) }}" method="POST" class="inline" onsubmit="return confirm('Remover esta pasta e todo o conteúdo dentro dela?')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="text-red-600 ml-2">Remover</button>
-                                </form>
-                            </td>
+                            @if(auth()->user()->hasPermission('repositorio.criar'))
+                                <td class="p-3 text-right whitespace-nowrap">
+                                    <a href="{{ route('repositorio.pastas.editar', $subpasta) }}" class="text-blue-600">Editar</a>
+                                    <form action="{{ route('repositorio.pastas.destroy', $subpasta) }}" method="POST" class="inline" onsubmit="return confirm('Remover esta pasta e todo o conteúdo dentro dela?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="text-red-600 ml-2">Remover</button>
+                                    </form>
+                                </td>
+                            @endif
                         </tr>
                     @endforeach
                     @foreach($arquivos as $arquivo)
@@ -85,14 +91,16 @@
                             </td>
                             <td class="p-3 uppercase">{{ $arquivo->extensao }}</td>
                             <td class="p-3">{{ $arquivo->tamanhoFormatado() }}</td>
-                            <td class="p-3 text-right whitespace-nowrap">
-                                <a href="{{ route('repositorio.arquivos.editar', $arquivo) }}" class="text-blue-600">Editar</a>
-                                <form action="{{ route('repositorio.arquivos.destroy', $arquivo) }}" method="POST" class="inline" onsubmit="return confirm('Remover este arquivo?')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="text-red-600 ml-2">Remover</button>
-                                </form>
-                            </td>
+                            @if(auth()->user()->hasPermission('repositorio.criar'))
+                                <td class="p-3 text-right whitespace-nowrap">
+                                    <a href="{{ route('repositorio.arquivos.editar', $arquivo) }}" class="text-blue-600">Editar</a>
+                                    <form action="{{ route('repositorio.arquivos.destroy', $arquivo) }}" method="POST" class="inline" onsubmit="return confirm('Remover este arquivo?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="text-red-600 ml-2">Remover</button>
+                                    </form>
+                                </td>
+                            @endif
                         </tr>
                     @endforeach
                     @if($subpastas->isEmpty() && $arquivos->isEmpty())

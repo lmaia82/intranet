@@ -16,7 +16,9 @@
                     @endforeach
                 </select>
             </form>
-            <a href="{{ route('informativos.create') }}" class="px-4 py-2 bg-blue-600 text-white rounded">Novo informativo</a>
+            @if(auth()->user()->hasPermission('informativos.criar'))
+                <a href="{{ route('informativos.create') }}" class="px-4 py-2 bg-blue-600 text-white rounded">Novo informativo</a>
+            @endif
         </div>
 
         <div class="space-y-4">
@@ -28,14 +30,16 @@
                     <div class="flex-1">
                         <a href="{{ route('informativos.show', $informativo) }}" class="text-lg font-semibold text-blue-700">{{ $informativo->title }}</a>
                         <p class="text-sm text-gray-500">{{ $informativo->sector->name ?? 'Geral' }} — {{ $informativo->published_at?->format('d/m/Y H:i') }}</p>
-                        <div class="mt-2 flex gap-2">
-                            <a href="{{ route('informativos.edit', $informativo) }}" class="text-blue-600 text-sm">Editar</a>
-                            <form action="{{ route('informativos.destroy', $informativo) }}" method="POST" onsubmit="return confirm('Remover este informativo?')">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="text-red-600 text-sm">Remover</button>
-                            </form>
-                        </div>
+                        @if(auth()->user()->hasPermission('informativos.criar'))
+                            <div class="mt-2 flex gap-2">
+                                <a href="{{ route('informativos.edit', $informativo) }}" class="text-blue-600 text-sm">Editar</a>
+                                <form action="{{ route('informativos.destroy', $informativo) }}" method="POST" onsubmit="return confirm('Remover este informativo?')">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="text-red-600 text-sm">Remover</button>
+                                </form>
+                            </div>
+                        @endif
                     </div>
                 </div>
             @empty

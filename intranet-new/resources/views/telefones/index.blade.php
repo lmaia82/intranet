@@ -13,10 +13,12 @@
                 <input type="text" name="busca" value="{{ request('busca') }}" placeholder="Buscar por nome..." class="border-gray-300 rounded">
                 <button class="px-3 py-1 bg-gray-200 rounded">Buscar</button>
             </form>
-            <div class="flex items-center gap-3">
-                <a href="{{ route('telefones.lote.form') }}" class="text-blue-600 text-sm">Cadastro em lote</a>
-                <a href="{{ route('telefones.create') }}" class="px-4 py-2 bg-blue-600 text-white rounded">Novo ramal</a>
-            </div>
+            @if(auth()->user()->hasPermission('ramais.criar'))
+                <div class="flex items-center gap-3">
+                    <a href="{{ route('telefones.lote.form') }}" class="text-blue-600 text-sm">Cadastro em lote</a>
+                    <a href="{{ route('telefones.create') }}" class="px-4 py-2 bg-blue-600 text-white rounded">Novo ramal</a>
+                </div>
+            @endif
         </div>
 
         <div class="mb-4 flex flex-wrap gap-1">
@@ -34,7 +36,9 @@
                         <th class="p-3">Setor</th>
                         <th class="p-3">Cargo</th>
                         <th class="p-3">E-mail</th>
-                        <th class="p-3"></th>
+                        @if(auth()->user()->hasPermission('ramais.criar'))
+                            <th class="p-3"></th>
+                        @endif
                     </tr>
                 </thead>
                 <tbody>
@@ -45,14 +49,16 @@
                             <td class="p-3">{{ $telefone->sector->name ?? '-' }}</td>
                             <td class="p-3">{{ $telefone->cargo }}</td>
                             <td class="p-3">{{ $telefone->email }}</td>
-                            <td class="p-3 text-right whitespace-nowrap">
-                                <a href="{{ route('telefones.edit', $telefone) }}" class="text-blue-600">Editar</a>
-                                <form action="{{ route('telefones.destroy', $telefone) }}" method="POST" class="inline" onsubmit="return confirm('Remover este ramal?')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="text-red-600 ml-2">Remover</button>
-                                </form>
-                            </td>
+                            @if(auth()->user()->hasPermission('ramais.criar'))
+                                <td class="p-3 text-right whitespace-nowrap">
+                                    <a href="{{ route('telefones.edit', $telefone) }}" class="text-blue-600">Editar</a>
+                                    <form action="{{ route('telefones.destroy', $telefone) }}" method="POST" class="inline" onsubmit="return confirm('Remover este ramal?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="text-red-600 ml-2">Remover</button>
+                                    </form>
+                                </td>
+                            @endif
                         </tr>
                     @endforeach
                 </tbody>

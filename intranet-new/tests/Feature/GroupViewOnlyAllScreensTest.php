@@ -68,4 +68,42 @@ class GroupViewOnlyAllScreensTest extends TestCase
         $this->actingAs($user)->get(route('eventos.create'))->assertForbidden();
         $this->actingAs($user)->get(route('artigos.create'))->assertForbidden();
     }
+
+    public function test_leitor_nao_ve_botoes_de_criar_editar_remover(): void
+    {
+        $user = $this->criarUsuarioLeitor([
+            'ramais.ver', 'informativos.ver', 'eventos.ver', 'artigos.ver', 'repositorio.ver',
+        ]);
+
+        \App\Models\Telefone::create([
+            'nome' => 'Fulano', 'telefone' => '1234',
+            'sector_id' => \App\Models\Sector::create(['name' => 'TI'])->id,
+        ]);
+        \App\Models\Informativo::create(['title' => 'Aviso', 'content' => 'x', 'published_at' => now()]);
+        \App\Models\Artigo::create(['titulo' => 'Artigo X', 'ano' => 2026, 'autores' => 'Fulano', 'arquivo' => 'x.pdf']);
+
+        $this->actingAs($user)->get(route('telefones.index'))
+            ->assertOk()->assertDontSee('Novo ramal')->assertDontSee('Cadastro em lote')->assertDontSee('Remover');
+
+        $this->actingAs($user)->get(route('informativos.index'))
+            ->assertOk()->assertDontSee('Novo informativo')->assertDontSee('Editar')->assertDontSee('Remover');
+
+        $this->actingAs($user)->get(route('eventos.index'))
+            ->assertOk()->assertDontSee('Novo evento')->assertDontSee('Novo evento gravado');
+
+        $this->actingAs($user)->get(route('artigos.index'))
+            ->assertOk()->assertDontSee('Novo artigo')->assertDontSee('Remover');
+
+        $this->actingAs($user)->get(route('repositorio.index'))
+            ->assertOk()->assertDontSee('Nova pasta')->assertDontSee('Enviar arquivo');
+    }
+
+    public function test_grupo_leitor_de_informativos_nao_ve_botao_de_reenviar(): void
+    {
+        $user = $this->criarUsuarioLeitor(['informativos.ver']);
+        $informativo = \App\Models\Informativo::create(['title' => 'Aviso', 'content' => 'x', 'published_at' => now()]);
+
+        $this->actingAs($user)->get(route('informativos.show', $informativo))
+            ->assertOk()->assertDontSee('Reenviar e-mails');
+    }
 }
