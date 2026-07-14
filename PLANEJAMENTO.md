@@ -1,8 +1,11 @@
 # Planejamento — Modernização da Intranet
 
-Reescrita completa da intranet (framework PHP próprio "Diamond", legado em
-`intranet-legacy-slim/` e `lib/`) usando Laravel. O legado fica só como
-referência de regras de negócio e schema de dados — não é executado.
+Reescrita completa da intranet (framework PHP próprio "Diamond") usando
+Laravel. O código legado (`intranet-legacy-slim/` e `lib/`) serviu só como
+referência de regras de negócio — nunca foi executado — e já foi removido do
+repositório depois de todas as regras terem sido portadas. Fica apenas
+`intranet-legacy-slim/bck_intranet.sql`, o dump com os dados reais de
+produção, guardado até a migração de dados (ver Pendências abaixo).
 
 Stack: Laravel + Blade/Livewire, rodando via Docker Compose na VM Ubuntu
 (`docker-compose.yml` na raiz). Autenticação local (Breeze) por enquanto;
