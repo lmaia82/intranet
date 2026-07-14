@@ -59,11 +59,17 @@
                 </div>
                 <p class="text-sm text-gray-600 mb-3">
                     Os artigos científicos do CETEM estão disponíveis no Mineralis,
-                    o repositório institucional.
+                    o repositório institucional, e no Master, a biblioteca digital
+                    de produção técnico-científica publicada por editores externos.
                 </p>
-                <a href="https://mineralis.cetem.gov.br/buscar" target="_blank" rel="noopener" class="text-sm text-blue-600 font-medium">
-                    Acessar o Mineralis &rarr;
-                </a>
+                <div class="flex flex-col gap-1">
+                    <a href="https://mineralis.cetem.gov.br/buscar" target="_blank" rel="noopener" class="text-sm text-blue-600 font-medium">
+                        Acessar o Mineralis &rarr;
+                    </a>
+                    <a href="https://master.cetem.gov.br/" target="_blank" rel="noopener" class="text-sm text-blue-600 font-medium">
+                        Acessar o Master &rarr;
+                    </a>
+                </div>
             </div>
 
             <div class="bg-white shadow rounded p-4">
