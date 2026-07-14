@@ -36,7 +36,7 @@ class RepositorioController extends Controller
         $validated = $request->validate([
             'nome' => 'required|string|max:100',
             'parent_id' => 'nullable|exists:pastas,id',
-            'sector_id' => 'nullable|exists:sectors,id',
+            'sector_id' => 'required|exists:sectors,id',
             'is_private' => 'boolean',
         ]);
         $validated['is_private'] = $request->boolean('is_private');
@@ -56,7 +56,7 @@ class RepositorioController extends Controller
     {
         $validated = $request->validate([
             'nome' => 'required|string|max:100',
-            'sector_id' => 'nullable|exists:sectors,id',
+            'sector_id' => 'required|exists:sectors,id',
             'is_private' => 'boolean',
         ]);
         $validated['is_private'] = $request->boolean('is_private');
@@ -87,20 +87,17 @@ class RepositorioController extends Controller
             'pasta_id' => 'nullable|exists:pastas,id',
             'arquivo' => 'required|file|max:51200',
             'descricao' => 'nullable|string',
-            'sector_id' => 'nullable|exists:sectors,id',
+            'sector_id' => 'required|exists:sectors,id',
             'is_private' => 'boolean',
         ]);
 
         $file = $request->file('arquivo');
+        $sector = Sector::find($validated['sector_id']);
 
-        if (!empty($validated['sector_id'])) {
-            $sector = Sector::find($validated['sector_id']);
-
-            if ($sector->quotaExcedida($file->getSize())) {
-                return back()->withErrors([
-                    'arquivo' => "O setor \"{$sector->name}\" atingiria a cota de armazenamento ({$sector->quotaFormatada()}) com este envio. Uso atual: {$sector->usoFormatado()}.",
-                ])->withInput();
-            }
+        if ($sector->quotaExcedida($file->getSize())) {
+            return back()->withErrors([
+                'arquivo' => "O setor \"{$sector->name}\" atingiria a cota de armazenamento ({$sector->quotaFormatada()}) com este envio. Uso atual: {$sector->usoFormatado()}.",
+            ])->withInput();
         }
 
         $caminho = $file->store('uploads', 'arquivos');
@@ -134,7 +131,7 @@ class RepositorioController extends Controller
     {
         $validated = $request->validate([
             'descricao' => 'nullable|string',
-            'sector_id' => 'nullable|exists:sectors,id',
+            'sector_id' => 'required|exists:sectors,id',
             'is_private' => 'boolean',
         ]);
         $validated['is_private'] = $request->boolean('is_private');

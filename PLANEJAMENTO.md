@@ -89,6 +89,16 @@ integração com AD/LDAP fica para o final, depois de todas as telas prontas.
   `RepositorioController` quando ultrapassaria a cota do setor
   selecionado. Nova tela **Admin > Armazenamento** mostra uso/cota por
   setor com barra de progresso (vermelho ≥90%, laranja ≥70%).
+  O setor passou a ser **obrigatório** ao criar pasta/enviar arquivo no
+  Repositório (antes existia a opção "Geral, sem setor", que ficava sem
+  cota e sem limite). Uma migração cria automaticamente um setor
+  **"CETEM"**, que cobre os arquivos públicos/institucionais que não
+  pertencem a um setor específico — ele aparece na lista de setores
+  como qualquer outro e tem sua própria cota configurável em Admin >
+  Setores/Armazenamento, eliminando o "buraco" de uso ilimitado. Nos
+  formulários, o setor do usuário logado já vem pré-selecionado (com
+  fallback para o setor gravado no registro, em edições de itens
+  antigos que ainda não tinham setor).
 
 ## Pendências técnicas anotadas
 

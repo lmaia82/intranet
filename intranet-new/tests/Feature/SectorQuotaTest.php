@@ -86,10 +86,13 @@ class SectorQuotaTest extends TestCase
         $this->assertEquals(1, Arquivo::where('sector_id', $sector->id)->count());
     }
 
-    public function test_upload_sem_setor_nao_e_afetado_por_cotas(): void
+    public function test_setor_geral_cetem_e_criado_pela_migracao(): void
     {
-        Storage::fake('arquivos');
+        $this->assertNotNull(Sector::where('name', 'CETEM')->first());
+    }
 
+    public function test_upload_sem_informar_setor_falha_validacao(): void
+    {
         $user = User::factory()->create();
 
         $file = UploadedFile::fake()->create('novo.pdf', 100);
@@ -98,8 +101,27 @@ class SectorQuotaTest extends TestCase
             'arquivo' => $file,
         ]);
 
-        $response->assertRedirect();
-        $response->assertSessionDoesntHaveErrors();
+        $response->assertSessionHasErrors('sector_id');
+    }
+
+    public function test_upload_para_setor_geral_cetem_respeita_cota(): void
+    {
+        Storage::fake('arquivos');
+
+        $user = User::factory()->create();
+        $cetem = Sector::where('name', 'CETEM')->first();
+        $cetem->update(['quota_bytes' => 1024]);
+
+        Arquivo::create(['nome_original' => 'existente.pdf', 'caminho' => 'existente.pdf', 'extensao' => 'pdf', 'tamanho' => 900, 'sector_id' => $cetem->id]);
+
+        $file = UploadedFile::fake()->create('novo.pdf', 200);
+
+        $response = $this->actingAs($user)->post(route('repositorio.arquivos.store'), [
+            'arquivo' => $file,
+            'sector_id' => $cetem->id,
+        ]);
+
+        $response->assertSessionHasErrors('arquivo');
     }
 
     public function test_dashboard_de_armazenamento_renderiza_para_admin(): void

@@ -23,10 +23,9 @@
                 <input type="hidden" name="parent_id" value="{{ $pastaAtual?->id }}">
                 <label class="block text-sm font-medium">Nova pasta</label>
                 <input type="text" name="nome" placeholder="Nome da pasta" required class="block w-full border-gray-300 rounded">
-                <select name="sector_id" class="block w-full border-gray-300 rounded">
-                    <option value="">(Geral, sem setor)</option>
+                <select name="sector_id" required class="block w-full border-gray-300 rounded">
                     @foreach($sectors as $sector)
-                        <option value="{{ $sector->id }}">{{ $sector->name }}</option>
+                        <option value="{{ $sector->id }}" @selected(old('sector_id', auth()->user()->sector_id) == $sector->id)>{{ $sector->name }}</option>
                     @endforeach
                 </select>
                 <label class="flex items-center gap-2 text-sm"><input type="checkbox" name="is_private" value="1"> Restrita ao setor</label>
@@ -40,10 +39,9 @@
                 <input type="file" name="arquivo" required class="block w-full">
                 @error('arquivo') <p class="text-red-600 text-sm">{{ $message }}</p> @enderror
                 <input type="text" name="descricao" placeholder="Descrição (opcional)" class="block w-full border-gray-300 rounded">
-                <select name="sector_id" class="block w-full border-gray-300 rounded">
-                    <option value="">(Geral, sem setor)</option>
+                <select name="sector_id" required class="block w-full border-gray-300 rounded">
                     @foreach($sectors as $sector)
-                        <option value="{{ $sector->id }}">{{ $sector->name }}</option>
+                        <option value="{{ $sector->id }}" @selected(old('sector_id', auth()->user()->sector_id) == $sector->id)>{{ $sector->name }}</option>
                     @endforeach
                 </select>
                 <label class="flex items-center gap-2 text-sm"><input type="checkbox" name="is_private" value="1"> Restrito ao setor</label>
