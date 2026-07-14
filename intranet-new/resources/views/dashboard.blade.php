@@ -93,6 +93,63 @@
                 </div>
             </div>
 
+            @if(auth()->user()->hasPermission('tutoriais.ver'))
+            <div class="bg-white shadow rounded p-4">
+                <div class="flex justify-between items-center mb-3">
+                    <h3 class="font-semibold text-lg">🎬 Últimos Tutoriais</h3>
+                    <a href="{{ route('tutoriais.index') }}" class="text-sm text-blue-600">Ver todos</a>
+                </div>
+                <div class="space-y-3">
+                    @forelse($tutoriais as $tutorial)
+                        <a href="{{ $tutorial->youtube_url }}" target="_blank" rel="noopener" class="block border-b pb-2 last:border-0">
+                            <p class="font-medium text-blue-700">{{ $tutorial->titulo }}</p>
+                            <p class="text-xs text-gray-500">{{ $tutorial->data->format('d/m/Y') }}</p>
+                        </a>
+                    @empty
+                        <p class="text-sm text-gray-500">Nenhum tutorial publicado ainda.</p>
+                    @endforelse
+                </div>
+            </div>
+            @endif
+
+            @if(auth()->user()->hasPermission('eventos.ver'))
+            <div class="bg-white shadow rounded p-4">
+                <div class="flex justify-between items-center mb-3">
+                    <h3 class="font-semibold text-lg">🎥 Últimos Eventos Gravados</h3>
+                    <a href="{{ route('eventos.index') }}" class="text-sm text-blue-600">Ver todos</a>
+                </div>
+                <div class="space-y-3">
+                    @forelse($eventosGravados as $gravado)
+                        <a href="{{ $gravado->youtube_url }}" target="_blank" rel="noopener" class="block border-b pb-2 last:border-0">
+                            <p class="font-medium text-blue-700">{{ $gravado->titulo }}</p>
+                            <p class="text-xs text-gray-500">{{ $gravado->data->format('d/m/Y') }}</p>
+                        </a>
+                    @empty
+                        <p class="text-sm text-gray-500">Nenhum evento gravado ainda.</p>
+                    @endforelse
+                </div>
+            </div>
+            @endif
+
+            @if(auth()->user()->hasPermission('repositorio.ver'))
+            <div class="bg-white shadow rounded p-4">
+                <div class="flex justify-between items-center mb-3">
+                    <h3 class="font-semibold text-lg">📁 Documentos públicos recentes</h3>
+                    <a href="{{ route('repositorio.index') }}" class="text-sm text-blue-600">Ver repositório</a>
+                </div>
+                <div class="space-y-3">
+                    @forelse($documentosPublicos as $documento)
+                        <a href="{{ route('repositorio.download', $documento) }}" class="block border-b pb-2 last:border-0">
+                            <p class="font-medium text-blue-700">{{ $documento->nome_original }}</p>
+                            <p class="text-xs text-gray-500">{{ $documento->sector->name ?? 'Geral' }} — {{ $documento->created_at->format('d/m/Y') }}</p>
+                        </a>
+                    @empty
+                        <p class="text-sm text-gray-500">Nenhum documento público ainda.</p>
+                    @endforelse
+                </div>
+            </div>
+            @endif
+
         </div>
     </div>
 </x-app-layout>
