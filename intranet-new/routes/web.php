@@ -71,6 +71,14 @@ Route::middleware('auth')->group(function () {
     Route::get('tutoriais-lote/template', [TutorialController::class, 'loteTemplate'])->name('tutoriais.lote.template')->middleware('permission:tutoriais.criar');
 });
 
+use App\Http\Controllers\DestaqueController;
+
+Route::middleware('auth')->group(function () {
+    Route::resource('destaques', DestaqueController::class)
+        ->middlewareFor(['index', 'show'], 'permission:destaques.ver')
+        ->middlewareFor(['create', 'store', 'edit', 'update', 'destroy'], 'permission:destaques.criar');
+});
+
 use App\Http\Controllers\ArtigoController;
 
 Route::middleware('auth')->group(function () {

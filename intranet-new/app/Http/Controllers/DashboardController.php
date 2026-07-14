@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Arquivo;
+use App\Models\Destaque;
 use App\Models\Evento;
 use App\Models\EventoGravado;
 use App\Models\Informativo;
@@ -13,6 +14,8 @@ class DashboardController extends Controller
     public function index()
     {
         $user = auth()->user();
+
+        $destaques = Destaque::ativos()->get();
 
         $informativos = Informativo::with('sector')->latest('published_at')->take(5)->get();
 
@@ -41,7 +44,7 @@ class DashboardController extends Controller
             : collect();
 
         return view('dashboard', compact(
-            'informativos', 'eventos', 'meusArquivos',
+            'destaques', 'informativos', 'eventos', 'meusArquivos',
             'tutoriais', 'eventosGravados', 'documentosPublicos'
         ));
     }

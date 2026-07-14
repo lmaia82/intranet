@@ -15,6 +15,7 @@
             'informativos' => 'Informativos',
             'eventos' => 'Agenda / Eventos',
             'tutoriais' => 'Tutoriais',
+            'destaques' => 'Destaques',
             'artigos' => 'Publicações',
             'repositorio' => 'Repositório',
         ];

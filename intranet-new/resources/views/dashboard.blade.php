@@ -5,6 +5,44 @@
 
     <div class="py-6 max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
 
+        @if($destaques->isNotEmpty())
+        <div
+            x-data="{ atual: 0, total: {{ $destaques->count() }} }"
+            x-init="setInterval(() => { atual = (atual + 1) % total }, 5000)"
+            class="relative bg-white shadow rounded overflow-hidden"
+        >
+            @foreach($destaques as $i => $destaque)
+                <div x-show="atual === {{ $i }}" x-cloak>
+                    @if($destaque->link)
+                        <a href="{{ $destaque->link }}" target="_blank" rel="noopener">
+                            <img src="{{ Storage::url($destaque->imagem) }}" alt="{{ $destaque->titulo }}" class="w-full h-auto block">
+                        </a>
+                    @else
+                        <img src="{{ Storage::url($destaque->imagem) }}" alt="{{ $destaque->titulo }}" class="w-full h-auto block">
+                    @endif
+                </div>
+            @endforeach
+
+            @if($destaques->count() > 1)
+                <button @click="atual = (atual - 1 + total) % total" type="button"
+                    class="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white rounded-full w-8 h-8 flex items-center justify-center shadow">
+                    &#8249;
+                </button>
+                <button @click="atual = (atual + 1) % total" type="button"
+                    class="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white rounded-full w-8 h-8 flex items-center justify-center shadow">
+                    &#8250;
+                </button>
+                <div class="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-2">
+                    @foreach($destaques as $i => $destaque)
+                        <button @click="atual = {{ $i }}" type="button"
+                            :class="atual === {{ $i }} ? 'bg-white' : 'bg-white/50'"
+                            class="w-2.5 h-2.5 rounded-full"></button>
+                    @endforeach
+                </div>
+            @endif
+        </div>
+        @endif
+
         <div class="bg-white shadow rounded p-4">
             <h3 class="font-semibold text-lg mb-3">Aplicações</h3>
             <div class="flex flex-wrap gap-3">
