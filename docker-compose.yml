@@ -60,6 +60,12 @@ services:
     ports:
       - "8082:80"
 
+  mailpit:
+    image: axllent/mailpit
+    ports:
+      - "8025:8025"
+      - "1025:1025"
+
 volumes:
   mysql_data:
   minio_data:

@@ -30,11 +30,9 @@
                             {{ __('Agenda') }}
                         </x-nav-link>
                     @endif
-                    @if(auth()->user()->hasPermission('artigos.ver'))
-                        <x-nav-link :href="route('artigos.index')" :active="request()->routeIs('artigos.*')">
-                            {{ __('Artigos') }}
-                        </x-nav-link>
-                    @endif
+                    <x-nav-link :href="route('artigos.index')" :active="request()->routeIs('artigos.*')">
+                        {{ __('Artigos') }}
+                    </x-nav-link>
                     @if(auth()->user()->hasPermission('repositorio.ver'))
                         <x-nav-link :href="route('repositorio.index')" :active="request()->routeIs('repositorio.*')">
                             {{ __('Repositório') }}
@@ -118,11 +116,9 @@
                     {{ __('Agenda') }}
                 </x-responsive-nav-link>
             @endif
-            @if(auth()->user()->hasPermission('artigos.ver'))
-                <x-responsive-nav-link :href="route('artigos.index')" :active="request()->routeIs('artigos.*')">
-                    {{ __('Artigos') }}
-                </x-responsive-nav-link>
-            @endif
+            <x-responsive-nav-link :href="route('artigos.index')" :active="request()->routeIs('artigos.*')">
+                {{ __('Artigos') }}
+            </x-responsive-nav-link>
             @if(auth()->user()->hasPermission('repositorio.ver'))
                 <x-responsive-nav-link :href="route('repositorio.index')" :active="request()->routeIs('repositorio.*')">
                     {{ __('Repositório') }}

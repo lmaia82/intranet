@@ -54,19 +54,16 @@
 
             <div class="bg-white shadow rounded p-4">
                 <div class="flex justify-between items-center mb-3">
-                    <h3 class="font-semibold text-lg">🔬 Últimos Artigos</h3>
-                    <a href="{{ route('artigos.index') }}" class="text-sm text-blue-600">Ver todos</a>
+                    <h3 class="font-semibold text-lg">🔬 Artigos Científicos</h3>
+                    <a href="{{ route('artigos.index') }}" class="text-sm text-blue-600">Ver mais</a>
                 </div>
-                <div class="space-y-3">
-                    @forelse($artigos as $artigo)
-                        <a href="{{ route('artigos.show', $artigo) }}" class="block border-b pb-2 last:border-0">
-                            <p class="font-medium text-blue-700">{{ $artigo->titulo }}</p>
-                            <p class="text-xs text-gray-500">{{ $artigo->ano }} — {{ $artigo->autores }}</p>
-                        </a>
-                    @empty
-                        <p class="text-sm text-gray-500">Nenhum artigo cadastrado ainda.</p>
-                    @endforelse
-                </div>
+                <p class="text-sm text-gray-600 mb-3">
+                    Os artigos científicos do CETEM estão disponíveis no Mineralis,
+                    o repositório institucional.
+                </p>
+                <a href="https://mineralis.cetem.gov.br/buscar" target="_blank" rel="noopener" class="text-sm text-blue-600 font-medium">
+                    Acessar o Mineralis &rarr;
+                </a>
             </div>
 
             <div class="bg-white shadow rounded p-4">

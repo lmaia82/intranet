@@ -38,12 +38,6 @@ class GroupViewOnlyAllScreensTest extends TestCase
         $this->actingAs($user)->get(route('eventos.index'))->assertOk();
     }
 
-    public function test_leitor_de_artigos_acessa_index(): void
-    {
-        $user = $this->criarUsuarioLeitor(['artigos.ver']);
-        $this->actingAs($user)->get(route('artigos.index'))->assertOk();
-    }
-
     public function test_leitor_de_repositorio_acessa_index(): void
     {
         $user = $this->criarUsuarioLeitor(['repositorio.ver']);
@@ -53,26 +47,24 @@ class GroupViewOnlyAllScreensTest extends TestCase
     public function test_leitor_de_tudo_acessa_todas_as_telas(): void
     {
         $user = $this->criarUsuarioLeitor([
-            'ramais.ver', 'informativos.ver', 'eventos.ver', 'artigos.ver', 'repositorio.ver',
+            'ramais.ver', 'informativos.ver', 'eventos.ver', 'repositorio.ver',
         ]);
 
         $this->actingAs($user)->get(route('telefones.index'))->assertOk();
         $this->actingAs($user)->get(route('informativos.index'))->assertOk();
         $this->actingAs($user)->get(route('eventos.index'))->assertOk();
-        $this->actingAs($user)->get(route('artigos.index'))->assertOk();
         $this->actingAs($user)->get(route('repositorio.index'))->assertOk();
 
         // E continua sem poder criar em nenhuma delas.
         $this->actingAs($user)->get(route('telefones.create'))->assertForbidden();
         $this->actingAs($user)->get(route('informativos.create'))->assertForbidden();
         $this->actingAs($user)->get(route('eventos.create'))->assertForbidden();
-        $this->actingAs($user)->get(route('artigos.create'))->assertForbidden();
     }
 
     public function test_leitor_nao_ve_botoes_de_criar_editar_remover(): void
     {
         $user = $this->criarUsuarioLeitor([
-            'ramais.ver', 'informativos.ver', 'eventos.ver', 'artigos.ver', 'repositorio.ver',
+            'ramais.ver', 'informativos.ver', 'eventos.ver', 'repositorio.ver',
         ]);
 
         \App\Models\Telefone::create([
@@ -80,7 +72,6 @@ class GroupViewOnlyAllScreensTest extends TestCase
             'sector_id' => \App\Models\Sector::create(['name' => 'TI'])->id,
         ]);
         \App\Models\Informativo::create(['title' => 'Aviso', 'content' => 'x', 'published_at' => now()]);
-        \App\Models\Artigo::create(['titulo' => 'Artigo X', 'ano' => 2026, 'autores' => 'Fulano', 'arquivo' => 'x.pdf']);
 
         $this->actingAs($user)->get(route('telefones.index'))
             ->assertOk()->assertDontSee('Novo ramal')->assertDontSee('Cadastro em lote')->assertDontSee('Remover');
@@ -91,11 +82,20 @@ class GroupViewOnlyAllScreensTest extends TestCase
         $this->actingAs($user)->get(route('eventos.index'))
             ->assertOk()->assertDontSee('Novo evento')->assertDontSee('Novo evento gravado');
 
-        $this->actingAs($user)->get(route('artigos.index'))
-            ->assertOk()->assertDontSee('Novo artigo')->assertDontSee('Remover');
-
         $this->actingAs($user)->get(route('repositorio.index'))
             ->assertOk()->assertDontSee('Nova pasta')->assertDontSee('Enviar arquivo');
+    }
+
+    public function test_artigos_e_acessivel_a_qualquer_usuario_autenticado_e_mostra_links_mineralis_e_master(): void
+    {
+        $user = $this->criarUsuarioLeitor([]);
+
+        $this->actingAs($user)->get(route('artigos.index'))
+            ->assertOk()
+            ->assertSee('Mineralis')
+            ->assertSee('https://mineralis.cetem.gov.br/buscar', false)
+            ->assertSee('Master')
+            ->assertSee('https://master.cetem.gov.br/', false);
     }
 
     public function test_grupo_leitor_de_informativos_nao_ve_botao_de_reenviar(): void

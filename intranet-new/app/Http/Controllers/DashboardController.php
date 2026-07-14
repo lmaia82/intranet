@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Arquivo;
-use App\Models\Artigo;
 use App\Models\Evento;
 use App\Models\Informativo;
 
@@ -18,8 +17,6 @@ class DashboardController extends Controller
             ->take(5)
             ->get();
 
-        $artigos = Artigo::latest('ano')->take(5)->get();
-
         $meusArquivos = Arquivo::whereHas('pasta', function ($query) {
                 $query->where('user_id', auth()->id());
             })
@@ -27,6 +24,6 @@ class DashboardController extends Controller
             ->take(5)
             ->get();
 
-        return view('dashboard', compact('informativos', 'eventos', 'artigos', 'meusArquivos'));
+        return view('dashboard', compact('informativos', 'eventos', 'meusArquivos'));
     }
 }

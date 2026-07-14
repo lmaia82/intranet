@@ -62,15 +62,7 @@ Route::middleware('auth')->group(function () {
 use App\Http\Controllers\ArtigoController;
 
 Route::middleware('auth')->group(function () {
-    Route::resource('artigos', ArtigoController::class)
-        ->middlewareFor(['index', 'show'], 'permission:artigos.ver')
-        ->middlewareFor(['create', 'store', 'edit', 'update', 'destroy'], 'permission:artigos.criar');
-});
-
-Route::middleware('auth')->group(function () {
-    Route::get('artigos-lote', [ArtigoController::class, 'loteForm'])->name('artigos.lote.form')->middleware('permission:artigos.criar');
-    Route::post('artigos-lote', [ArtigoController::class, 'loteImport'])->name('artigos.lote.import')->middleware('permission:artigos.criar');
-    Route::get('artigos-lote/template', [ArtigoController::class, 'loteTemplate'])->name('artigos.lote.template')->middleware('permission:artigos.criar');
+    Route::get('artigos', [ArtigoController::class, 'index'])->name('artigos.index');
 });
 
 use App\Http\Controllers\RepositorioController;
