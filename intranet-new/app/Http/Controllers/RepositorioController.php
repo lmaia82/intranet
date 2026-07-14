@@ -30,10 +30,12 @@ class RepositorioController extends Controller
         $pastaAtual = $pasta;
         $subpastas = ($pastaAtual ? $pastaAtual->children : Pasta::whereNull('parent_id')->orderBy('nome')->get())
             ->filter(fn (Pasta $p) => $p->visivelPara($user))
-            ->values();
+            ->values()
+            ->load('sector');
         $arquivos = ($pastaAtual ? $pastaAtual->arquivos : Arquivo::whereNull('pasta_id')->orderBy('nome_original')->get())
             ->filter(fn (Arquivo $a) => $a->visivelPara($user))
-            ->values();
+            ->values()
+            ->load('sector');
         $sectors = Sector::orderBy('name')->get();
         $breadcrumb = $pastaAtual ? $pastaAtual->breadcrumb() : collect();
 

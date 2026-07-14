@@ -59,6 +59,7 @@
                         <th class="p-3">Nome</th>
                         <th class="p-3">Tipo</th>
                         <th class="p-3">Tamanho</th>
+                        <th class="p-3">Visibilidade</th>
                         @if(auth()->user()->hasPermission('repositorio.criar'))
                             <th class="p-3"></th>
                         @endif
@@ -70,6 +71,13 @@
                             <td class="p-3"><a href="{{ route('repositorio.index', ['pasta' => $subpasta->id]) }}" class="text-blue-700 font-semibold">📁 {{ $subpasta->nome }}</a></td>
                             <td class="p-3">Pasta</td>
                             <td class="p-3">—</td>
+                            <td class="p-3">
+                                @if($subpasta->is_private)
+                                    <span class="inline-block px-2 py-0.5 text-xs rounded bg-orange-100 text-orange-800">Restrito ({{ $subpasta->sector?->name }})</span>
+                                @else
+                                    <span class="inline-block px-2 py-0.5 text-xs rounded bg-green-100 text-green-800">Público</span>
+                                @endif
+                            </td>
                             @if(auth()->user()->hasPermission('repositorio.criar'))
                                 <td class="p-3 text-right whitespace-nowrap">
                                     <a href="{{ route('repositorio.pastas.editar', $subpasta) }}" class="text-blue-600">Editar</a>
@@ -92,6 +100,13 @@
                             </td>
                             <td class="p-3 uppercase">{{ $arquivo->extensao }}</td>
                             <td class="p-3">{{ $arquivo->tamanhoFormatado() }}</td>
+                            <td class="p-3">
+                                @if($arquivo->is_private)
+                                    <span class="inline-block px-2 py-0.5 text-xs rounded bg-orange-100 text-orange-800">Restrito ({{ $arquivo->sector?->name }})</span>
+                                @else
+                                    <span class="inline-block px-2 py-0.5 text-xs rounded bg-green-100 text-green-800">Público</span>
+                                @endif
+                            </td>
                             @if(auth()->user()->hasPermission('repositorio.criar'))
                                 <td class="p-3 text-right whitespace-nowrap">
                                     <a href="{{ route('repositorio.arquivos.editar', $arquivo) }}" class="text-blue-600">Editar</a>
@@ -105,7 +120,7 @@
                         </tr>
                     @endforeach
                     @if($subpastas->isEmpty() && $arquivos->isEmpty())
-                        <tr><td colspan="4" class="p-3 text-gray-500">Pasta vazia.</td></tr>
+                        <tr><td colspan="{{ auth()->user()->hasPermission('repositorio.criar') ? 5 : 4 }}" class="p-3 text-gray-500">Pasta vazia.</td></tr>
                     @endif
                 </tbody>
             </table>
