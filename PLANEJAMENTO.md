@@ -78,6 +78,18 @@ integração com AD/LDAP fica para o final, depois de todas as telas prontas.
   enviados foram mantidos no banco (não usados na UI), só por precaução
   — podem ser removidos numa limpeza futura se não fizerem mais falta.
 
+- **Cotas de armazenamento por setor**: ✅ Pronta. Implementado direto
+  no Laravel (não no MinIO — MinIO aplica quota por bucket, e todos os
+  setores compartilham um único bucket organizado por pasta/setor a
+  nível de aplicação; usar quota nativa exigiria um bucket por setor,
+  complexidade desproporcional ao ganho). Setores ganharam uma coluna
+  `quota_bytes` (editável em MB via Admin > Setores, em branco = sem
+  limite). O uso é calculado somando `arquivos.tamanho` por setor
+  (já rastreado no banco, sem consultar o MinIO). Upload é bloqueado no
+  `RepositorioController` quando ultrapassaria a cota do setor
+  selecionado. Nova tela **Admin > Armazenamento** mostra uso/cota por
+  setor com barra de progresso (vermelho ≥90%, laranja ≥70%).
+
 ## Pendências técnicas anotadas
 
 - **Migração de dados do legado** (Ramais, Eventos, Informativos): existe

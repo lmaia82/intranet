@@ -109,6 +109,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::put('setores/{setor}', [AdminController::class, 'updateSetor'])->name('setores.update');
     Route::delete('setores/{setor}', [AdminController::class, 'destroySetor'])->name('setores.destroy');
 
+    Route::get('armazenamento', [AdminController::class, 'armazenamento'])->name('armazenamento');
+
     Route::get('grupos', [AdminController::class, 'grupos'])->name('grupos');
     Route::get('grupos/criar', [AdminController::class, 'criarGrupoForm'])->name('grupos.criar');
     Route::post('grupos', [AdminController::class, 'storeGrupo'])->name('grupos.store');

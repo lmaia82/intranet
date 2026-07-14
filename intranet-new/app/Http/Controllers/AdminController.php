@@ -40,15 +40,27 @@ class AdminController extends Controller
 
     public function storeSetor(Request $request)
     {
-        $request->validate(['name' => 'required|string|max:100|unique:sectors,name']);
-        Sector::create($request->only('name'));
+        $validated = $request->validate([
+            'name' => 'required|string|max:100|unique:sectors,name',
+            'quota_mb' => 'nullable|numeric|min:0',
+        ]);
+        Sector::create([
+            'name' => $validated['name'],
+            'quota_bytes' => $this->mbParaBytes($validated['quota_mb'] ?? null),
+        ]);
         return redirect()->route('admin.setores')->with('status', 'Setor criado com sucesso.');
     }
 
     public function updateSetor(Request $request, Sector $setor)
     {
-        $request->validate(['name' => 'required|string|max:100|unique:sectors,name,' . $setor->id]);
-        $setor->update($request->only('name'));
+        $validated = $request->validate([
+            'name' => 'required|string|max:100|unique:sectors,name,' . $setor->id,
+            'quota_mb' => 'nullable|numeric|min:0',
+        ]);
+        $setor->update([
+            'name' => $validated['name'],
+            'quota_bytes' => $this->mbParaBytes($validated['quota_mb'] ?? null),
+        ]);
         return redirect()->route('admin.setores')->with('status', 'Setor atualizado com sucesso.');
     }
 
@@ -56,6 +68,17 @@ class AdminController extends Controller
     {
         $setor->delete();
         return redirect()->route('admin.setores')->with('status', 'Setor removido.');
+    }
+
+    private function mbParaBytes($mb): ?int
+    {
+        return $mb !== null && $mb !== '' ? (int) round($mb * 1048576) : null;
+    }
+
+    public function armazenamento()
+    {
+        $setores = Sector::orderBy('name')->get();
+        return view('admin.armazenamento', compact('setores'));
     }
 
     public function grupos()

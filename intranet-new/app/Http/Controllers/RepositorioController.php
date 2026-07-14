@@ -92,6 +92,17 @@ class RepositorioController extends Controller
         ]);
 
         $file = $request->file('arquivo');
+
+        if (!empty($validated['sector_id'])) {
+            $sector = Sector::find($validated['sector_id']);
+
+            if ($sector->quotaExcedida($file->getSize())) {
+                return back()->withErrors([
+                    'arquivo' => "O setor \"{$sector->name}\" atingiria a cota de armazenamento ({$sector->quotaFormatada()}) com este envio. Uso atual: {$sector->usoFormatado()}.",
+                ])->withInput();
+            }
+        }
+
         $caminho = $file->store('uploads', 'arquivos');
 
         Arquivo::create([

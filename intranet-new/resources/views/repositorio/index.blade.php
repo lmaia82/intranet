@@ -38,6 +38,7 @@
                 <input type="hidden" name="pasta_id" value="{{ $pastaAtual?->id }}">
                 <label class="block text-sm font-medium">Enviar arquivo</label>
                 <input type="file" name="arquivo" required class="block w-full">
+                @error('arquivo') <p class="text-red-600 text-sm">{{ $message }}</p> @enderror
                 <input type="text" name="descricao" placeholder="Descrição (opcional)" class="block w-full border-gray-300 rounded">
                 <select name="sector_id" class="block w-full border-gray-300 rounded">
                     <option value="">(Geral, sem setor)</option>
