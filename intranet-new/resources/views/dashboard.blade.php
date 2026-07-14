@@ -54,7 +54,7 @@
 
             <div class="bg-white shadow rounded p-4">
                 <div class="flex justify-between items-center mb-3">
-                    <h3 class="font-semibold text-lg">🔬 Artigos Científicos</h3>
+                    <h3 class="font-semibold text-lg">🔬 Publicações</h3>
                     <a href="{{ route('artigos.index') }}" class="text-sm text-blue-600">Ver mais</a>
                 </div>
                 <p class="text-sm text-gray-600 mb-3">

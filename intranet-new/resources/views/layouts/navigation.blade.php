@@ -31,7 +31,7 @@
                         </x-nav-link>
                     @endif
                     <x-nav-link :href="route('artigos.index')" :active="request()->routeIs('artigos.*')">
-                        {{ __('Artigos') }}
+                        {{ __('Publicações') }}
                     </x-nav-link>
                     @if(auth()->user()->hasPermission('repositorio.ver'))
                         <x-nav-link :href="route('repositorio.index')" :active="request()->routeIs('repositorio.*')">
@@ -117,7 +117,7 @@
                 </x-responsive-nav-link>
             @endif
             <x-responsive-nav-link :href="route('artigos.index')" :active="request()->routeIs('artigos.*')">
-                {{ __('Artigos') }}
+                {{ __('Publicações') }}
             </x-responsive-nav-link>
             @if(auth()->user()->hasPermission('repositorio.ver'))
                 <x-responsive-nav-link :href="route('repositorio.index')" :active="request()->routeIs('repositorio.*')">

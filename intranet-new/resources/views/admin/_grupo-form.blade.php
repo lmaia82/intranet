@@ -8,11 +8,20 @@
 <div>
     <label class="block text-sm font-medium mb-2">Permissões</label>
     <p class="text-xs text-gray-500 mb-3">Marque "Ver" para permitir acesso à tela, e "Criar/editar" para permitir cadastrar, editar e remover registros nela.</p>
-    @php $selecionadas = old('permissions', $grupo?->permissions->pluck('id')->all() ?? []); @endphp
+    @php
+        $selecionadas = old('permissions', $grupo?->permissions->pluck('id')->all() ?? []);
+        $telaLabels = [
+            'ramais' => 'Ramais',
+            'informativos' => 'Informativos',
+            'eventos' => 'Agenda / Eventos',
+            'artigos' => 'Publicações',
+            'repositorio' => 'Repositório',
+        ];
+    @endphp
     <div class="border rounded divide-y">
         @foreach($permissoes as $tela => $perms)
             <div class="p-3 flex items-center justify-between">
-                <span class="font-medium capitalize">{{ $tela }}</span>
+                <span class="font-medium">{{ $telaLabels[$tela] ?? ucfirst($tela) }}</span>
                 <div class="flex gap-4">
                     @foreach($perms as $permissao)
                         <label class="flex items-center gap-1 text-sm">

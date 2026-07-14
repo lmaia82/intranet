@@ -19,7 +19,7 @@ integração com AD/LDAP fica para o final, depois de todas as telas prontas.
 | Informativos / Mural de Avisos | ✅ Pronta (CRUD + upload de imagem) |
 | Agenda / Eventos | ✅ Pronta (CRUD completo) |
 | Repositório de Arquivos | ✅ Pronta (pastas, upload/download, MinIO) |
-| Artigos | ✅ Pronta (apresentação + links para o Mineralis e o Master) |
+| Publicações (ex-Artigos) | ✅ Pronta (apresentação + links para o Mineralis e o Master) |
 | Painel de Administração | ✅ Pronta (setores, usuários, estatísticas) |
 | Autenticação via AD/LDAP | ⬜ Pendente (substituirá o Breeze) |
 
@@ -62,13 +62,16 @@ integração com AD/LDAP fica para o final, depois de todas as telas prontas.
   padrão "Colaboradores" com acesso total e migra todos os usuários
   existentes para ele, então nada quebra após o `migrate` — a
   restrição por grupo é opt-in via a tela de Admin > Grupos. As
-  permissões `artigos.ver`/`artigos.criar` ficaram órfãs (não gateiam
-  mais nada) depois da tela de Artigos virar um link estático — podem
-  ser removidas do catálogo numa limpeza futura.
+  permissões internas `artigos.ver`/`artigos.criar` ficaram órfãs (não
+  gateiam mais nada) depois da tela virar um link estático — o rótulo
+  exibido em Admin > Grupos já foi atualizado para "Publicações", mas a
+  chave interna continua `artigos.*`; podem ser renomeadas/removidas do
+  catálogo numa limpeza futura.
 
-- **Artigos → Mineralis / Master**: ✅ Pronta. A tela de Artigos deixou
-  de ter CRUD/busca/cadastro em lote e virou uma página de apresentação
-  com dois links: Mineralis (`https://mineralis.cetem.gov.br/buscar`),
+- **Publicações (ex-Artigos) → Mineralis / Master**: ✅ Pronta. A tela
+  (renomeada de "Artigos" para "Publicações" no menu) deixou de ter
+  CRUD/busca/cadastro em lote e virou uma página de apresentação com
+  dois links: Mineralis (`https://mineralis.cetem.gov.br/buscar`),
   repositório institucional do CETEM, e Master (`https://master.cetem.gov.br/`),
   biblioteca digital com a produção técnico-científica publicada por
   editores externos ao Centro. O model/tabela `Artigo` e os PDFs já

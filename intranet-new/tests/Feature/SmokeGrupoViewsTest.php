@@ -25,4 +25,16 @@ class SmokeGrupoViewsTest extends TestCase
         $this->actingAs($admin)->get(route('admin.usuarios.grupo-lote.form'))->assertOk();
         $this->actingAs($admin)->get(route('admin.index'))->assertOk()->assertSee('Gerenciar Grupos');
     }
+
+    public function test_publicacoes_aparece_no_menu_e_na_configuracao_de_grupos(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true]);
+        $grupo = Group::first();
+
+        $this->actingAs($admin)->get(route('dashboard'))
+            ->assertOk()->assertSee('Publicações')->assertDontSee('Artigos');
+
+        $this->actingAs($admin)->get(route('admin.grupos.editar', $grupo))
+            ->assertOk()->assertSee('Publicações')->assertDontSee('Artigos');
+    }
 }
