@@ -79,6 +79,10 @@ Route::middleware('auth')->group(function () {
         ->middlewareFor(['create', 'store', 'edit', 'update', 'destroy'], 'permission:destaques.criar');
 });
 
+use App\Http\Controllers\BuscaController;
+
+Route::get('busca', [BuscaController::class, 'index'])->name('busca.index')->middleware('auth');
+
 use App\Http\Controllers\ArtigoController;
 
 Route::middleware('auth')->group(function () {

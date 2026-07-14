@@ -5,6 +5,11 @@
 
     <div class="py-6 max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
 
+        <form method="GET" action="{{ route('busca.index') }}" class="bg-white shadow rounded p-4">
+            <input type="text" name="q" placeholder="🔎 Buscar por pessoas, documentos, ramais, informativos..."
+                class="block w-full border-gray-300 rounded">
+        </form>
+
         @if($destaques->isNotEmpty())
         <div
             x-data="{ atual: 0, total: {{ $destaques->count() }} }"
