@@ -42,4 +42,17 @@ class TelefoneLoteTest extends TestCase
             ->assertOk()
             ->assertSee('Baixar modelo CSV');
     }
+
+    public function test_pagina_de_ramais_lista_indice_alfabetico(): void
+    {
+        $user = User::factory()->create();
+        $sector = Sector::create(['name' => 'TI']);
+        Telefone::create(['nome' => 'Ana Silva', 'telefone' => '1111', 'sector_id' => $sector->id]);
+        Telefone::create(['nome' => 'Bruno Costa', 'telefone' => '2222', 'sector_id' => $sector->id]);
+
+        $this->actingAs($user)->get(route('telefones.index'))
+            ->assertOk()
+            ->assertSee('Ana Silva')
+            ->assertSee('Bruno Costa');
+    }
 }

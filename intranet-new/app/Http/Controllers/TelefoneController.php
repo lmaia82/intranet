@@ -20,7 +20,11 @@ class TelefoneController extends Controller
         }
 
         $telefones = $query->paginate(20)->withQueryString();
-        $letras = Telefone::selectRaw('DISTINCT UPPER(LEFT(nome,1)) as letra')->orderBy('letra')->pluck('letra');
+        $letras = Telefone::pluck('nome')
+            ->map(fn ($nome) => mb_strtoupper(mb_substr($nome, 0, 1)))
+            ->unique()
+            ->sort()
+            ->values();
 
         return view('telefones.index', compact('telefones', 'letras'));
     }
