@@ -54,6 +54,56 @@
             </div>
         </div>
 
+        <div class="bg-white shadow rounded p-4" x-data="{ selecionado: null }">
+            <div class="flex justify-between items-center mb-3">
+                <h3 class="font-semibold text-lg">🗓️ {{ $nomeMesAno }}</h3>
+                <div class="flex items-center gap-2">
+                    <a href="{{ route('dashboard', ['mes' => $mesAnterior->month, 'ano' => $mesAnterior->year]) }}" class="px-2 py-1 bg-gray-100 rounded hover:bg-gray-200">&#8249;</a>
+                    <a href="{{ route('dashboard') }}" class="px-2 py-1 bg-gray-100 rounded hover:bg-gray-200 text-xs">Hoje</a>
+                    <a href="{{ route('dashboard', ['mes' => $mesProximo->month, 'ano' => $mesProximo->year]) }}" class="px-2 py-1 bg-gray-100 rounded hover:bg-gray-200">&#8250;</a>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-7 gap-1 text-center text-xs font-semibold text-gray-500 mb-1">
+                <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
+            </div>
+            <div class="grid grid-cols-7 gap-1">
+                @foreach($diasCalendario as $diaInfo)
+                    @php
+                        $chave = $diaInfo['data']->toDateString();
+                        $eventosDoDia = $eventosPorDia->get($chave, collect());
+                    @endphp
+                    <button
+                        type="button"
+                        @if($eventosDoDia->isNotEmpty())
+                            @click="selecionado = (selecionado === '{{ $chave }}' ? null : '{{ $chave }}')"
+                        @endif
+                        class="aspect-square rounded flex flex-col items-center justify-center text-sm
+                            {{ $diaInfo['foraDoMes'] ? 'text-gray-300' : 'text-gray-700' }}
+                            {{ $diaInfo['hoje'] ? 'ring-2 ring-blue-500 font-bold' : '' }}
+                            {{ $eventosDoDia->isNotEmpty() ? 'hover:bg-blue-50 cursor-pointer' : 'cursor-default' }}"
+                    >
+                        <span>{{ $diaInfo['data']->day }}</span>
+                        @if($eventosDoDia->isNotEmpty())
+                            <span class="w-1.5 h-1.5 rounded-full bg-blue-600 mt-0.5"></span>
+                        @endif
+                    </button>
+                @endforeach
+            </div>
+
+            @foreach($eventosPorDia as $chave => $eventosDoDia)
+                <div x-show="selecionado === '{{ $chave }}'" x-cloak class="mt-3 p-3 bg-blue-50 rounded text-sm">
+                    <p class="font-semibold mb-1">{{ \Carbon\Carbon::parse($chave)->format('d/m/Y') }}</p>
+                    <ul class="space-y-1 list-disc list-inside">
+                        @foreach($eventosDoDia as $evento)
+                            <li>{{ $evento->title }}@if($evento->local) — {{ $evento->local }}@endif</li>
+                        @endforeach
+                    </ul>
+                    <a href="{{ route('eventos.index') }}" class="text-blue-600 text-xs">Ver na Agenda &rarr;</a>
+                </div>
+            @endforeach
+        </div>
+
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
             <div class="bg-white shadow rounded p-4">
