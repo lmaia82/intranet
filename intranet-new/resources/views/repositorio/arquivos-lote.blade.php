@@ -5,7 +5,7 @@
     <div class="py-6 max-w-2xl mx-auto sm:px-6 lg:px-8">
         <div class="bg-white shadow rounded p-6 space-y-4">
             <p class="text-sm text-gray-600">
-                Útil para migrar arquivos legados. Baixe o modelo de planilha CSV, preencha uma linha
+                Baixe o modelo de planilha CSV, preencha uma linha
                 por arquivo (coluna <strong>arquivo</strong> deve ter o nome exato do arquivo que será
                 selecionado abaixo; <strong>pasta</strong> aceita caminhos aninhados separados por "/",
                 ex: <em>Notas Fiscais/2024</em>, e é criada automaticamente se não existir; <strong>setor</strong>

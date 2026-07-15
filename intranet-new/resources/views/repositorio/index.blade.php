@@ -52,7 +52,7 @@
                 <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded">Enviar</button>
             </form>
         </div>
-        <p class="text-sm mb-6"><a href="{{ route('repositorio.arquivos.lote.form') }}" class="text-blue-600">📦 Cadastro em lote de arquivos (upload de arquivos legados)</a></p>
+        <p class="text-sm mb-6"><a href="{{ route('repositorio.arquivos.lote.form') }}" class="text-blue-600">📦 Cadastro em lote de arquivos</a></p>
         @endif
 
         <div class="bg-white shadow rounded overflow-hidden">

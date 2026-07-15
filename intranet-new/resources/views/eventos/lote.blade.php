@@ -5,7 +5,7 @@
     <div class="py-6 max-w-2xl mx-auto sm:px-6 lg:px-8">
         <div class="bg-white shadow rounded p-6 space-y-4">
             <p class="text-sm text-gray-600">
-                Útil para migrar a agenda legada. Baixe o modelo de planilha CSV, preencha uma linha
+                Baixe o modelo de planilha CSV, preencha uma linha
                 por evento (datas no formato dd/mm/aaaa; <strong>dt_end</strong>, <strong>tm_start</strong>,
                 <strong>tm_end</strong> e <strong>informacoes</strong> são opcionais) e envie o arquivo.
             </p>
