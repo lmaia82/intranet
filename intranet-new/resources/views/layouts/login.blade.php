@@ -20,12 +20,12 @@
             <div class="fixed inset-0 bg-gradient-to-b from-black/50 via-black/30 to-black/50"></div>
 
             <div class="relative min-h-screen flex flex-col">
-                <header class="bg-blue-700 shadow">
+                <header class="bg-gradient-to-b from-blue-300 to-white shadow">
                     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex justify-between items-center">
-                        <a href="https://cetem.gov.br" target="_blank" rel="noopener" class="bg-white rounded px-3 py-1.5 shadow-sm inline-flex items-center">
+                        <a href="https://cetem.gov.br" target="_blank" rel="noopener" class="inline-flex items-center">
                             <img src="{{ asset('images/logo-cetem.png') }}" alt="CETEM - Centro de Tecnologia Mineral" class="h-8 w-auto">
                         </a>
-                        <span class="bg-white rounded px-3 py-1.5 shadow-sm inline-flex items-center">
+                        <span class="inline-flex items-center">
                             <img src="{{ asset('images/logo-intra.png') }}" alt="Intranet" class="h-8 w-auto">
                         </span>
                     </div>
