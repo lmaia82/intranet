@@ -23,9 +23,11 @@
                 <header class="bg-blue-700 shadow">
                     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex justify-between items-center">
                         <a href="https://cetem.gov.br" target="_blank" rel="noopener" class="bg-white rounded px-3 py-1.5 shadow-sm inline-flex items-center">
-                            <x-cetem-logo class="h-8 w-auto" />
+                            <img src="{{ asset('images/logo-cetem.png') }}" alt="CETEM - Centro de Tecnologia Mineral" class="h-8 w-auto">
                         </a>
-                        <span class="font-heading font-bold tracking-widest text-white text-lg">INTRANET</span>
+                        <span class="bg-white rounded px-3 py-1.5 shadow-sm inline-flex items-center">
+                            <img src="{{ asset('images/logo-intra.png') }}" alt="Intranet" class="h-8 w-auto">
+                        </span>
                     </div>
                 </header>
 
