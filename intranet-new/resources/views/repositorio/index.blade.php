@@ -40,6 +40,8 @@
                 <input type="file" name="arquivo" required class="block w-full">
                 @error('arquivo') <p class="text-red-600 text-sm">{{ $message }}</p> @enderror
                 <input type="text" name="descricao" placeholder="Descrição (opcional)" class="block w-full border-gray-300 rounded">
+                <label class="block text-sm font-medium">Data do documento</label>
+                <input type="date" name="data" value="{{ old('data', now()->format('Y-m-d')) }}" class="block w-full border-gray-300 rounded">
                 <select name="sector_id" required class="block w-full border-gray-300 rounded">
                     @foreach($sectors as $sector)
                         <option value="{{ $sector->id }}" @selected(old('sector_id', auth()->user()->sector_id) == $sector->id)>{{ $sector->name }}</option>
@@ -50,6 +52,7 @@
                 <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded">Enviar</button>
             </form>
         </div>
+        <p class="text-sm mb-6"><a href="{{ route('repositorio.arquivos.lote.form') }}" class="text-blue-600">📦 Cadastro em lote de arquivos (upload de arquivos legados)</a></p>
         @endif
 
         <div class="bg-white shadow rounded overflow-hidden">
@@ -59,6 +62,7 @@
                         <th class="p-3">Nome</th>
                         <th class="p-3">Tipo</th>
                         <th class="p-3">Tamanho</th>
+                        <th class="p-3">Data</th>
                         <th class="p-3">Visibilidade</th>
                         @if(auth()->user()->hasPermission('repositorio.criar'))
                             <th class="p-3"></th>
@@ -70,6 +74,7 @@
                         <tr class="border-t">
                             <td class="p-3"><a href="{{ route('repositorio.index', ['pasta' => $subpasta->id]) }}" class="text-blue-700 font-semibold">📁 {{ $subpasta->nome }}</a></td>
                             <td class="p-3">Pasta</td>
+                            <td class="p-3">—</td>
                             <td class="p-3">—</td>
                             <td class="p-3">
                                 @if($subpasta->is_private)
@@ -100,6 +105,7 @@
                             </td>
                             <td class="p-3 uppercase">{{ $arquivo->extensao }}</td>
                             <td class="p-3">{{ $arquivo->tamanhoFormatado() }}</td>
+                            <td class="p-3">{{ optional($arquivo->data)->format('d/m/Y') }}</td>
                             <td class="p-3">
                                 @if($arquivo->is_private)
                                     <span class="inline-block px-2 py-0.5 text-xs rounded bg-orange-100 text-orange-800">Restrito ({{ $arquivo->sector?->name }})</span>
@@ -120,7 +126,7 @@
                         </tr>
                     @endforeach
                     @if($subpastas->isEmpty() && $arquivos->isEmpty())
-                        <tr><td colspan="{{ auth()->user()->hasPermission('repositorio.criar') ? 5 : 4 }}" class="p-3 text-gray-500">Pasta vazia.</td></tr>
+                        <tr><td colspan="{{ auth()->user()->hasPermission('repositorio.criar') ? 6 : 5 }}" class="p-3 text-gray-500">Pasta vazia.</td></tr>
                     @endif
                 </tbody>
             </table>

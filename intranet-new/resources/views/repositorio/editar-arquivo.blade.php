@@ -12,6 +12,10 @@
                 <textarea name="descricao" rows="3" class="mt-1 block w-full border-gray-300 rounded">{{ old('descricao', $arquivo->descricao) }}</textarea>
             </div>
             <div>
+                <label class="block text-sm font-medium">Data do documento</label>
+                <input type="date" name="data" value="{{ old('data', optional($arquivo->data)->format('Y-m-d')) }}" class="mt-1 block w-full border-gray-300 rounded">
+            </div>
+            <div>
                 <label class="block text-sm font-medium">Setor</label>
                 <select name="sector_id" required class="mt-1 block w-full border-gray-300 rounded">
                     @foreach($sectors as $sector)

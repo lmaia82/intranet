@@ -45,6 +45,9 @@ Route::middleware('auth')->group(function () {
     Route::resource('eventos', EventoController::class)
         ->middlewareFor(['index', 'show'], 'permission:eventos.ver')
         ->middlewareFor(['create', 'store', 'edit', 'update', 'destroy'], 'permission:eventos.criar');
+    Route::get('eventos-lote', [EventoController::class, 'loteForm'])->name('eventos.lote.form')->middleware('permission:eventos.criar');
+    Route::post('eventos-lote', [EventoController::class, 'loteImport'])->name('eventos.lote.import')->middleware('permission:eventos.criar');
+    Route::get('eventos-lote/template', [EventoController::class, 'loteTemplate'])->name('eventos.lote.template')->middleware('permission:eventos.criar');
 });
 
 use App\Http\Controllers\EventoGravadoController;
@@ -107,6 +110,10 @@ Route::middleware(['auth', 'permission:repositorio.criar'])->group(function () {
     Route::get('repositorio/arquivos/{arquivo}/editar', [RepositorioController::class, 'editArquivo'])->name('repositorio.arquivos.editar');
     Route::put('repositorio/arquivos/{arquivo}', [RepositorioController::class, 'updateArquivo'])->name('repositorio.arquivos.update');
     Route::delete('repositorio/arquivos/{arquivo}', [RepositorioController::class, 'destroyArquivo'])->name('repositorio.arquivos.destroy');
+
+    Route::get('repositorio-arquivos-lote', [RepositorioController::class, 'loteArquivosForm'])->name('repositorio.arquivos.lote.form');
+    Route::post('repositorio-arquivos-lote', [RepositorioController::class, 'loteArquivosImport'])->name('repositorio.arquivos.lote.import');
+    Route::get('repositorio-arquivos-lote/template', [RepositorioController::class, 'loteArquivosTemplate'])->name('repositorio.arquivos.lote.template');
 });
 
 use App\Http\Controllers\OnlyOfficeController;

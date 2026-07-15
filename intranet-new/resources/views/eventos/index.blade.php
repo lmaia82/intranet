@@ -8,7 +8,8 @@
         @endif
 
         @if(auth()->user()->hasPermission('eventos.criar'))
-            <div class="flex justify-end mb-4">
+            <div class="flex justify-end items-center gap-3 mb-4">
+                <a href="{{ route('eventos.lote.form') }}" class="text-blue-600 text-sm">Cadastro em lote</a>
                 <a href="{{ route('eventos.create') }}" class="px-4 py-2 bg-blue-600 text-white rounded">Novo evento</a>
             </div>
         @endif

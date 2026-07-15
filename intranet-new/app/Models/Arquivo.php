@@ -6,10 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class Arquivo extends Model
 {
-    protected $fillable = ['pasta_id', 'nome_original', 'caminho', 'extensao', 'tamanho', 'descricao', 'sector_id', 'is_private'];
+    protected $fillable = ['pasta_id', 'nome_original', 'caminho', 'extensao', 'tamanho', 'descricao', 'data', 'sector_id', 'is_private'];
 
     protected $casts = [
         'is_private' => 'boolean',
+        'data' => 'date',
     ];
 
     public function visivelPara(User $user): bool

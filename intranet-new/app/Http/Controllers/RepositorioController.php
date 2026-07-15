@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Arquivo;
 use App\Models\Pasta;
 use App\Models\Sector;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -98,6 +99,7 @@ class RepositorioController extends Controller
             'pasta_id' => 'nullable|exists:pastas,id',
             'arquivo' => 'required|file|max:51200',
             'descricao' => 'nullable|string',
+            'data' => 'nullable|date',
             'sector_id' => 'required|exists:sectors,id',
             'is_private' => 'boolean',
         ]);
@@ -120,6 +122,7 @@ class RepositorioController extends Controller
             'extensao' => strtolower($file->getClientOriginalExtension()),
             'tamanho' => $file->getSize(),
             'descricao' => $validated['descricao'] ?? null,
+            'data' => $validated['data'] ?? now()->toDateString(),
             'sector_id' => $validated['sector_id'] ?? null,
             'is_private' => $request->boolean('is_private'),
         ]);
@@ -144,6 +147,7 @@ class RepositorioController extends Controller
     {
         $validated = $request->validate([
             'descricao' => 'nullable|string',
+            'data' => 'nullable|date',
             'sector_id' => 'required|exists:sectors,id',
             'is_private' => 'boolean',
         ]);
@@ -164,5 +168,139 @@ class RepositorioController extends Controller
 
         return redirect()->route('repositorio.index', $pastaId ? ['pasta' => $pastaId] : [])
             ->with('status', 'Arquivo removido.');
+    }
+
+    public function loteArquivosForm()
+    {
+        return view('repositorio.arquivos-lote');
+    }
+
+    public function loteArquivosTemplate()
+    {
+        $csv = "arquivo,pasta,setor,data,publico,descricao\n";
+        $csv .= "exemplo.pdf,Notas Fiscais/2024,Financeiro,31/12/2024,nao,Nota fiscal de exemplo\n";
+
+        return response($csv, 200, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="modelo_arquivos_lote.csv"',
+        ]);
+    }
+
+    public function loteArquivosImport(Request $request)
+    {
+        $request->validate([
+            'csv' => 'required|file|mimes:csv,txt',
+            'arquivos' => 'required|array',
+            'arquivos.*' => 'file|max:51200',
+        ]);
+
+        $arquivosPorNome = collect($request->file('arquivos'))
+            ->keyBy(fn ($file) => $file->getClientOriginalName());
+
+        $conteudo = file_get_contents($request->file('csv')->getRealPath());
+        $conteudo = preg_replace('/^\xEF\xBB\xBF/', '', $conteudo);
+        $linhas = preg_split('/\r\n|\r|\n/', $conteudo);
+        $linhas = array_values(array_filter($linhas, fn ($l) => trim($l) !== ''));
+
+        $header = array_map('trim', str_getcsv(array_shift($linhas)));
+
+        $sucesso = 0;
+        $erros = [];
+        $linhaNum = 1;
+        $pastasCriadas = [];
+
+        foreach ($linhas as $linhaTexto) {
+            $linhaNum++;
+            $row = array_map('trim', str_getcsv($linhaTexto));
+            $dados = array_combine($header, $row);
+
+            $nomeArquivo = trim($dados['arquivo'] ?? '');
+            $setorNome = trim($dados['setor'] ?? '');
+
+            if ($nomeArquivo === '' || $setorNome === '') {
+                $erros[] = "Linha {$linhaNum}: campos obrigatórios em branco.";
+                continue;
+            }
+
+            $file = $arquivosPorNome->get($nomeArquivo);
+            if (!$file) {
+                $erros[] = "Linha {$linhaNum}: arquivo '{$nomeArquivo}' não foi enviado junto com o lote.";
+                continue;
+            }
+
+            $sector = Sector::whereRaw('LOWER(name) = ?', [strtolower($setorNome)])->first();
+            if (!$sector) {
+                $erros[] = "Linha {$linhaNum}: setor '{$setorNome}' não encontrado.";
+                continue;
+            }
+
+            if ($sector->quotaExcedida($file->getSize())) {
+                $erros[] = "Linha {$linhaNum}: o setor \"{$sector->name}\" atingiria a cota de armazenamento com este arquivo.";
+                continue;
+            }
+
+            $dataTexto = trim($dados['data'] ?? '');
+            $data = now()->toDateString();
+            if ($dataTexto !== '') {
+                $data = null;
+                foreach (['d/m/Y', 'Y-m-d'] as $formato) {
+                    try {
+                        $data = Carbon::createFromFormat($formato, $dataTexto)->startOfDay();
+                        break;
+                    } catch (\Exception $e) {
+                        $data = null;
+                    }
+                }
+
+                if (!$data) {
+                    $erros[] = "Linha {$linhaNum}: data '{$dataTexto}' inválida (use dd/mm/aaaa).";
+                    continue;
+                }
+            }
+
+            $publicoTexto = strtolower(trim($dados['publico'] ?? 'sim'));
+            $isPrivate = !in_array($publicoTexto, ['sim', 's', 'yes', '1', 'publico', 'público'], true);
+
+            $pastaId = null;
+            $pastaTexto = trim($dados['pasta'] ?? '');
+            if ($pastaTexto !== '') {
+                foreach (explode('/', $pastaTexto) as $segmento) {
+                    $segmento = trim($segmento);
+                    if ($segmento === '') {
+                        continue;
+                    }
+
+                    $chave = $sector->id . ':' . $pastaId . ':' . mb_strtolower($segmento);
+                    if (!isset($pastasCriadas[$chave])) {
+                        $pastasCriadas[$chave] = Pasta::firstOrCreate(
+                            ['nome' => $segmento, 'parent_id' => $pastaId, 'sector_id' => $sector->id],
+                            ['is_private' => false]
+                        );
+                    }
+
+                    $pastaId = $pastasCriadas[$chave]->id;
+                }
+            }
+
+            $caminho = $file->store('uploads', 'arquivos');
+
+            Arquivo::create([
+                'pasta_id' => $pastaId,
+                'nome_original' => $file->getClientOriginalName(),
+                'caminho' => $caminho,
+                'extensao' => strtolower($file->getClientOriginalExtension()),
+                'tamanho' => $file->getSize(),
+                'descricao' => trim($dados['descricao'] ?? '') ?: null,
+                'data' => $data,
+                'sector_id' => $sector->id,
+                'is_private' => $isPrivate,
+            ]);
+
+            $sucesso++;
+        }
+
+        return redirect()->route('repositorio.arquivos.lote.form')
+            ->with('status', "{$sucesso} arquivo(s) importado(s) com sucesso.")
+            ->with('erros_lote', $erros);
     }
 }
