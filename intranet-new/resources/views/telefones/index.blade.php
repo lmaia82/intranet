@@ -3,7 +3,7 @@
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">Ramais / Telefones</h2>
     </x-slot>
 
-    <div class="py-6 max-w-5xl mx-auto sm:px-6 lg:px-8">
+    <div class="py-6 max-w-7xl mx-auto sm:px-6 lg:px-8">
         @if(session('status'))
             <div class="mb-4 p-4 bg-green-100 text-green-800 rounded">{{ session('status') }}</div>
         @endif
@@ -27,17 +27,29 @@
             @endforeach
         </div>
 
-        <div class="bg-white shadow rounded overflow-hidden">
-            <table class="w-full text-left">
+        <div class="bg-white shadow rounded overflow-x-auto">
+            <table class="w-full table-fixed text-left text-sm">
+                <colgroup>
+                    <col class="w-[18%]">
+                    <col class="w-[9%]">
+                    <col class="w-[7%]">
+                    <col class="w-[9%]">
+                    <col class="w-[18%]">
+                    <col class="w-[19%]">
+                    <col class="w-[11%]">
+                    @if(auth()->user()->hasPermission('ramais.criar'))
+                        <col class="w-[9%]">
+                    @endif
+                </colgroup>
                 <thead class="bg-gray-50">
                     <tr>
-                        <th class="p-3">Nome</th>
-                        <th class="p-3">Unidade</th>
-                        <th class="p-3">Ramal</th>
-                        <th class="p-3">Setor</th>
-                        <th class="p-3">Cargo</th>
-                        <th class="p-3">E-mail</th>
-                        <th class="p-3">Telefone Externo</th>
+                        <th class="p-3 truncate">Nome</th>
+                        <th class="p-3 truncate">Unidade</th>
+                        <th class="p-3 truncate">Ramal</th>
+                        <th class="p-3 truncate">Setor</th>
+                        <th class="p-3 truncate">Cargo</th>
+                        <th class="p-3 truncate">E-mail</th>
+                        <th class="p-3 truncate">Telefone Externo</th>
                         @if(auth()->user()->hasPermission('ramais.criar'))
                             <th class="p-3"></th>
                         @endif
@@ -46,13 +58,13 @@
                 <tbody>
                     @foreach($telefones as $telefone)
                         <tr class="border-t">
-                            <td class="p-3">{{ $telefone->nome }}</td>
-                            <td class="p-3">{{ $telefone->unidade }}</td>
-                            <td class="p-3">{{ $telefone->telefone }}</td>
-                            <td class="p-3">{{ $telefone->sector->name ?? '-' }}</td>
-                            <td class="p-3">{{ $telefone->cargo }}</td>
-                            <td class="p-3">{{ $telefone->email }}</td>
-                            <td class="p-3">{{ $telefone->telefone_externo }}</td>
+                            <td class="p-3 truncate" title="{{ $telefone->nome }}">{{ $telefone->nome }}</td>
+                            <td class="p-3 truncate" title="{{ $telefone->unidade }}">{{ $telefone->unidade }}</td>
+                            <td class="p-3 truncate" title="{{ $telefone->telefone }}">{{ $telefone->telefone }}</td>
+                            <td class="p-3 truncate" title="{{ $telefone->sector->name ?? '-' }}">{{ $telefone->sector->name ?? '-' }}</td>
+                            <td class="p-3 truncate" title="{{ $telefone->cargo }}">{{ $telefone->cargo }}</td>
+                            <td class="p-3 truncate" title="{{ $telefone->email }}">{{ $telefone->email }}</td>
+                            <td class="p-3 truncate" title="{{ $telefone->telefone_externo }}">{{ $telefone->telefone_externo }}</td>
                             @if(auth()->user()->hasPermission('ramais.criar'))
                                 <td class="p-3 text-right whitespace-nowrap">
                                     <a href="{{ route('telefones.edit', $telefone) }}" class="text-blue-600">Editar</a>
