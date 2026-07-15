@@ -17,7 +17,6 @@
     <body class="font-sans text-gray-900 antialiased">
         <div class="relative min-h-screen">
             <div class="fixed inset-0 bg-cover bg-center" style="background-image: url('{{ asset('images/frente_cr.png') }}')"></div>
-            <div class="fixed inset-0 bg-gradient-to-b from-black/50 via-black/30 to-black/50"></div>
 
             <div class="relative min-h-screen flex flex-col">
                 <header class="bg-gradient-to-b from-blue-300 to-white shadow">
