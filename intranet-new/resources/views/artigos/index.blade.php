@@ -5,7 +5,7 @@
     <div class="py-6 max-w-4xl mx-auto sm:px-6 lg:px-8">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div class="bg-white shadow rounded p-8 text-center">
-                <h3 class="text-2xl font-bold text-blue-700 mb-4">Bem-vindo ao Mineralis</h3>
+                <h3 class="text-2xl font-bold text-[#166F9E] mb-4">Bem-vindo ao Mineralis</h3>
                 <p class="text-gray-600 leading-relaxed mb-6">
                     O repositório institucional do CETEM coleta, preserva e distribui
                     material digital, mantendo os princípios da segurança da informação.
@@ -17,7 +17,7 @@
             </div>
 
             <div class="bg-white shadow rounded p-8 text-center">
-                <h3 class="text-2xl font-bold text-blue-700 mb-4">Bem-vindo ao Master</h3>
+                <h3 class="text-2xl font-bold text-[#166F9E] mb-4">Bem-vindo ao Master</h3>
                 <p class="text-gray-600 leading-relaxed mb-6">
                     A Biblioteca Digital Master disponibiliza a produção
                     técnico-científica do CETEM publicada por editores externos ao

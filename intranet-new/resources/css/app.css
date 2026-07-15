@@ -5,3 +5,9 @@
 [x-cloak] {
     display: none !important;
 }
+
+@layer base {
+    h2, h3 {
+        color: #166F9E;
+    }
+}
