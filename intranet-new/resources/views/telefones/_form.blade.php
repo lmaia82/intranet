@@ -10,6 +10,11 @@
     @error('telefone') <p class="text-red-600 text-sm">{{ $message }}</p> @enderror
 </div>
 <div>
+    <label class="block text-sm font-medium">Unidade</label>
+    <input type="text" name="unidade" value="{{ old('unidade', $telefone->unidade ?? '') }}" placeholder="Ex: CETEM-RJ" class="mt-1 block w-full border-gray-300 rounded">
+    @error('unidade') <p class="text-red-600 text-sm">{{ $message }}</p> @enderror
+</div>
+<div>
     <label class="block text-sm font-medium">Setor</label>
     <select name="sector_id" class="mt-1 block w-full border-gray-300 rounded">
         <option value="">Selecione...</option>
@@ -27,4 +32,9 @@
     <label class="block text-sm font-medium">E-mail</label>
     <input type="email" name="email" value="{{ old('email', $telefone->email ?? '') }}" class="mt-1 block w-full border-gray-300 rounded">
     @error('email') <p class="text-red-600 text-sm">{{ $message }}</p> @enderror
+</div>
+<div>
+    <label class="block text-sm font-medium">Telefone Externo</label>
+    <input type="text" name="telefone_externo" value="{{ old('telefone_externo', $telefone->telefone_externo ?? '') }}" placeholder="Ex: (21)3512-0000" class="mt-1 block w-full border-gray-300 rounded">
+    @error('telefone_externo') <p class="text-red-600 text-sm">{{ $message }}</p> @enderror
 </div>

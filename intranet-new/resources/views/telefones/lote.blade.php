@@ -5,9 +5,10 @@
     <div class="py-6 max-w-2xl mx-auto sm:px-6 lg:px-8">
         <div class="bg-white shadow rounded p-6 space-y-4">
             <p class="text-sm text-gray-600">
-                Baixe o modelo de planilha CSV, preencha uma linha por ramal (a coluna
-                <strong>setor</strong> deve ter exatamente o nome de um setor já cadastrado
-                em Administração &gt; Setores) e envie o arquivo.
+                Envie um arquivo CSV ou XLSX (aceita o próprio catálogo telefônico, com as colunas
+                <strong>Ramal, Unidade, Setor, Nome, Cargo, E-mail, Telefone Externo</strong>) ou baixe o
+                modelo simplificado abaixo. A coluna <strong>setor</strong> deve ter exatamente o nome
+                de um setor já cadastrado em Administração &gt; Setores.
             </p>
 
             @if(session('status'))
@@ -30,9 +31,9 @@
             <form method="POST" action="{{ route('telefones.lote.import') }}" enctype="multipart/form-data" class="space-y-4">
                 @csrf
                 <div>
-                    <label class="block text-sm font-medium">Arquivo CSV</label>
-                    <input type="file" name="csv" accept=".csv,text/csv" required class="mt-1 block w-full">
-                    @error('csv') <p class="text-red-600 text-sm">{{ $message }}</p> @enderror
+                    <label class="block text-sm font-medium">Arquivo CSV ou XLSX</label>
+                    <input type="file" name="arquivo" accept=".csv,.xlsx,text/csv" required class="mt-1 block w-full">
+                    @error('arquivo') <p class="text-red-600 text-sm">{{ $message }}</p> @enderror
                 </div>
                 <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded">Importar</button>
             </form>

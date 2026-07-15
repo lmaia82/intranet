@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Telefone extends Model
 {
-    protected $fillable = ['nome', 'telefone', 'sector_id', 'email', 'cargo'];
+    protected $fillable = ['nome', 'unidade', 'telefone', 'sector_id', 'email', 'telefone_externo', 'cargo'];
 
     public function sector()
     {

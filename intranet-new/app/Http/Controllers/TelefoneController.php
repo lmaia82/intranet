@@ -39,9 +39,11 @@ class TelefoneController extends Controller
     {
         $validated = $request->validate([
             'nome' => 'required|string|max:100',
+            'unidade' => 'nullable|string|max:100',
             'telefone' => 'required|string|max:100',
             'sector_id' => 'required|exists:sectors,id',
             'email' => 'nullable|email|max:100',
+            'telefone_externo' => 'nullable|string|max:100',
             'cargo' => 'nullable|string|max:100',
         ]);
 
@@ -60,9 +62,11 @@ class TelefoneController extends Controller
     {
         $validated = $request->validate([
             'nome' => 'required|string|max:100',
+            'unidade' => 'nullable|string|max:100',
             'telefone' => 'required|string|max:100',
             'sector_id' => 'required|exists:sectors,id',
             'email' => 'nullable|email|max:100',
+            'telefone_externo' => 'nullable|string|max:100',
             'cargo' => 'nullable|string|max:100',
         ]);
 
@@ -84,8 +88,8 @@ class TelefoneController extends Controller
 
     public function loteTemplate()
     {
-        $csv = "nome,telefone,setor,email,cargo\n";
-        $csv .= "Fulano de Tal,2222,TI,fulano@cetem.gov.br,Analista\n";
+        $csv = "ramal,unidade,setor,nome,cargo,email,telefone_externo\n";
+        $csv .= "2222,CETEM-RJ,TI,Fulano de Tal,Analista,fulano@cetem.gov.br,(21)3512-0000\n";
 
         return response($csv, 200, [
             'Content-Type' => 'text/csv; charset=UTF-8',
@@ -95,27 +99,36 @@ class TelefoneController extends Controller
 
     public function loteImport(Request $request)
     {
-        $request->validate(['csv' => 'required|file|mimes:csv,txt']);
+        $request->validate(['arquivo' => 'required|file|mimes:csv,txt,xlsx']);
 
-        $conteudo = file_get_contents($request->file('csv')->getRealPath());
-        $conteudo = preg_replace('/^\xEF\xBB\xBF/', '', $conteudo);
-        $linhas = preg_split('/\r\n|\r|\n/', $conteudo);
-        $linhas = array_values(array_filter($linhas, fn($l) => trim($l) !== ''));
+        $linhas = $this->lerLinhasDaPlanilha($request->file('arquivo'));
 
-        $header = array_map('trim', str_getcsv(array_shift($linhas)));
+        if (empty($linhas)) {
+            return redirect()->route('telefones.lote.form')
+                ->with('status', '0 ramal(is) importado(s) com sucesso.')
+                ->with('erros_lote', ['Arquivo vazio ou sem linhas de dados.']);
+        }
+
+        $header = array_map([$this, 'normalizarCabecalho'], array_shift($linhas));
 
         $sucesso = 0;
         $erros = [];
         $linhaNum = 1;
 
-        foreach ($linhas as $linhaTexto) {
+        foreach ($linhas as $row) {
             $linhaNum++;
-            $row = array_map('trim', str_getcsv($linhaTexto));
-            $dados = array_combine($header, $row);
 
-            $nome = trim($dados['nome'] ?? '');
-            $telefone = trim($dados['telefone'] ?? '');
-            $setorNome = trim($dados['setor'] ?? '');
+            if (count(array_filter($row, fn ($v) => trim((string) $v) !== '')) === 0) {
+                continue;
+            }
+
+            $row = array_pad($row, count($header), null);
+            $dados = array_combine($header, $row);
+            $dados = array_map(fn ($v) => trim((string) $v), $dados);
+
+            $nome = $dados['nome'] ?? '';
+            $telefone = $dados['telefone'] ?? '';
+            $setorNome = $dados['setor'] ?? '';
 
             if ($nome === '' || $telefone === '' || $setorNome === '') {
                 $erros[] = "Linha {$linhaNum}: campos obrigatórios em branco.";
@@ -131,10 +144,12 @@ class TelefoneController extends Controller
 
             Telefone::create([
                 'nome' => $nome,
+                'unidade' => ($dados['unidade'] ?? '') ?: null,
                 'telefone' => $telefone,
                 'sector_id' => $sector->id,
-                'email' => trim($dados['email'] ?? '') ?: null,
-                'cargo' => trim($dados['cargo'] ?? '') ?: null,
+                'email' => ($dados['email'] ?? '') ?: null,
+                'telefone_externo' => ($dados['telefone_externo'] ?? '') ?: null,
+                'cargo' => ($dados['cargo'] ?? '') ?: null,
             ]);
 
             $sucesso++;
@@ -143,5 +158,46 @@ class TelefoneController extends Controller
         return redirect()->route('telefones.lote.form')
             ->with('status', "{$sucesso} ramal(is) importado(s) com sucesso.")
             ->with('erros_lote', $erros);
+    }
+
+    /**
+     * Lê um arquivo CSV/TXT ou XLSX e devolve as linhas (a primeira é o cabeçalho),
+     * descartando linhas totalmente em branco.
+     */
+    private function lerLinhasDaPlanilha($file): array
+    {
+        if (strtolower($file->getClientOriginalExtension()) === 'xlsx') {
+            $planilha = \PhpOffice\PhpSpreadsheet\IOFactory::load($file->getRealPath());
+            $linhas = $planilha->getActiveSheet()->toArray(null, true, true, false);
+        } else {
+            $conteudo = file_get_contents($file->getRealPath());
+            $conteudo = preg_replace('/^\xEF\xBB\xBF/', '', $conteudo);
+            $textoLinhas = preg_split('/\r\n|\r|\n/', $conteudo);
+            $linhas = array_map('str_getcsv', $textoLinhas);
+        }
+
+        return array_values(array_filter(
+            $linhas,
+            fn ($linha) => count(array_filter($linha, fn ($v) => trim((string) $v) !== '')) > 0
+        ));
+    }
+
+    /**
+     * Normaliza cabeçalhos vindos tanto do modelo simples quanto do catálogo
+     * telefônico oficial (que usa "Ramal", "E-mail", "Telefone Externo" etc,
+     * às vezes com espaços extras).
+     */
+    private function normalizarCabecalho($valor): string
+    {
+        $valor = mb_strtolower(trim((string) $valor));
+        $valor = str_replace(['-', '_'], ' ', $valor);
+        $valor = preg_replace('/\s+/', ' ', $valor);
+
+        return match ($valor) {
+            'ramal', 'telefone' => 'telefone',
+            'e mail' => 'email',
+            'telefone externo' => 'telefone_externo',
+            default => $valor,
+        };
     }
 }

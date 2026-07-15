@@ -9,7 +9,7 @@ class SectorSeeder extends Seeder
 {
     public function run(): void
     {
-        foreach (['SEIN', 'CATE', 'COAD', 'COAM', 'COPM', 'CPMA', 'DIRETORIA', 'CPGI', 'BIBLIOTECA'] as $name) {
+        foreach (['SEIN', 'CATE', 'COADM', 'COAMI', 'COPTM', 'COPMA', 'DIRETORIA', 'COPGI', 'BIBLIOTECA', 'SECOM', 'CORON'] as $name) {
             Sector::firstOrCreate(['name' => $name]);
         }
     }

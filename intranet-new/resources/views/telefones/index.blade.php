@@ -32,10 +32,12 @@
                 <thead class="bg-gray-50">
                     <tr>
                         <th class="p-3">Nome</th>
+                        <th class="p-3">Unidade</th>
                         <th class="p-3">Ramal</th>
                         <th class="p-3">Setor</th>
                         <th class="p-3">Cargo</th>
                         <th class="p-3">E-mail</th>
+                        <th class="p-3">Telefone Externo</th>
                         @if(auth()->user()->hasPermission('ramais.criar'))
                             <th class="p-3"></th>
                         @endif
@@ -45,10 +47,12 @@
                     @foreach($telefones as $telefone)
                         <tr class="border-t">
                             <td class="p-3">{{ $telefone->nome }}</td>
+                            <td class="p-3">{{ $telefone->unidade }}</td>
                             <td class="p-3">{{ $telefone->telefone }}</td>
                             <td class="p-3">{{ $telefone->sector->name ?? '-' }}</td>
                             <td class="p-3">{{ $telefone->cargo }}</td>
                             <td class="p-3">{{ $telefone->email }}</td>
+                            <td class="p-3">{{ $telefone->telefone_externo }}</td>
                             @if(auth()->user()->hasPermission('ramais.criar'))
                                 <td class="p-3 text-right whitespace-nowrap">
                                     <a href="{{ route('telefones.edit', $telefone) }}" class="text-blue-600">Editar</a>
