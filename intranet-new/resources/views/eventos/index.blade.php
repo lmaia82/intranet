@@ -16,7 +16,7 @@
         <h3 class="font-semibold text-lg mb-2">Próximos eventos</h3>
         <div class="space-y-3 mb-8">
             @forelse($proximos as $evento)
-                <div class="bg-white shadow rounded p-4 flex justify-between items-start">
+                <div id="evento-{{ $evento->id }}" class="bg-white shadow rounded p-4 flex justify-between items-start scroll-mt-4">
                     <div>
                         <p class="font-semibold">{{ $evento->title }}</p>
                         <p class="text-sm text-gray-500">
@@ -45,7 +45,7 @@
         <h3 class="font-semibold text-lg mb-2">Eventos anteriores</h3>
         <div class="space-y-3">
             @forelse($anteriores as $evento)
-                <div class="bg-white shadow rounded p-4 flex justify-between items-start opacity-70">
+                <div id="evento-{{ $evento->id }}" class="bg-white shadow rounded p-4 flex justify-between items-start opacity-70 scroll-mt-4">
                     <div>
                         <p class="font-semibold">{{ $evento->title }}</p>
                         <p class="text-sm text-gray-500">{{ $evento->dt_start->format('d/m/Y') }} — {{ $evento->local }}</p>
