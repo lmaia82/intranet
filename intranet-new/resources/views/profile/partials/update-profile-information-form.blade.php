@@ -47,6 +47,17 @@
             @endif
         </div>
 
+        <div>
+            <x-input-label for="sector_id" value="Sigla do setor (lotação)" />
+            <select id="sector_id" name="sector_id" class="mt-1 block w-full border-gray-300 rounded">
+                <option value="">Sem lotação</option>
+                @foreach($sectors as $sector)
+                    <option value="{{ $sector->id }}" @selected(old('sector_id', $user->sector_id) == $sector->id)>{{ $sector->sigla }}</option>
+                @endforeach
+            </select>
+            <x-input-error class="mt-2" :messages="$errors->get('sector_id')" />
+        </div>
+
         <div class="flex items-center gap-4">
             <x-primary-button>{{ __('Save') }}</x-primary-button>
 

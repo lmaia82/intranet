@@ -1,6 +1,18 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">Bem-vindo(a), {{ auth()->user()->name }}</h2>
+        <div class="flex justify-between items-center flex-wrap gap-2">
+            <h2 class="font-semibold text-xl leading-tight">Bem-vindo(a), {{ auth()->user()->name }}</h2>
+            <div class="flex items-center gap-3 text-sm text-white">
+                <span>
+                    @if(auth()->user()->sector)
+                        {{ auth()->user()->sector->nome ?: auth()->user()->sector->sigla }} ({{ auth()->user()->sector->sigla }})
+                    @else
+                        Sem lotação definida
+                    @endif
+                </span>
+                <a href="{{ route('profile.edit') }}" class="px-3 py-1 bg-white/20 hover:bg-white/30 rounded text-white">Alterar lotação</a>
+            </div>
+        </div>
     </x-slot>
 
     <div class="py-6 max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">

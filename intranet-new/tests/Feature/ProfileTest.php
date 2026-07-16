@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Sector;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -41,6 +42,38 @@ class ProfileTest extends TestCase
         $this->assertSame('Test User', $user->name);
         $this->assertSame('test@example.com', $user->email);
         $this->assertNull($user->email_verified_at);
+    }
+
+    public function test_usuario_pode_atualizar_a_propria_lotacao(): void
+    {
+        $user = User::factory()->create();
+        $sector = Sector::create(['sigla' => 'COADM', 'nome' => 'Coordenação de Administração']);
+
+        $response = $this
+            ->actingAs($user)
+            ->patch('/profile', [
+                'name' => $user->name,
+                'email' => $user->email,
+                'sector_id' => $sector->id,
+            ]);
+
+        $response
+            ->assertSessionHasNoErrors()
+            ->assertRedirect('/profile');
+
+        $this->assertEquals($sector->id, $user->fresh()->sector_id);
+    }
+
+    public function test_dashboard_exibe_nome_e_sigla_da_lotacao_do_usuario(): void
+    {
+        $sector = Sector::create(['sigla' => 'COADM', 'nome' => 'Coordenação de Administração']);
+        $user = User::factory()->create(['sector_id' => $sector->id]);
+
+        $this->actingAs($user)->get(route('dashboard'))
+            ->assertOk()
+            ->assertSee('Coordenação de Administração')
+            ->assertSee('(COADM)', false)
+            ->assertSee('Alterar lotação');
     }
 
     public function test_email_verification_status_is_unchanged_when_the_email_address_is_unchanged(): void
