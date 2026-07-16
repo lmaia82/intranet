@@ -40,4 +40,8 @@ return [
         'jwt_secret' => env('ONLYOFFICE_JWT_SECRET'),
     ],
 
+    'stirling_pdf' => [
+        'url' => env('STIRLING_PDF_URL'),
+    ],
+
 ];

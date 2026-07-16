@@ -54,6 +54,7 @@
                 <a href="{{ route('onlyoffice.aplicacoes') }}" class="px-4 py-2 bg-blue-600 text-white rounded">📄 Documento Word</a>
                 <a href="{{ route('onlyoffice.aplicacoes') }}" class="px-4 py-2 bg-green-600 text-white rounded">📊 Planilha Excel</a>
                 <a href="{{ route('onlyoffice.aplicacoes') }}" class="px-4 py-2 bg-orange-600 text-white rounded">📽️ Apresentação</a>
+                <a href="{{ config('services.stirling_pdf.url') }}" target="_blank" rel="noopener" class="px-4 py-2 bg-red-600 text-white rounded">📕 PDF (Stirling)</a>
                 <a href="{{ route('repositorio.index') }}" class="px-4 py-2 bg-gray-200 rounded">🗂️ Repositório de Arquivos</a>
                 <a href="{{ route('telefones.index') }}" class="px-4 py-2 bg-gray-200 rounded">☎️ Ramais</a>
             </div>
