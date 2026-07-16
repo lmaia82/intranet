@@ -150,6 +150,21 @@ class RepositorioController extends Controller
         return Storage::disk('arquivos')->download($arquivo->caminho, $arquivo->nome_original);
     }
 
+    public function ocrStatus(Arquivo $arquivo)
+    {
+        abort_unless($arquivo->visivelPara(auth()->user()), 403, 'Você não tem acesso a este arquivo.');
+
+        if ($arquivo->ocr_status === 'pendente') {
+            $this->paperless->sincronizarPendente($arquivo);
+            $arquivo->refresh();
+        }
+
+        return response()->json([
+            'status' => $arquivo->ocr_status,
+            'erro' => $arquivo->ocr_erro,
+        ]);
+    }
+
     public function editArquivo(Arquivo $arquivo)
     {
         $sectors = Sector::orderBy('sigla')->get();

@@ -110,15 +110,34 @@
                             <td class="p-3">{{ optional($arquivo->data)->format('d/m/Y') }}</td>
                             <td class="p-3">
                                 @if($arquivo->extensao === 'pdf')
-                                    @if($arquivo->ocr_status === 'concluido')
-                                        <span class="inline-block px-2 py-0.5 text-xs rounded bg-green-100 text-green-800" title="Arquivo já pesquisável e com texto selecionável">✅ Concluído</span>
-                                    @elseif($arquivo->ocr_status === 'pendente')
-                                        <span class="inline-block px-2 py-0.5 text-xs rounded bg-yellow-100 text-yellow-800" title="Processando em segundo plano, atualize a página em instantes">⏳ Processando</span>
-                                    @elseif($arquivo->ocr_status === 'falhou')
-                                        <span class="inline-block px-2 py-0.5 text-xs rounded bg-red-100 text-red-800" title="{{ $arquivo->ocr_erro ?: 'Não foi possível processar o OCR' }}">⚠️ Falhou</span>
-                                    @else
-                                        <span class="text-xs text-gray-400">—</span>
-                                    @endif
+                                    <div
+                                        x-data="{
+                                            status: @js($arquivo->ocr_status),
+                                            erro: @js($arquivo->ocr_erro),
+                                            tentativas: 0,
+                                        }"
+                                        @if($arquivo->ocr_status === 'pendente')
+                                            x-init="
+                                                const intervalo = setInterval(() => {
+                                                    tentativas++;
+                                                    if (tentativas > 120) { clearInterval(intervalo); return; }
+                                                    fetch('{{ route('repositorio.arquivos.ocr-status', $arquivo) }}')
+                                                        .then(r => r.json())
+                                                        .then(dados => {
+                                                            status = dados.status;
+                                                            erro = dados.erro;
+                                                            if (status !== 'pendente') clearInterval(intervalo);
+                                                        })
+                                                        .catch(() => {});
+                                                }, 5000);
+                                            "
+                                        @endif
+                                    >
+                                        <span x-show="status === 'concluido'" x-cloak class="inline-block px-2 py-0.5 text-xs rounded bg-green-100 text-green-800" title="Arquivo já pesquisável e com texto selecionável">✅ Concluído</span>
+                                        <span x-show="status === 'pendente'" x-cloak class="inline-block px-2 py-0.5 text-xs rounded bg-yellow-100 text-yellow-800" title="Processando em segundo plano — atualiza sozinho">⏳ Processando</span>
+                                        <span x-show="status === 'falhou'" x-cloak class="inline-block px-2 py-0.5 text-xs rounded bg-red-100 text-red-800" x-bind:title="erro || 'Não foi possível processar o OCR'">⚠️ Falhou</span>
+                                        <span x-show="!status" x-cloak class="text-xs text-gray-400">—</span>
+                                    </div>
                                 @else
                                     <span class="text-xs text-gray-400">—</span>
                                 @endif

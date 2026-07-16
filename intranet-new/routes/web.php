@@ -98,6 +98,7 @@ Route::middleware(['auth', 'permission:repositorio.ver'])->group(function () {
     Route::get('meus-arquivos', [RepositorioController::class, 'meusArquivos'])->name('repositorio.meus');
     Route::get('repositorio/{pasta?}', [RepositorioController::class, 'index'])->name('repositorio.index');
     Route::get('repositorio/arquivos/{arquivo}/download', [RepositorioController::class, 'download'])->name('repositorio.download');
+    Route::get('repositorio/arquivos/{arquivo}/ocr-status', [RepositorioController::class, 'ocrStatus'])->name('repositorio.arquivos.ocr-status');
 });
 
 Route::middleware(['auth', 'permission:repositorio.criar'])->group(function () {
