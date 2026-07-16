@@ -14,7 +14,7 @@
     <select name="sector_id" class="mt-1 block w-full border-gray-300 rounded">
         <option value="">(Geral, sem setor)</option>
         @foreach($sectors as $sector)
-            <option value="{{ $sector->id }}" @selected(old('sector_id', $informativo->sector_id ?? null) == $sector->id)>{{ $sector->name }}</option>
+            <option value="{{ $sector->id }}" @selected(old('sector_id', $informativo->sector_id ?? null) == $sector->id)>{{ $sector->sigla }}</option>
         @endforeach
     </select>
 </div>

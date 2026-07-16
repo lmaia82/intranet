@@ -34,18 +34,20 @@ class AdminController extends Controller
 
     public function setores()
     {
-        $setores = Sector::orderBy('name')->get();
+        $setores = Sector::orderBy('sigla')->get();
         return view('admin.setores', compact('setores'));
     }
 
     public function storeSetor(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:100|unique:sectors,name',
+            'sigla' => 'required|string|max:100|unique:sectors,sigla',
+            'nome' => 'nullable|string|max:150',
             'quota_mb' => 'nullable|numeric|min:0',
         ]);
         Sector::create([
-            'name' => $validated['name'],
+            'sigla' => $validated['sigla'],
+            'nome' => $validated['nome'] ?? null,
             'quota_bytes' => $this->mbParaBytes($validated['quota_mb'] ?? null),
         ]);
         return redirect()->route('admin.setores')->with('status', 'Setor criado com sucesso.');
@@ -54,11 +56,13 @@ class AdminController extends Controller
     public function updateSetor(Request $request, Sector $setor)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:100|unique:sectors,name,' . $setor->id,
+            'sigla' => 'required|string|max:100|unique:sectors,sigla,' . $setor->id,
+            'nome' => 'nullable|string|max:150',
             'quota_mb' => 'nullable|numeric|min:0',
         ]);
         $setor->update([
-            'name' => $validated['name'],
+            'sigla' => $validated['sigla'],
+            'nome' => $validated['nome'] ?? null,
             'quota_bytes' => $this->mbParaBytes($validated['quota_mb'] ?? null),
         ]);
         return redirect()->route('admin.setores')->with('status', 'Setor atualizado com sucesso.');
@@ -77,7 +81,7 @@ class AdminController extends Controller
 
     public function armazenamento()
     {
-        $setores = Sector::orderBy('name')->get();
+        $setores = Sector::orderBy('sigla')->get();
         return view('admin.armazenamento', compact('setores'));
     }
 
@@ -144,14 +148,14 @@ class AdminController extends Controller
     public function usuarios()
     {
         $usuarios = User::orderBy('name')->get();
-        $setores = Sector::orderBy('name')->get();
+        $setores = Sector::orderBy('sigla')->get();
         $grupos = Group::orderBy('name')->get();
         return view('admin.usuarios', compact('usuarios', 'setores', 'grupos'));
     }
 
     public function criarUsuarioForm()
     {
-        $setores = Sector::orderBy('name')->get();
+        $setores = Sector::orderBy('sigla')->get();
         $grupos = Group::orderBy('name')->get();
         return view('admin.criar-usuario', compact('setores', 'grupos'));
     }
@@ -265,7 +269,7 @@ class AdminController extends Controller
 
             $sectorId = null;
             if ($setorNome !== '') {
-                $sector = Sector::whereRaw('LOWER(name) = ?', [mb_strtolower($setorNome)])->first();
+                $sector = Sector::whereRaw('LOWER(sigla) = ?', [mb_strtolower($setorNome)])->first();
                 if (!$sector) {
                     $erros[] = "Linha {$linhaNum}: setor '{$setorNome}' não encontrado.";
                     continue;

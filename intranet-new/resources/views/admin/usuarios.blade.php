@@ -36,7 +36,7 @@
                                     <select name="sector_id" class="border-gray-300 rounded text-sm" onchange="this.form.submit()">
                                         <option value="">(nenhum)</option>
                                         @foreach($setores as $setor)
-                                            <option value="{{ $setor->id }}" @selected($usuario->sector_id == $setor->id)>{{ $setor->name }}</option>
+                                            <option value="{{ $setor->id }}" @selected($usuario->sector_id == $setor->id)>{{ $setor->sigla }}</option>
                                         @endforeach
                                     </select>
                                 </form>

@@ -21,7 +21,7 @@ class InformativoController extends Controller
         }
 
         $informativos = $query->paginate(10)->withQueryString();
-        $sectors = Sector::orderBy('name')->get();
+        $sectors = Sector::orderBy('sigla')->get();
 
         return view('informativos.index', compact('informativos', 'sectors'));
     }
@@ -35,7 +35,7 @@ class InformativoController extends Controller
 
     public function create()
     {
-        $sectors = Sector::orderBy('name')->get();
+        $sectors = Sector::orderBy('sigla')->get();
         return view('informativos.create', compact('sectors'));
     }
 
@@ -70,7 +70,7 @@ class InformativoController extends Controller
 
     public function edit(Informativo $informativo)
     {
-        $sectors = Sector::orderBy('name')->get();
+        $sectors = Sector::orderBy('sigla')->get();
         return view('informativos.edit', compact('informativo', 'sectors'));
     }
 
@@ -103,7 +103,7 @@ class InformativoController extends Controller
 
     public function reenviarForm(Informativo $informativo)
     {
-        $sectors = Sector::orderBy('name')->get();
+        $sectors = Sector::orderBy('sigla')->get();
         $sectorId = request()->filled('sector_id') ? request('sector_id') : $informativo->sector_id;
 
         $query = User::query();

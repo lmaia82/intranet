@@ -18,7 +18,7 @@
                 @php $percentual = $setor->percentualUso(); @endphp
                 <div class="bg-white shadow rounded p-4">
                     <div class="flex justify-between items-baseline mb-2">
-                        <p class="font-semibold">{{ $setor->name }}</p>
+                        <p class="font-semibold">{{ $setor->sigla }}</p>
                         <p class="text-sm text-gray-500">
                             {{ $setor->usoFormatado() }} / {{ $setor->quotaFormatada() }}
                         </p>

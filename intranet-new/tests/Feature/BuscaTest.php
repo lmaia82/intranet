@@ -21,7 +21,7 @@ class BuscaTest extends TestCase
     public function test_admin_encontra_item_de_cada_modulo(): void
     {
         $admin = User::factory()->create(['is_admin' => true, 'group_id' => null]);
-        $sector = Sector::create(['name' => 'TI']);
+        $sector = Sector::create(['sigla' => 'TI']);
 
         Telefone::create(['nome' => 'Fulano Buscatermo', 'telefone' => '1234', 'cargo' => 'Analista', 'sector_id' => $sector->id]);
         Informativo::create(['title' => 'Aviso Buscatermo', 'content' => 'x', 'published_at' => now()]);
@@ -44,7 +44,7 @@ class BuscaTest extends TestCase
         $grupo = Group::create(['name' => 'So Ramais']);
         $grupo->permissions()->attach($permissao);
         $user = User::factory()->create(['group_id' => $grupo->id]);
-        $sector = Sector::create(['name' => 'TI']);
+        $sector = Sector::create(['sigla' => 'TI']);
 
         Telefone::create(['nome' => 'Ciclano Buscatermo', 'telefone' => '5678', 'cargo' => 'Técnico', 'sector_id' => $sector->id]);
         Tutorial::create(['titulo' => 'Tutorial Buscatermo', 'data' => '2026-01-01', 'youtube_url' => 'https://youtu.be/y']);
@@ -57,8 +57,8 @@ class BuscaTest extends TestCase
 
     public function test_informativo_restrito_a_outro_setor_nao_aparece_na_busca(): void
     {
-        $setorA = Sector::create(['name' => 'Setor A']);
-        $setorB = Sector::create(['name' => 'Setor B']);
+        $setorA = Sector::create(['sigla' => 'Setor A']);
+        $setorB = Sector::create(['sigla' => 'Setor B']);
 
         $permissao = Permission::where('key', 'informativos.ver')->first();
         $grupo = Group::create(['name' => 'Leitores Informativos']);

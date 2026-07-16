@@ -15,7 +15,7 @@
                 <label class="block text-sm font-medium">Setor</label>
                 <select name="sector_id" required class="mt-1 block w-full border-gray-300 rounded">
                     @foreach($sectors as $sector)
-                        <option value="{{ $sector->id }}" @selected(old('sector_id', $pasta->sector_id ?? auth()->user()->sector_id) == $sector->id)>{{ $sector->name }}</option>
+                        <option value="{{ $sector->id }}" @selected(old('sector_id', $pasta->sector_id ?? auth()->user()->sector_id) == $sector->id)>{{ $sector->sigla }}</option>
                     @endforeach
                 </select>
             </div>

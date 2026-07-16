@@ -61,7 +61,7 @@
                             <td class="p-3 truncate" title="{{ $telefone->nome }}">{{ $telefone->nome }}</td>
                             <td class="p-3 truncate" title="{{ $telefone->unidade }}">{{ $telefone->unidade }}</td>
                             <td class="p-3 truncate" title="{{ $telefone->telefone }}">{{ $telefone->telefone }}</td>
-                            <td class="p-3 truncate" title="{{ $telefone->sector->name ?? '-' }}">{{ $telefone->sector->name ?? '-' }}</td>
+                            <td class="p-3 truncate" title="{{ $telefone->sector->sigla ?? '-' }}">{{ $telefone->sector->sigla ?? '-' }}</td>
                             <td class="p-3 truncate" title="{{ $telefone->cargo }}">{{ $telefone->cargo }}</td>
                             <td class="p-3 truncate" title="{{ $telefone->email }}">{{ $telefone->email }}</td>
                             <td class="p-3 truncate" title="{{ $telefone->telefone_externo }}">{{ $telefone->telefone_externo }}</td>

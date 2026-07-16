@@ -12,7 +12,7 @@
                 <img src="{{ Storage::url($informativo->image) }}" class="w-full rounded mb-4">
             @endif
             <p class="text-sm text-gray-500 mb-4">
-                {{ $informativo->sector->name ?? 'Geral' }} — {{ $informativo->published_at?->format('d/m/Y H:i') }}
+                {{ $informativo->sector->sigla ?? 'Geral' }} — {{ $informativo->published_at?->format('d/m/Y H:i') }}
                 @if($informativo->is_private) <span class="text-red-600">(privado)</span> @endif
             </p>
             <div class="whitespace-pre-line">{{ $informativo->content }}</div>

@@ -12,7 +12,7 @@
                 <select name="sector_id" class="border-gray-300 rounded" onchange="this.form.submit()">
                     <option value="">Todos os setores</option>
                     @foreach($sectors as $sector)
-                        <option value="{{ $sector->id }}" @selected(request('sector_id') == $sector->id)>{{ $sector->name }}</option>
+                        <option value="{{ $sector->id }}" @selected(request('sector_id') == $sector->id)>{{ $sector->sigla }}</option>
                     @endforeach
                 </select>
             </form>
@@ -29,7 +29,7 @@
                     @endif
                     <div class="flex-1">
                         <a href="{{ route('informativos.show', $informativo) }}" class="text-lg font-semibold text-blue-700">{{ $informativo->title }}</a>
-                        <p class="text-sm text-gray-500">{{ $informativo->sector->name ?? 'Geral' }} — {{ $informativo->published_at?->format('d/m/Y H:i') }}</p>
+                        <p class="text-sm text-gray-500">{{ $informativo->sector->sigla ?? 'Geral' }} — {{ $informativo->published_at?->format('d/m/Y H:i') }}</p>
                         @if(auth()->user()->hasPermission('informativos.criar'))
                             <div class="mt-2 flex gap-2">
                                 <a href="{{ route('informativos.edit', $informativo) }}" class="text-blue-600 text-sm">Editar</a>

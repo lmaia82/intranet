@@ -17,10 +17,10 @@ class SectorQuotaTest extends TestCase
     public function test_admin_pode_definir_cota_do_setor_em_mb(): void
     {
         $admin = User::factory()->create(['is_admin' => true]);
-        $sector = Sector::create(['name' => 'TI']);
+        $sector = Sector::create(['sigla' => 'TI']);
 
         $this->actingAs($admin)->put(route('admin.setores.update', $sector), [
-            'name' => 'TI',
+            'sigla' => 'TI',
             'quota_mb' => 10,
         ])->assertRedirect(route('admin.setores'));
 
@@ -29,7 +29,7 @@ class SectorQuotaTest extends TestCase
 
     public function test_setor_sem_cota_definida_e_ilimitado(): void
     {
-        $sector = Sector::create(['name' => 'TI']);
+        $sector = Sector::create(['sigla' => 'TI']);
 
         $this->assertNull($sector->percentualUso());
         $this->assertFalse($sector->quotaExcedida(999999999));
@@ -38,8 +38,8 @@ class SectorQuotaTest extends TestCase
 
     public function test_uso_bytes_soma_arquivos_do_setor(): void
     {
-        $sector = Sector::create(['name' => 'TI']);
-        $outroSector = Sector::create(['name' => 'RH']);
+        $sector = Sector::create(['sigla' => 'TI']);
+        $outroSector = Sector::create(['sigla' => 'RH']);
 
         Arquivo::create(['nome_original' => 'a.pdf', 'caminho' => 'a.pdf', 'extensao' => 'pdf', 'tamanho' => 1000, 'sector_id' => $sector->id]);
         Arquivo::create(['nome_original' => 'b.pdf', 'caminho' => 'b.pdf', 'extensao' => 'pdf', 'tamanho' => 2000, 'sector_id' => $sector->id]);
@@ -52,7 +52,7 @@ class SectorQuotaTest extends TestCase
     public function test_upload_bloqueado_quando_excede_cota_do_setor(): void
     {
         $user = User::factory()->create();
-        $sector = Sector::create(['name' => 'TI', 'quota_bytes' => 1024]);
+        $sector = Sector::create(['sigla' => 'TI', 'quota_bytes' => 1024]);
 
         Arquivo::create(['nome_original' => 'existente.pdf', 'caminho' => 'existente.pdf', 'extensao' => 'pdf', 'tamanho' => 900, 'sector_id' => $sector->id]);
 
@@ -72,7 +72,7 @@ class SectorQuotaTest extends TestCase
         Storage::fake('arquivos');
 
         $user = User::factory()->create();
-        $sector = Sector::create(['name' => 'TI', 'quota_bytes' => 1048576]);
+        $sector = Sector::create(['sigla' => 'TI', 'quota_bytes' => 1048576]);
 
         $file = UploadedFile::fake()->create('novo.pdf', 100);
 
@@ -101,8 +101,8 @@ class SectorQuotaTest extends TestCase
 
     public function test_pasta_publica_e_visivel_a_qualquer_usuario(): void
     {
-        $sector = Sector::create(['name' => 'TI']);
-        $outroSetor = Sector::create(['name' => 'RH']);
+        $sector = Sector::create(['sigla' => 'TI']);
+        $outroSetor = Sector::create(['sigla' => 'RH']);
         $user = User::factory()->create(['sector_id' => $outroSetor->id]);
 
         $pasta = \App\Models\Pasta::create(['nome' => 'Pública', 'sector_id' => $sector->id, 'is_private' => false]);
@@ -112,8 +112,8 @@ class SectorQuotaTest extends TestCase
 
     public function test_pasta_restrita_ao_setor_e_invisivel_para_outro_setor(): void
     {
-        $sector = Sector::create(['name' => 'TI']);
-        $outroSetor = Sector::create(['name' => 'RH']);
+        $sector = Sector::create(['sigla' => 'TI']);
+        $outroSetor = Sector::create(['sigla' => 'RH']);
         $user = User::factory()->create(['sector_id' => $outroSetor->id]);
 
         $pasta = \App\Models\Pasta::create(['nome' => 'Restrita TI', 'sector_id' => $sector->id, 'is_private' => true]);
@@ -124,7 +124,7 @@ class SectorQuotaTest extends TestCase
 
     public function test_pasta_restrita_ao_setor_e_visivel_para_mesmo_setor(): void
     {
-        $sector = Sector::create(['name' => 'TI']);
+        $sector = Sector::create(['sigla' => 'TI']);
         $user = User::factory()->create(['sector_id' => $sector->id]);
 
         \App\Models\Pasta::create(['nome' => 'Restrita TI', 'sector_id' => $sector->id, 'is_private' => true]);
@@ -134,7 +134,7 @@ class SectorQuotaTest extends TestCase
 
     public function test_admin_ve_pastas_restritas_de_qualquer_setor(): void
     {
-        $sector = Sector::create(['name' => 'TI']);
+        $sector = Sector::create(['sigla' => 'TI']);
         $admin = User::factory()->create(['is_admin' => true]);
 
         \App\Models\Pasta::create(['nome' => 'Restrita TI', 'sector_id' => $sector->id, 'is_private' => true]);
@@ -146,8 +146,8 @@ class SectorQuotaTest extends TestCase
     {
         Storage::fake('arquivos');
 
-        $sector = Sector::create(['name' => 'TI']);
-        $outroSetor = Sector::create(['name' => 'RH']);
+        $sector = Sector::create(['sigla' => 'TI']);
+        $outroSetor = Sector::create(['sigla' => 'RH']);
         $user = User::factory()->create(['sector_id' => $outroSetor->id]);
 
         Storage::disk('arquivos')->put('uploads/restrito.pdf', 'conteudo');
@@ -165,7 +165,7 @@ class SectorQuotaTest extends TestCase
 
     public function test_pasta_meus_arquivos_e_criada_com_o_setor_do_usuario(): void
     {
-        $sector = Sector::create(['name' => 'TI']);
+        $sector = Sector::create(['sigla' => 'TI']);
         $user = User::factory()->create(['sector_id' => $sector->id]);
 
         $this->actingAs($user)->get(route('repositorio.meus'));
@@ -178,8 +178,8 @@ class SectorQuotaTest extends TestCase
     public function test_dashboard_de_armazenamento_renderiza_para_admin(): void
     {
         $admin = User::factory()->create(['is_admin' => true]);
-        Sector::create(['name' => 'TI', 'quota_bytes' => 1048576]);
-        Sector::create(['name' => 'RH']);
+        Sector::create(['sigla' => 'TI', 'quota_bytes' => 1048576]);
+        Sector::create(['sigla' => 'RH']);
 
         $this->actingAs($admin)->get(route('admin.armazenamento'))
             ->assertOk()

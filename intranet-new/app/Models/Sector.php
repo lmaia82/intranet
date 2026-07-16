@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Sector extends Model
 {
-    protected $fillable = ['name', 'quota_bytes'];
+    protected $fillable = ['sigla', 'nome', 'quota_bytes'];
 
     public function telefones()
     {

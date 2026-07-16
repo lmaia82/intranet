@@ -28,7 +28,7 @@ class ArquivoLoteTest extends TestCase
     {
         Storage::fake('arquivos');
         $user = User::factory()->create();
-        $sector = Sector::create(['name' => 'Financeiro']);
+        $sector = Sector::create(['sigla' => 'Financeiro']);
 
         $csv = "arquivo,pasta,setor,data,publico,descricao\n";
         $csv .= "nota.pdf,Notas Fiscais/2024,Financeiro,31/12/2024,nao,Nota de exemplo\n";

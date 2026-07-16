@@ -25,7 +25,7 @@
                 <input type="text" name="nome" placeholder="Nome da pasta" required class="block w-full border-gray-300 rounded">
                 <select name="sector_id" required class="block w-full border-gray-300 rounded">
                     @foreach($sectors as $sector)
-                        <option value="{{ $sector->id }}" @selected(old('sector_id', auth()->user()->sector_id) == $sector->id)>{{ $sector->name }}</option>
+                        <option value="{{ $sector->id }}" @selected(old('sector_id', auth()->user()->sector_id) == $sector->id)>{{ $sector->sigla }}</option>
                     @endforeach
                 </select>
                 <label class="flex items-center gap-2 text-sm"><input type="checkbox" name="is_private" value="1"> Restrita ao setor</label>
@@ -44,7 +44,7 @@
                 <input type="date" name="data" value="{{ old('data', now()->format('Y-m-d')) }}" class="block w-full border-gray-300 rounded">
                 <select name="sector_id" required class="block w-full border-gray-300 rounded">
                     @foreach($sectors as $sector)
-                        <option value="{{ $sector->id }}" @selected(old('sector_id', auth()->user()->sector_id) == $sector->id)>{{ $sector->name }}</option>
+                        <option value="{{ $sector->id }}" @selected(old('sector_id', auth()->user()->sector_id) == $sector->id)>{{ $sector->sigla }}</option>
                     @endforeach
                 </select>
                 <label class="flex items-center gap-2 text-sm"><input type="checkbox" name="is_private" value="1"> Restrito ao setor</label>
@@ -78,7 +78,7 @@
                             <td class="p-3">—</td>
                             <td class="p-3">
                                 @if($subpasta->is_private)
-                                    <span class="inline-block px-2 py-0.5 text-xs rounded bg-orange-100 text-orange-800">Restrito ({{ $subpasta->sector?->name }})</span>
+                                    <span class="inline-block px-2 py-0.5 text-xs rounded bg-orange-100 text-orange-800">Restrito ({{ $subpasta->sector?->sigla }})</span>
                                 @else
                                     <span class="inline-block px-2 py-0.5 text-xs rounded bg-green-100 text-green-800">Público</span>
                                 @endif
@@ -108,7 +108,7 @@
                             <td class="p-3">{{ optional($arquivo->data)->format('d/m/Y') }}</td>
                             <td class="p-3">
                                 @if($arquivo->is_private)
-                                    <span class="inline-block px-2 py-0.5 text-xs rounded bg-orange-100 text-orange-800">Restrito ({{ $arquivo->sector?->name }})</span>
+                                    <span class="inline-block px-2 py-0.5 text-xs rounded bg-orange-100 text-orange-800">Restrito ({{ $arquivo->sector?->sigla }})</span>
                                 @else
                                     <span class="inline-block px-2 py-0.5 text-xs rounded bg-green-100 text-green-800">Público</span>
                                 @endif

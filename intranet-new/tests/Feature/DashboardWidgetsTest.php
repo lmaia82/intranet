@@ -18,7 +18,7 @@ class DashboardWidgetsTest extends TestCase
     public function test_dashboard_mostra_tutoriais_eventos_gravados_e_documentos_publicos_recentes(): void
     {
         $user = User::factory()->create();
-        $sector = Sector::first() ?? Sector::create(['name' => 'TI']);
+        $sector = Sector::first() ?? Sector::create(['sigla' => 'TI']);
 
         Tutorial::create(['titulo' => 'Tutorial Recente', 'data' => '2026-01-01', 'youtube_url' => 'https://youtu.be/tut']);
         EventoGravado::create(['titulo' => 'Gravado Recente', 'data' => '2026-01-01', 'youtube_url' => 'https://youtu.be/grav']);

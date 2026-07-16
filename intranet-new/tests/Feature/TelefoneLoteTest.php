@@ -16,7 +16,7 @@ class TelefoneLoteTest extends TestCase
     public function test_cadastro_em_lote_de_ramais(): void
     {
         $user = User::factory()->create();
-        $sector = Sector::create(['name' => 'TI']);
+        $sector = Sector::create(['sigla' => 'TI']);
 
         $csv = "nome,telefone,setor,email,cargo\n";
         $csv .= "Fulano de Tal,2222,TI,fulano@cetem.gov.br,Analista\n";
@@ -37,7 +37,7 @@ class TelefoneLoteTest extends TestCase
     public function test_cadastro_em_lote_com_colunas_do_catalogo_telefonico(): void
     {
         $user = User::factory()->create();
-        $sector = Sector::create(['name' => 'COADM']);
+        $sector = Sector::create(['sigla' => 'COADM']);
 
         $csv = "Ramal ,Unidade ,Setor ,Nome ,Cargo ,E-mail ,Telefone Externo \n";
         $csv .= "1000,CETEM-RJ,COADM,Rosângela Bastos Torres,Secretária da COADM,rtorres@cetem.gov.br,(21)3512-9902\n";
@@ -59,7 +59,7 @@ class TelefoneLoteTest extends TestCase
     public function test_cadastro_em_lote_a_partir_de_arquivo_xlsx(): void
     {
         $user = User::factory()->create();
-        $sector = Sector::create(['name' => 'COADM']);
+        $sector = Sector::create(['sigla' => 'COADM']);
 
         $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
@@ -98,7 +98,7 @@ class TelefoneLoteTest extends TestCase
     public function test_pagina_de_ramais_lista_indice_alfabetico(): void
     {
         $user = User::factory()->create();
-        $sector = Sector::create(['name' => 'TI']);
+        $sector = Sector::create(['sigla' => 'TI']);
         Telefone::create(['nome' => 'Ana Silva', 'telefone' => '1111', 'sector_id' => $sector->id]);
         Telefone::create(['nome' => 'Bruno Costa', 'telefone' => '2222', 'sector_id' => $sector->id]);
 

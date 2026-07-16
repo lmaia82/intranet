@@ -19,7 +19,7 @@
     <select name="sector_id" class="mt-1 block w-full border-gray-300 rounded">
         <option value="">Selecione...</option>
         @foreach($sectors as $sector)
-            <option value="{{ $sector->id }}" @selected(old('sector_id', $telefone->sector_id ?? null) == $sector->id)>{{ $sector->name }}</option>
+            <option value="{{ $sector->id }}" @selected(old('sector_id', $telefone->sector_id ?? null) == $sector->id)>{{ $sector->sigla }}</option>
         @endforeach
     </select>
     @error('sector_id') <p class="text-red-600 text-sm">{{ $message }}</p> @enderror

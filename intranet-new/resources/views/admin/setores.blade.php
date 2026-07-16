@@ -6,7 +6,10 @@
         @if(session('status'))
             <div class="mb-4 p-4 bg-green-100 text-green-800 rounded">{{ session('status') }}</div>
         @endif
-        @error('name')
+        @error('sigla')
+            <div class="mb-4 p-4 bg-red-100 text-red-800 rounded">{{ $message }}</div>
+        @enderror
+        @error('nome')
             <div class="mb-4 p-4 bg-red-100 text-red-800 rounded">{{ $message }}</div>
         @enderror
         @error('quota_mb')
@@ -19,7 +22,8 @@
 
         <form method="POST" action="{{ route('admin.setores.store') }}" class="bg-white shadow rounded p-4 mb-6 flex gap-2">
             @csrf
-            <input type="text" name="name" placeholder="Nome do novo setor" required class="flex-1 border-gray-300 rounded">
+            <input type="text" name="sigla" placeholder="Sigla do novo setor" required class="w-40 border-gray-300 rounded">
+            <input type="text" name="nome" placeholder="Nome por extenso (opcional)" class="flex-1 border-gray-300 rounded">
             <input type="number" name="quota_mb" placeholder="Cota (MB, opcional)" min="0" step="1" class="w-48 border-gray-300 rounded">
             <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded">Adicionar</button>
         </form>
@@ -28,6 +32,7 @@
             <table class="w-full text-left">
                 <thead class="bg-gray-50">
                     <tr>
+                        <th class="p-3">Sigla</th>
                         <th class="p-3">Nome</th>
                         <th class="p-3">Cota (MB)</th>
                         <th class="p-3">Uso atual</th>
@@ -41,7 +46,10 @@
                                 @csrf
                                 @method('PUT')
                                 <td class="p-3">
-                                    <input type="text" name="name" value="{{ $setor->name }}" class="border-gray-300 rounded w-full">
+                                    <input type="text" name="sigla" value="{{ $setor->sigla }}" class="border-gray-300 rounded w-full">
+                                </td>
+                                <td class="p-3">
+                                    <input type="text" name="nome" value="{{ $setor->nome }}" placeholder="Nome por extenso" class="border-gray-300 rounded w-full">
                                 </td>
                                 <td class="p-3">
                                     <input type="number" name="quota_mb" min="0" step="1" placeholder="Sem limite"

@@ -29,7 +29,7 @@
                 <select name="sector_id" class="mt-1 block w-full border-gray-300 rounded">
                     <option value="">(nenhum)</option>
                     @foreach($setores as $setor)
-                        <option value="{{ $setor->id }}" @selected(old('sector_id') == $setor->id)>{{ $setor->name }}</option>
+                        <option value="{{ $setor->id }}" @selected(old('sector_id') == $setor->id)>{{ $setor->sigla }}</option>
                     @endforeach
                 </select>
                 @error('sector_id') <p class="text-red-600 text-sm">{{ $message }}</p> @enderror

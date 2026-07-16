@@ -31,7 +31,7 @@ class TelefoneController extends Controller
 
     public function create()
     {
-        $sectors = Sector::orderBy('name')->get();
+        $sectors = Sector::orderBy('sigla')->get();
         return view('telefones.create', compact('sectors'));
     }
 
@@ -54,7 +54,7 @@ class TelefoneController extends Controller
 
     public function edit(Telefone $telefone)
     {
-        $sectors = Sector::orderBy('name')->get();
+        $sectors = Sector::orderBy('sigla')->get();
         return view('telefones.edit', compact('telefone', 'sectors'));
     }
 
@@ -135,7 +135,7 @@ class TelefoneController extends Controller
                 continue;
             }
 
-            $sector = Sector::whereRaw('LOWER(name) = ?', [mb_strtolower($setorNome)])->first();
+            $sector = Sector::whereRaw('LOWER(sigla) = ?', [mb_strtolower($setorNome)])->first();
 
             if (!$sector) {
                 $erros[] = "Linha {$linhaNum}: setor '{$setorNome}' não encontrado. Cadastre-o antes em Administração > Setores.";

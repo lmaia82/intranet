@@ -71,7 +71,7 @@
                     @forelse($informativos as $informativo)
                         <a href="{{ route('informativos.show', $informativo) }}" class="block border-b pb-2 last:border-0">
                             <p class="font-medium text-blue-700">{{ $informativo->title }}</p>
-                            <p class="text-xs text-gray-500">{{ $informativo->sector->name ?? 'Geral' }} — {{ $informativo->published_at?->format('d/m/Y') }}</p>
+                            <p class="text-xs text-gray-500">{{ $informativo->sector->sigla ?? 'Geral' }} — {{ $informativo->published_at?->format('d/m/Y') }}</p>
                         </a>
                     @empty
                         <p class="text-sm text-gray-500">Nenhum informativo publicado ainda.</p>
@@ -242,7 +242,7 @@
                     @forelse($documentosPublicos as $documento)
                         <a href="{{ route('repositorio.download', $documento) }}" class="block border-b pb-2 last:border-0">
                             <p class="font-medium text-blue-700">{{ $documento->nome_original }}</p>
-                            <p class="text-xs text-gray-500">{{ $documento->sector->name ?? 'Geral' }} — {{ $documento->created_at->format('d/m/Y') }}</p>
+                            <p class="text-xs text-gray-500">{{ $documento->sector->sigla ?? 'Geral' }} — {{ $documento->created_at->format('d/m/Y') }}</p>
                         </a>
                     @empty
                         <p class="text-sm text-gray-500">Nenhum documento público ainda.</p>

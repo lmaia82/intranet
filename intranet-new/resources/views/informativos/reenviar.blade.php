@@ -14,7 +14,7 @@
                     <select name="sector_id" class="mt-1 block w-full border-gray-300 rounded" onchange="this.form.submit()">
                         <option value="" @selected(!$sectorId)>Todos os usuários</option>
                         @foreach($sectors as $sector)
-                            <option value="{{ $sector->id }}" @selected($sectorId == $sector->id)>{{ $sector->name }}</option>
+                            <option value="{{ $sector->id }}" @selected($sectorId == $sector->id)>{{ $sector->sigla }}</option>
                         @endforeach
                     </select>
                 </div>

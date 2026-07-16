@@ -61,7 +61,7 @@ class InformativoNotificationTest extends TestCase
         Mail::fake();
 
         $admin = User::factory()->create();
-        $sector = Sector::create(['name' => 'TI']);
+        $sector = Sector::create(['sigla' => 'TI']);
         $doSetor = User::factory()->create(['sector_id' => $sector->id]);
         $foraDoSetor = User::factory()->create(['sector_id' => null]);
 
@@ -83,7 +83,7 @@ class InformativoNotificationTest extends TestCase
     public function test_reenviar_formulario_sugere_emails_do_setor_do_informativo(): void
     {
         $admin = User::factory()->create();
-        $sector = Sector::create(['name' => 'TI']);
+        $sector = Sector::create(['sigla' => 'TI']);
         $doSetor = User::factory()->create(['sector_id' => $sector->id]);
         User::factory()->create(['sector_id' => null]);
 
@@ -105,7 +105,7 @@ class InformativoNotificationTest extends TestCase
         Mail::fake();
 
         $admin = User::factory()->create();
-        $sector = Sector::create(['name' => 'TI']);
+        $sector = Sector::create(['sigla' => 'TI']);
         $doSetor = User::factory()->create(['sector_id' => $sector->id]);
 
         $informativo = Informativo::create([

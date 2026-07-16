@@ -37,7 +37,7 @@ class RepositorioController extends Controller
             ->filter(fn (Arquivo $a) => $a->visivelPara($user))
             ->values()
             ->load('sector');
-        $sectors = Sector::orderBy('name')->get();
+        $sectors = Sector::orderBy('sigla')->get();
         $breadcrumb = $pastaAtual ? $pastaAtual->breadcrumb() : collect();
 
         return view('repositorio.index', compact('pastaAtual', 'subpastas', 'arquivos', 'sectors', 'breadcrumb'));
@@ -60,7 +60,7 @@ class RepositorioController extends Controller
 
     public function editPasta(Pasta $pasta)
     {
-        $sectors = Sector::orderBy('name')->get();
+        $sectors = Sector::orderBy('sigla')->get();
         return view('repositorio.editar-pasta', compact('pasta', 'sectors'));
     }
 
@@ -109,7 +109,7 @@ class RepositorioController extends Controller
 
         if ($sector->quotaExcedida($file->getSize())) {
             return back()->withErrors([
-                'arquivo' => "O setor \"{$sector->name}\" atingiria a cota de armazenamento ({$sector->quotaFormatada()}) com este envio. Uso atual: {$sector->usoFormatado()}.",
+                'arquivo' => "O setor \"{$sector->sigla}\" atingiria a cota de armazenamento ({$sector->quotaFormatada()}) com este envio. Uso atual: {$sector->usoFormatado()}.",
             ])->withInput();
         }
 
@@ -139,7 +139,7 @@ class RepositorioController extends Controller
 
     public function editArquivo(Arquivo $arquivo)
     {
-        $sectors = Sector::orderBy('name')->get();
+        $sectors = Sector::orderBy('sigla')->get();
         return view('repositorio.editar-arquivo', compact('arquivo', 'sectors'));
     }
 
@@ -228,14 +228,14 @@ class RepositorioController extends Controller
                 continue;
             }
 
-            $sector = Sector::whereRaw('LOWER(name) = ?', [strtolower($setorNome)])->first();
+            $sector = Sector::whereRaw('LOWER(sigla) = ?', [strtolower($setorNome)])->first();
             if (!$sector) {
                 $erros[] = "Linha {$linhaNum}: setor '{$setorNome}' não encontrado.";
                 continue;
             }
 
             if ($sector->quotaExcedida($file->getSize())) {
-                $erros[] = "Linha {$linhaNum}: o setor \"{$sector->name}\" atingiria a cota de armazenamento com este arquivo.";
+                $erros[] = "Linha {$linhaNum}: o setor \"{$sector->sigla}\" atingiria a cota de armazenamento com este arquivo.";
                 continue;
             }
 

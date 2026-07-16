@@ -86,7 +86,7 @@
                         @foreach($resultados['arquivos'] ?? [] as $arquivo)
                             <a href="{{ route('repositorio.download', $arquivo) }}" class="block border-b pb-2 last:border-0">
                                 📄 {{ $arquivo->nome_original }}
-                                <span class="text-xs text-gray-500"> — {{ $arquivo->sector->name ?? 'Geral' }}</span>
+                                <span class="text-xs text-gray-500"> — {{ $arquivo->sector->sigla ?? 'Geral' }}</span>
                             </a>
                         @endforeach
                     </div>

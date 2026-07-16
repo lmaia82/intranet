@@ -69,7 +69,7 @@ class GroupViewOnlyAllScreensTest extends TestCase
 
         \App\Models\Telefone::create([
             'nome' => 'Fulano', 'telefone' => '1234',
-            'sector_id' => \App\Models\Sector::create(['name' => 'TI'])->id,
+            'sector_id' => \App\Models\Sector::create(['sigla' => 'TI'])->id,
         ]);
         \App\Models\Informativo::create(['title' => 'Aviso', 'content' => 'x', 'published_at' => now()]);
 

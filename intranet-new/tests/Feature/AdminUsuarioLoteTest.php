@@ -16,7 +16,7 @@ class AdminUsuarioLoteTest extends TestCase
     public function test_cadastro_em_lote_de_usuarios(): void
     {
         $admin = User::factory()->create(['is_admin' => true]);
-        $sector = Sector::create(['name' => 'TI']);
+        $sector = Sector::create(['sigla' => 'TI']);
         $group = Group::firstOrCreate(['name' => 'Colaboradores']);
         $existente = User::factory()->create(['email' => 'ja-existe@cetem.gov.br']);
 
