@@ -63,6 +63,7 @@
                         <th class="p-3">Tipo</th>
                         <th class="p-3">Tamanho</th>
                         <th class="p-3">Data</th>
+                        <th class="p-3">OCR</th>
                         <th class="p-3">Visibilidade</th>
                         @if(auth()->user()->hasPermission('repositorio.criar'))
                             <th class="p-3"></th>
@@ -74,6 +75,7 @@
                         <tr class="border-t">
                             <td class="p-3"><a href="{{ route('repositorio.index', ['pasta' => $subpasta->id]) }}" class="text-blue-700 font-semibold">📁 {{ $subpasta->nome }}</a></td>
                             <td class="p-3">Pasta</td>
+                            <td class="p-3">—</td>
                             <td class="p-3">—</td>
                             <td class="p-3">—</td>
                             <td class="p-3">
@@ -107,6 +109,21 @@
                             <td class="p-3">{{ $arquivo->tamanhoFormatado() }}</td>
                             <td class="p-3">{{ optional($arquivo->data)->format('d/m/Y') }}</td>
                             <td class="p-3">
+                                @if($arquivo->extensao === 'pdf')
+                                    @if($arquivo->ocr_status === 'concluido')
+                                        <span class="inline-block px-2 py-0.5 text-xs rounded bg-green-100 text-green-800" title="Arquivo já pesquisável e com texto selecionável">✅ Concluído</span>
+                                    @elseif($arquivo->ocr_status === 'pendente')
+                                        <span class="inline-block px-2 py-0.5 text-xs rounded bg-yellow-100 text-yellow-800" title="Processando em segundo plano, atualize a página em instantes">⏳ Processando</span>
+                                    @elseif($arquivo->ocr_status === 'falhou')
+                                        <span class="inline-block px-2 py-0.5 text-xs rounded bg-red-100 text-red-800" title="Não foi possível enviar para o serviço de OCR">⚠️ Falhou</span>
+                                    @else
+                                        <span class="text-xs text-gray-400">—</span>
+                                    @endif
+                                @else
+                                    <span class="text-xs text-gray-400">—</span>
+                                @endif
+                            </td>
+                            <td class="p-3">
                                 @if($arquivo->is_private)
                                     <span class="inline-block px-2 py-0.5 text-xs rounded bg-orange-100 text-orange-800">Restrito ({{ $arquivo->sector?->sigla }})</span>
                                 @else
@@ -126,7 +143,7 @@
                         </tr>
                     @endforeach
                     @if($subpastas->isEmpty() && $arquivos->isEmpty())
-                        <tr><td colspan="{{ auth()->user()->hasPermission('repositorio.criar') ? 6 : 5 }}" class="p-3 text-gray-500">Pasta vazia.</td></tr>
+                        <tr><td colspan="{{ auth()->user()->hasPermission('repositorio.criar') ? 7 : 6 }}" class="p-3 text-gray-500">Pasta vazia.</td></tr>
                     @endif
                 </tbody>
             </table>

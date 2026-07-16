@@ -7,6 +7,7 @@ use App\Models\Sector;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class PaperlessWebhookTest extends TestCase
@@ -42,12 +43,15 @@ class PaperlessWebhookTest extends TestCase
             ->assertForbidden();
     }
 
-    public function test_atualiza_arquivo_com_conteudo_ocr(): void
+    public function test_atualiza_arquivo_com_conteudo_ocr_e_substitui_o_pdf(): void
     {
+        Storage::fake('arquivos');
         $this->configurarPaperless();
         $arquivo = $this->arquivo();
+        Storage::disk('arquivos')->put($arquivo->caminho, '%PDF-1.4 versao original sem ocr');
 
         Http::fake([
+            'paperless-teste/api/documents/*/download/*' => Http::response('%PDF-1.4 versao com camada de texto do ocr', 200),
             'paperless-teste/api/documents/*' => Http::response([
                 'id' => 99,
                 'title' => "intranet-arquivo-{$arquivo->id}",
@@ -62,6 +66,11 @@ class PaperlessWebhookTest extends TestCase
         $arquivo->refresh();
         $this->assertEquals(99, $arquivo->paperless_document_id);
         $this->assertEquals('Texto extraido via OCR de teste.', $arquivo->conteudo_ocr);
+        $this->assertEquals('concluido', $arquivo->ocr_status);
+
+        $conteudoSalvo = Storage::disk('arquivos')->get($arquivo->caminho);
+        $this->assertEquals('%PDF-1.4 versao com camada de texto do ocr', $conteudoSalvo);
+        $this->assertEquals(strlen($conteudoSalvo), $arquivo->tamanho);
     }
 
     public function test_nao_falha_quando_titulo_nao_correlaciona_com_arquivo(): void

@@ -39,7 +39,10 @@ class PaperlessServiceTest extends TestCase
 
         $arquivo = $this->arquivoPdf();
 
-        app(PaperlessService::class)->enviarParaOcr($arquivo);
+        $enviado = app(PaperlessService::class)->enviarParaOcr($arquivo);
+
+        $this->assertTrue($enviado);
+        $this->assertEquals('pendente', $arquivo->fresh()->ocr_status);
 
         Http::assertSent(function ($request) use ($arquivo) {
             return str_contains($request->url(), 'post_document')
@@ -92,9 +95,10 @@ class PaperlessServiceTest extends TestCase
         $arquivo = $this->arquivoPdf();
 
         // Não deve lançar exceção mesmo com falha na chamada.
-        app(PaperlessService::class)->enviarParaOcr($arquivo);
+        $enviado = app(PaperlessService::class)->enviarParaOcr($arquivo);
 
-        $this->assertTrue(true);
+        $this->assertFalse($enviado);
+        $this->assertEquals('falhou', $arquivo->fresh()->ocr_status);
     }
 
     public function test_arquivo_id_do_titulo(): void

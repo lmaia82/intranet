@@ -132,9 +132,12 @@ class RepositorioController extends Controller
             'is_private' => $request->boolean('is_private'),
         ]);
 
-        $this->paperless->enviarParaOcr($arquivo);
+        $status = 'Arquivo enviado com sucesso.';
+        if ($this->paperless->enviarParaOcr($arquivo)) {
+            $status .= ' O reconhecimento de texto (OCR) está sendo processado e pode levar alguns instantes — acompanhe o status na listagem.';
+        }
 
-        return redirect()->back()->with('status', 'Arquivo enviado com sucesso.');
+        return redirect()->back()->with('status', $status);
     }
 
     public function download(Arquivo $arquivo)
@@ -212,6 +215,7 @@ class RepositorioController extends Controller
         $header = array_map('trim', str_getcsv(array_shift($linhas)));
 
         $sucesso = 0;
+        $enviadosParaOcr = 0;
         $erros = [];
         $linhaNum = 1;
         $pastasCriadas = [];
@@ -303,13 +307,20 @@ class RepositorioController extends Controller
                 'is_private' => $isPrivate,
             ]);
 
-            $this->paperless->enviarParaOcr($arquivo);
+            if ($this->paperless->enviarParaOcr($arquivo)) {
+                $enviadosParaOcr++;
+            }
 
             $sucesso++;
         }
 
+        $status = "{$sucesso} arquivo(s) importado(s) com sucesso.";
+        if ($enviadosParaOcr > 0) {
+            $status .= " {$enviadosParaOcr} PDF(s) enviado(s) para reconhecimento de texto (OCR) em segundo plano.";
+        }
+
         return redirect()->route('repositorio.arquivos.lote.form')
-            ->with('status', "{$sucesso} arquivo(s) importado(s) com sucesso.")
+            ->with('status', $status)
             ->with('erros_lote', $erros);
     }
 }
