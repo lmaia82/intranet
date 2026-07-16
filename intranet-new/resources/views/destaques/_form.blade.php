@@ -29,6 +29,19 @@
     <input type="url" name="link" value="{{ old('link', $destaque->link ?? '') }}" placeholder="https://..." class="mt-1 block w-full border-gray-300 rounded">
     @error('link') <p class="text-red-600 text-sm">{{ $message }}</p> @enderror
 </div>
+<div class="grid grid-cols-2 gap-4">
+    <div>
+        <label class="block text-sm font-medium">Início da exibição</label>
+        <input type="datetime-local" name="inicio_em" value="{{ old('inicio_em', optional($destaque?->inicio_em ?? now())->format('Y-m-d\TH:i')) }}" required class="mt-1 block w-full border-gray-300 rounded">
+        @error('inicio_em') <p class="text-red-600 text-sm">{{ $message }}</p> @enderror
+    </div>
+    <div>
+        <label class="block text-sm font-medium">Fim da exibição</label>
+        <input type="datetime-local" name="fim_em" value="{{ old('fim_em', optional($destaque?->fim_em)->format('Y-m-d\TH:i')) }}" required class="mt-1 block w-full border-gray-300 rounded">
+        @error('fim_em') <p class="text-red-600 text-sm">{{ $message }}</p> @enderror
+    </div>
+</div>
+<p class="text-xs text-gray-500 -mt-2">O destaque só aparece no carrossel da Tela Inicial dentro desse período.</p>
 <div>
     <label class="block text-sm font-medium">Ordem de exibição</label>
     <input type="number" name="ordem" value="{{ old('ordem', $destaque->ordem ?? 0) }}" class="mt-1 block w-32 border-gray-300 rounded">

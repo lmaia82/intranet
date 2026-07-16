@@ -19,6 +19,7 @@
                     <tr>
                         <th class="p-3">Imagem</th>
                         <th class="p-3">Título</th>
+                        <th class="p-3">Período</th>
                         <th class="p-3">Ordem</th>
                         <th class="p-3">Status</th>
                         @if(auth()->user()->hasPermission('destaques.criar'))
@@ -31,12 +32,19 @@
                         <tr class="border-t">
                             <td class="p-3"><img src="{{ Storage::url($destaque->imagem) }}" class="h-12 rounded border"></td>
                             <td class="p-3">{{ $destaque->titulo ?: '—' }}</td>
+                            <td class="p-3 text-xs whitespace-nowrap">
+                                {{ optional($destaque->inicio_em)->format('d/m/Y H:i') ?? '—' }}
+                                até
+                                {{ optional($destaque->fim_em)->format('d/m/Y H:i') ?? '—' }}
+                            </td>
                             <td class="p-3">{{ $destaque->ordem }}</td>
                             <td class="p-3">
-                                @if($destaque->ativo)
-                                    <span class="inline-block px-2 py-0.5 text-xs rounded bg-green-100 text-green-800">Ativo</span>
-                                @else
+                                @if(!$destaque->ativo)
                                     <span class="inline-block px-2 py-0.5 text-xs rounded bg-gray-200 text-gray-600">Inativo</span>
+                                @elseif($destaque->expirado())
+                                    <span class="inline-block px-2 py-0.5 text-xs rounded bg-orange-100 text-orange-800">Expirado</span>
+                                @else
+                                    <span class="inline-block px-2 py-0.5 text-xs rounded bg-green-100 text-green-800">Ativo</span>
                                 @endif
                             </td>
                             @if(auth()->user()->hasPermission('destaques.criar'))
@@ -51,7 +59,7 @@
                             @endif
                         </tr>
                     @empty
-                        <tr><td colspan="5" class="p-3 text-gray-500">Nenhum destaque cadastrado.</td></tr>
+                        <tr><td colspan="6" class="p-3 text-gray-500">Nenhum destaque cadastrado.</td></tr>
                     @endforelse
                 </tbody>
             </table>

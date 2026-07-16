@@ -24,6 +24,8 @@ class DestaqueTest extends TestCase
             'link' => 'https://cetem.gov.br',
             'ordem' => 1,
             'ativo' => '1',
+            'inicio_em' => now()->format('Y-m-d\TH:i'),
+            'fim_em' => now()->addDays(30)->format('Y-m-d\TH:i'),
         ])->assertRedirect(route('destaques.index'));
 
         $this->assertDatabaseHas('destaques', [
@@ -54,12 +56,16 @@ class DestaqueTest extends TestCase
             'imagem' => 'destaques/original.jpg',
             'ordem' => 0,
             'ativo' => true,
+            'inicio_em' => now(),
+            'fim_em' => now()->addDays(10),
         ]);
 
         $this->actingAs($user)->put(route('destaques.update', $destaque), [
             'titulo' => 'Editado',
             'ordem' => 2,
             'ativo' => '1',
+            'inicio_em' => now()->format('Y-m-d\TH:i'),
+            'fim_em' => now()->addDays(30)->format('Y-m-d\TH:i'),
         ])->assertRedirect(route('destaques.index'));
 
         $this->assertDatabaseHas('destaques', ['titulo' => 'Editado', 'imagem' => 'destaques/original.jpg']);
@@ -90,6 +96,67 @@ class DestaqueTest extends TestCase
         $ativos = Destaque::ativos()->pluck('titulo')->all();
 
         $this->assertEquals(['A', 'B'], $ativos);
+    }
+
+    public function test_scope_ativos_ignora_destaques_fora_do_periodo(): void
+    {
+        Destaque::create([
+            'titulo' => 'Ainda não começou',
+            'imagem' => 'futuro.jpg',
+            'ordem' => 0,
+            'ativo' => true,
+            'inicio_em' => now()->addDays(5),
+            'fim_em' => now()->addDays(10),
+        ]);
+        Destaque::create([
+            'titulo' => 'Já expirou',
+            'imagem' => 'expirado.jpg',
+            'ordem' => 0,
+            'ativo' => true,
+            'inicio_em' => now()->subDays(10),
+            'fim_em' => now()->subDay(),
+        ]);
+        Destaque::create([
+            'titulo' => 'Dentro do período',
+            'imagem' => 'atual.jpg',
+            'ordem' => 0,
+            'ativo' => true,
+            'inicio_em' => now()->subDay(),
+            'fim_em' => now()->addDay(),
+        ]);
+        Destaque::create([
+            'titulo' => 'Sem periodo definido',
+            'imagem' => 'sem-periodo.jpg',
+            'ordem' => 0,
+            'ativo' => true,
+        ]);
+
+        $ativos = Destaque::ativos()->pluck('titulo')->all();
+
+        $this->assertEqualsCanonicalizing(['Dentro do período', 'Sem periodo definido'], $ativos);
+    }
+
+    public function test_expirado_indica_destaques_com_fim_no_passado(): void
+    {
+        $expirado = Destaque::create([
+            'titulo' => 'Expirado',
+            'imagem' => 'e.jpg',
+            'ordem' => 0,
+            'ativo' => true,
+            'inicio_em' => now()->subDays(5),
+            'fim_em' => now()->subDay(),
+        ]);
+        $vigente = Destaque::create([
+            'titulo' => 'Vigente',
+            'imagem' => 'v.jpg',
+            'ordem' => 0,
+            'ativo' => true,
+            'inicio_em' => now()->subDay(),
+            'fim_em' => now()->addDay(),
+        ]);
+
+        $this->assertTrue($expirado->expirado());
+        $this->assertFalse($vigente->expirado());
     }
 
     public function test_dashboard_exibe_carrossel_com_destaque_ativo(): void

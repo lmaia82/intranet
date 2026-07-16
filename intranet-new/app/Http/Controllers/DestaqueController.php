@@ -27,6 +27,8 @@ class DestaqueController extends Controller
             'link' => 'nullable|url|max:255',
             'ordem' => 'nullable|integer',
             'ativo' => 'boolean',
+            'inicio_em' => 'required|date',
+            'fim_em' => 'required|date|after:inicio_em',
         ]);
 
         $validated['ativo'] = $request->boolean('ativo');
@@ -51,6 +53,8 @@ class DestaqueController extends Controller
             'link' => 'nullable|url|max:255',
             'ordem' => 'nullable|integer',
             'ativo' => 'boolean',
+            'inicio_em' => 'required|date',
+            'fim_em' => 'required|date|after:inicio_em',
         ]);
 
         $validated['ativo'] = $request->boolean('ativo');
