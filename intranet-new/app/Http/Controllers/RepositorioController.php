@@ -42,6 +42,9 @@ class RepositorioController extends Controller
             ->filter(fn (Arquivo $a) => $a->visivelPara($user))
             ->values()
             ->load('sector');
+
+        $arquivos->where('ocr_status', 'pendente')->each(fn (Arquivo $a) => $this->paperless->sincronizarPendente($a));
+
         $sectors = Sector::orderBy('sigla')->get();
         $breadcrumb = $pastaAtual ? $pastaAtual->breadcrumb() : collect();
 

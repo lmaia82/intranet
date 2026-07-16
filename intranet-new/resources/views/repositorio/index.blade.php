@@ -115,7 +115,7 @@
                                     @elseif($arquivo->ocr_status === 'pendente')
                                         <span class="inline-block px-2 py-0.5 text-xs rounded bg-yellow-100 text-yellow-800" title="Processando em segundo plano, atualize a página em instantes">⏳ Processando</span>
                                     @elseif($arquivo->ocr_status === 'falhou')
-                                        <span class="inline-block px-2 py-0.5 text-xs rounded bg-red-100 text-red-800" title="Não foi possível enviar para o serviço de OCR">⚠️ Falhou</span>
+                                        <span class="inline-block px-2 py-0.5 text-xs rounded bg-red-100 text-red-800" title="{{ $arquivo->ocr_erro ?: 'Não foi possível processar o OCR' }}">⚠️ Falhou</span>
                                     @else
                                         <span class="text-xs text-gray-400">—</span>
                                     @endif

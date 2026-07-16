@@ -31,7 +31,7 @@ class PaperlessService
         try {
             $conteudo = Storage::disk('arquivos')->get($arquivo->caminho);
 
-            Http::withToken($token, 'Token')
+            $resposta = Http::withToken($token, 'Token')
                 ->timeout(15)
                 ->attach('document', $conteudo, $arquivo->nome_original)
                 ->post(rtrim($url, '/') . '/api/documents/post_document/', [
@@ -39,7 +39,11 @@ class PaperlessService
                 ])
                 ->throw();
 
-            $arquivo->update(['ocr_status' => 'pendente']);
+            $arquivo->update([
+                'ocr_status' => 'pendente',
+                'paperless_task_id' => is_string($resposta->json()) ? $resposta->json() : null,
+                'ocr_erro' => null,
+            ]);
 
             return true;
         } catch (\Throwable $e) {
@@ -48,9 +52,78 @@ class PaperlessService
                 'erro' => $e->getMessage(),
             ]);
 
-            $arquivo->update(['ocr_status' => 'falhou']);
+            $arquivo->update(['ocr_status' => 'falhou', 'ocr_erro' => $e->getMessage()]);
 
             return false;
+        }
+    }
+
+    /**
+     * Verifica arquivos com OCR "pendente" contra a API do paperless-ngx e
+     * atualiza o status. Cobre dois cenários que o webhook sozinho não
+     * resolve: (1) o paperless rejeitou/falhou o documento (duplicata,
+     * arquivo corrompido etc. — o post-consume-script só roda em sucesso,
+     * então a intranet nunca ficaria sabendo) e (2) o webhook de sucesso
+     * não chegou por algum motivo de rede, mas o documento já existe.
+     */
+    public function sincronizarPendente(Arquivo $arquivo): void
+    {
+        if ($arquivo->ocr_status !== 'pendente' || !$arquivo->paperless_task_id) {
+            return;
+        }
+
+        $tarefa = $this->buscarTarefa($arquivo->paperless_task_id);
+
+        if (!$tarefa) {
+            return;
+        }
+
+        if ($tarefa['status'] === 'FAILURE') {
+            $arquivo->update([
+                'ocr_status' => 'falhou',
+                'ocr_erro' => $tarefa['result'] ?? 'Falha não especificada no paperless-ngx.',
+            ]);
+
+            return;
+        }
+
+        if ($tarefa['status'] === 'SUCCESS' && !empty($tarefa['related_document'])) {
+            $this->aplicarResultadoOcr($arquivo, (int) $tarefa['related_document']);
+        }
+    }
+
+    /**
+     * Aplica o resultado de um documento processado com sucesso a um Arquivo:
+     * salva o texto extraído e substitui o arquivo original pela versão com
+     * a camada de texto do OCR embutida (permitindo seleção/cópia de texto).
+     */
+    public function aplicarResultadoOcr(Arquivo $arquivo, int $documentId): void
+    {
+        $documento = $this->buscarDocumento($documentId);
+
+        if (!$documento) {
+            return;
+        }
+
+        $arquivo->update([
+            'paperless_document_id' => $documentId,
+            'conteudo_ocr' => $documento['content'] ?? null,
+            'ocr_status' => 'concluido',
+            'ocr_erro' => null,
+        ]);
+
+        try {
+            $pdfComOcr = $this->baixarPdfComOcr($documentId);
+
+            if ($pdfComOcr) {
+                Storage::disk('arquivos')->put($arquivo->caminho, $pdfComOcr);
+                $arquivo->update(['tamanho' => strlen($pdfComOcr)]);
+            }
+        } catch (\Throwable $e) {
+            Log::warning('Falha ao substituir arquivo pela versão com OCR do paperless-ngx', [
+                'arquivo_id' => $arquivo->id,
+                'erro' => $e->getMessage(),
+            ]);
         }
     }
 
@@ -92,6 +165,29 @@ class PaperlessService
             ->get(rtrim($url, '/') . "/api/documents/{$documentId}/");
 
         return $response->successful() ? $response->json() : null;
+    }
+
+    /**
+     * Consulta o status de uma tarefa de consumo (upload) na API do paperless.
+     */
+    public function buscarTarefa(string $taskId): ?array
+    {
+        $url = config('services.paperless.internal_url');
+        $token = config('services.paperless.token');
+
+        if (!$url || !$token) {
+            return null;
+        }
+
+        $response = Http::withToken($token, 'Token')
+            ->timeout(15)
+            ->get(rtrim($url, '/') . '/api/tasks/', ['task_id' => $taskId]);
+
+        if (!$response->successful()) {
+            return null;
+        }
+
+        return $response->json()[0] ?? null;
     }
 
     /**

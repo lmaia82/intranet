@@ -35,14 +35,16 @@ class PaperlessServiceTest extends TestCase
     {
         Config::set('services.paperless.internal_url', 'http://paperless-teste');
         Config::set('services.paperless.token', 'token-teste');
-        Http::fake(['paperless-teste/*' => Http::response(['task_id' => 'abc'], 200)]);
+        Http::fake(['paperless-teste/*' => Http::response('"tarefa-uuid-123"', 200)]);
 
         $arquivo = $this->arquivoPdf();
 
         $enviado = app(PaperlessService::class)->enviarParaOcr($arquivo);
 
         $this->assertTrue($enviado);
-        $this->assertEquals('pendente', $arquivo->fresh()->ocr_status);
+        $arquivo->refresh();
+        $this->assertEquals('pendente', $arquivo->ocr_status);
+        $this->assertEquals('tarefa-uuid-123', $arquivo->paperless_task_id);
 
         Http::assertSent(function ($request) use ($arquivo) {
             return str_contains($request->url(), 'post_document')
@@ -99,6 +101,75 @@ class PaperlessServiceTest extends TestCase
 
         $this->assertFalse($enviado);
         $this->assertEquals('falhou', $arquivo->fresh()->ocr_status);
+    }
+
+    public function test_sincronizarPendente_marca_falha_quando_paperless_rejeita(): void
+    {
+        Config::set('services.paperless.internal_url', 'http://paperless-teste');
+        Config::set('services.paperless.token', 'token-teste');
+
+        $arquivo = $this->arquivoPdf();
+        $arquivo->update(['ocr_status' => 'pendente', 'paperless_task_id' => 'tarefa-uuid-falha']);
+
+        Http::fake([
+            'paperless-teste/api/tasks/*' => Http::response([[
+                'task_id' => 'tarefa-uuid-falha',
+                'status' => 'FAILURE',
+                'result' => 'Documento duplicado.',
+            ]], 200),
+        ]);
+
+        app(PaperlessService::class)->sincronizarPendente($arquivo);
+
+        $arquivo->refresh();
+        $this->assertEquals('falhou', $arquivo->ocr_status);
+        $this->assertEquals('Documento duplicado.', $arquivo->ocr_erro);
+    }
+
+    public function test_sincronizarPendente_aplica_resultado_quando_webhook_nao_chegou(): void
+    {
+        Storage::fake('arquivos');
+        Config::set('services.paperless.internal_url', 'http://paperless-teste');
+        Config::set('services.paperless.token', 'token-teste');
+
+        $arquivo = $this->arquivoPdf();
+        $arquivo->update(['ocr_status' => 'pendente', 'paperless_task_id' => 'tarefa-uuid-sucesso']);
+
+        Http::fake([
+            'paperless-teste/api/tasks/*' => Http::response([[
+                'task_id' => 'tarefa-uuid-sucesso',
+                'status' => 'SUCCESS',
+                'related_document' => '7',
+            ]], 200),
+            'paperless-teste/api/documents/*/download/*' => Http::response('%PDF-1.4 com ocr', 200),
+            'paperless-teste/api/documents/*' => Http::response([
+                'id' => 7,
+                'title' => "intranet-arquivo-{$arquivo->id}",
+                'content' => 'Conteudo recuperado via fallback.',
+            ], 200),
+        ]);
+
+        app(PaperlessService::class)->sincronizarPendente($arquivo);
+
+        $arquivo->refresh();
+        $this->assertEquals('concluido', $arquivo->ocr_status);
+        $this->assertEquals(7, $arquivo->paperless_document_id);
+        $this->assertEquals('Conteudo recuperado via fallback.', $arquivo->conteudo_ocr);
+    }
+
+    public function test_sincronizarPendente_nao_faz_nada_sem_task_id(): void
+    {
+        Config::set('services.paperless.internal_url', 'http://paperless-teste');
+        Config::set('services.paperless.token', 'token-teste');
+        Http::fake();
+
+        $arquivo = $this->arquivoPdf();
+        $arquivo->update(['ocr_status' => 'pendente']);
+
+        app(PaperlessService::class)->sincronizarPendente($arquivo);
+
+        Http::assertNothingSent();
+        $this->assertEquals('pendente', $arquivo->fresh()->ocr_status);
     }
 
     public function test_arquivo_id_do_titulo(): void

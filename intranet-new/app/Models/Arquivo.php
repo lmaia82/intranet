@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Arquivo extends Model
 {
-    protected $fillable = ['pasta_id', 'nome_original', 'caminho', 'extensao', 'tamanho', 'descricao', 'data', 'sector_id', 'is_private', 'paperless_document_id', 'conteudo_ocr', 'ocr_status'];
+    protected $fillable = ['pasta_id', 'nome_original', 'caminho', 'extensao', 'tamanho', 'descricao', 'data', 'sector_id', 'is_private', 'paperless_document_id', 'conteudo_ocr', 'ocr_status', 'paperless_task_id', 'ocr_erro'];
 
     protected $casts = [
         'is_private' => 'boolean',
