@@ -2,7 +2,7 @@
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">Destaques</h2>
     </x-slot>
-    <div class="py-6 max-w-4xl mx-auto sm:px-6 lg:px-8">
+    <div class="py-6 max-w-5xl mx-auto sm:px-6 lg:px-8">
         @if(session('status'))
             <div class="mb-4 p-4 bg-green-100 text-green-800 rounded">{{ session('status') }}</div>
         @endif
@@ -13,8 +13,18 @@
             </div>
         @endif
 
-        <div class="bg-white shadow rounded overflow-hidden">
-            <table class="w-full text-left">
+        <div class="bg-white shadow rounded overflow-x-auto">
+            <table class="w-full table-fixed text-left">
+                <colgroup>
+                    <col class="w-[12%]">
+                    <col class="w-[20%]">
+                    <col class="w-[30%]">
+                    <col class="w-[8%]">
+                    <col class="w-[10%]">
+                    @if(auth()->user()->hasPermission('destaques.criar'))
+                        <col class="w-[20%]">
+                    @endif
+                </colgroup>
                 <thead class="bg-gray-50">
                     <tr>
                         <th class="p-3">Imagem</th>
@@ -31,7 +41,7 @@
                     @forelse($destaques as $destaque)
                         <tr class="border-t">
                             <td class="p-3"><img src="{{ Storage::url($destaque->imagem) }}" class="h-12 rounded border"></td>
-                            <td class="p-3">{{ $destaque->titulo ?: '—' }}</td>
+                            <td class="p-3 truncate" title="{{ $destaque->titulo }}">{{ $destaque->titulo ?: '—' }}</td>
                             <td class="p-3 text-xs whitespace-nowrap">
                                 {{ optional($destaque->inicio_em)->format('d/m/Y H:i') ?? '—' }}
                                 até
