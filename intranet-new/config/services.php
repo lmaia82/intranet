@@ -44,4 +44,11 @@ return [
         'url' => env('STIRLING_PDF_URL'),
     ],
 
+    'paperless' => [
+        'url' => env('PAPERLESS_URL'),
+        'internal_url' => env('PAPERLESS_INTERNAL_URL', env('PAPERLESS_URL')),
+        'token' => env('PAPERLESS_TOKEN'),
+        'webhook_secret' => env('PAPERLESS_WEBHOOK_SECRET'),
+    ],
+
 ];

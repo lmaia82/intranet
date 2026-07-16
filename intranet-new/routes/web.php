@@ -125,6 +125,10 @@ Route::middleware('auth')->group(function () {
 Route::get('onlyoffice/documento/{arquivo}', [OnlyOfficeController::class, 'documento'])->name('onlyoffice.documento')->middleware('signed');
 Route::post('onlyoffice/callback/{arquivo}', [OnlyOfficeController::class, 'callback'])->name('onlyoffice.callback')->middleware('signed');
 
+use App\Http\Controllers\PaperlessWebhookController;
+
+Route::post('webhooks/paperless', [PaperlessWebhookController::class, 'handle'])->name('webhooks.paperless');
+
 Route::middleware('auth')->group(function () {
     Route::get('aplicacoes', [OnlyOfficeController::class, 'aplicacoes'])->name('onlyoffice.aplicacoes');
     Route::post('aplicacoes/criar', [OnlyOfficeController::class, 'criar'])->name('onlyoffice.criar');

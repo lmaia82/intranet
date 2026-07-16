@@ -5,12 +5,17 @@ namespace App\Http\Controllers;
 use App\Models\Arquivo;
 use App\Models\Pasta;
 use App\Models\Sector;
+use App\Services\PaperlessService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 class RepositorioController extends Controller
 {
+    public function __construct(private PaperlessService $paperless)
+    {
+    }
+
     public function meusArquivos()
     {
         $user = auth()->user();
@@ -115,7 +120,7 @@ class RepositorioController extends Controller
 
         $caminho = $file->store('uploads', 'arquivos');
 
-        Arquivo::create([
+        $arquivo = Arquivo::create([
             'pasta_id' => $validated['pasta_id'] ?? null,
             'nome_original' => $file->getClientOriginalName(),
             'caminho' => $caminho,
@@ -126,6 +131,8 @@ class RepositorioController extends Controller
             'sector_id' => $validated['sector_id'] ?? null,
             'is_private' => $request->boolean('is_private'),
         ]);
+
+        $this->paperless->enviarParaOcr($arquivo);
 
         return redirect()->back()->with('status', 'Arquivo enviado com sucesso.');
     }
@@ -284,7 +291,7 @@ class RepositorioController extends Controller
 
             $caminho = $file->store('uploads', 'arquivos');
 
-            Arquivo::create([
+            $arquivo = Arquivo::create([
                 'pasta_id' => $pastaId,
                 'nome_original' => $file->getClientOriginalName(),
                 'caminho' => $caminho,
@@ -295,6 +302,8 @@ class RepositorioController extends Controller
                 'sector_id' => $sector->id,
                 'is_private' => $isPrivate,
             ]);
+
+            $this->paperless->enviarParaOcr($arquivo);
 
             $sucesso++;
         }

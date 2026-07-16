@@ -87,6 +87,9 @@
                             <a href="{{ route('repositorio.download', $arquivo) }}" class="block border-b pb-2 last:border-0">
                                 📄 {{ $arquivo->nome_original }}
                                 <span class="text-xs text-gray-500"> — {{ $arquivo->sector->sigla ?? 'Geral' }}</span>
+                                @if(!str_contains(mb_strtolower($arquivo->nome_original), mb_strtolower($q)) && $arquivo->conteudo_ocr)
+                                    <span class="text-xs text-blue-600">(encontrado no conteúdo do PDF)</span>
+                                @endif
                             </a>
                         @endforeach
                     </div>

@@ -78,9 +78,40 @@ services:
     ports:
       - "8083:8080"
 
+  paperless-redis:
+    image: redis:7-alpine
+    volumes:
+      - paperless_redis_data:/data
+
+  paperless-ngx:
+    image: ghcr.io/paperless-ngx/paperless-ngx:latest
+    restart: unless-stopped
+    depends_on:
+      - paperless-redis
+    environment:
+      - PAPERLESS_REDIS=redis://paperless-redis:6379
+      - PAPERLESS_SECRET_KEY=troque_essa_chave_super_secreta_paperless
+      - PAPERLESS_TIME_ZONE=America/Sao_Paulo
+      - PAPERLESS_OCR_LANGUAGE=por
+      - PAPERLESS_OCR_LANGUAGES=por
+      - PAPERLESS_ADMIN_USER=admin
+      - PAPERLESS_ADMIN_PASSWORD=troque_essa_senha_super_secreta_paperless
+      - PAPERLESS_POST_CONSUME_SCRIPT=/usr/src/paperless/scripts/post-consume-webhook.sh
+      - INTRANET_WEBHOOK_URL=http://app/webhooks/paperless
+      - INTRANET_WEBHOOK_SECRET=troque_essa_chave_super_secreta_webhook_paperless
+    volumes:
+      - paperless_data:/usr/src/paperless/data
+      - paperless_media:/usr/src/paperless/media
+      - ./docker/paperless/scripts:/usr/src/paperless/scripts:ro
+    ports:
+      - "8084:8000"
+
 volumes:
   mysql_data:
   minio_data:
   onlyoffice_data:
   stirling_pdf_data:
   stirling_pdf_config:
+  paperless_redis_data:
+  paperless_data:
+  paperless_media:

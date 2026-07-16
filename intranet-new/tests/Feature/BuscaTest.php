@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Arquivo;
 use App\Models\Evento;
 use App\Models\EventoGravado;
 use App\Models\Group;
@@ -76,6 +77,27 @@ class BuscaTest extends TestCase
         $this->actingAs($user)->get(route('busca.index', ['q' => 'Buscatermo']))
             ->assertOk()
             ->assertDontSee('Restrito Buscatermo');
+    }
+
+    public function test_encontra_arquivo_pelo_conteudo_ocr(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true, 'group_id' => null]);
+        $sector = Sector::create(['sigla' => 'TI']);
+
+        Arquivo::create([
+            'nome_original' => 'documento-sem-relacao.pdf',
+            'caminho' => 'uploads/documento-sem-relacao.pdf',
+            'extensao' => 'pdf',
+            'tamanho' => 100,
+            'sector_id' => $sector->id,
+            'is_private' => false,
+            'conteudo_ocr' => 'Este texto foi extraído via OCR e contém PalavraChaveOcrBuscatermo.',
+        ]);
+
+        $this->actingAs($admin)->get(route('busca.index', ['q' => 'PalavraChaveOcrBuscatermo']))
+            ->assertOk()
+            ->assertSee('documento-sem-relacao.pdf')
+            ->assertSee('encontrado no conteúdo do PDF');
     }
 
     public function test_busca_sem_termo_nao_executa_query(): void

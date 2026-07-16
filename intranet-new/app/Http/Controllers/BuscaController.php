@@ -57,7 +57,10 @@ class BuscaController extends Controller
                     ->take(20)
                     ->values();
 
-                $resultados['arquivos'] = Arquivo::where('nome_original', 'like', $termo)
+                $resultados['arquivos'] = Arquivo::where(function ($query) use ($termo) {
+                        $query->where('nome_original', 'like', $termo)
+                            ->orWhere('conteudo_ocr', 'like', $termo);
+                    })
                     ->with('sector')
                     ->get()
                     ->filter(fn ($arquivo) => $arquivo->visivelPara($user))
