@@ -48,7 +48,12 @@ class DashboardController extends Controller
             : collect();
 
         $documentosPublicos = $user->hasPermission('repositorio.ver')
-            ? Arquivo::where('is_private', false)->with('sector')->latest('data')->take(5)->get()
+            ? Arquivo::where('is_private', false)
+                ->whereDoesntHave('pasta', fn ($query) => $query->whereNotNull('user_id'))
+                ->with('sector')
+                ->latest('data')
+                ->take(5)
+                ->get()
             : collect();
 
         $mes = (int) $request->query('mes', now()->month);

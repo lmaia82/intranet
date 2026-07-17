@@ -62,7 +62,7 @@ class BuscaController extends Controller
                         $query->where('nome_original', 'like', $termo)
                             ->orWhere('conteudo_ocr', 'like', $termo);
                     })
-                    ->with('sector')
+                    ->with(['sector', 'pasta'])
                     ->get()
                     ->filter(fn ($arquivo) => $arquivo->visivelPara($user))
                     ->take(20)

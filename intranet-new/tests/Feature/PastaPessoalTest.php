@@ -106,4 +106,28 @@ class PastaPessoalTest extends TestCase
 
         $this->actingAs($outro)->get(route('repositorio.index', ['pasta' => $subpasta->id]))->assertForbidden();
     }
+
+    public function test_arquivo_pessoal_publico_nao_aparece_no_widget_de_documentos_publicos_da_home(): void
+    {
+        Storage::fake('arquivos');
+        $sector = Sector::create(['sigla' => 'TI']);
+        $dono = User::factory()->create(['sector_id' => $sector->id]);
+        $outro = User::factory()->create(['sector_id' => $sector->id]);
+
+        $pasta = Pasta::create(['nome' => 'Meus Arquivos', 'user_id' => $dono->id, 'sector_id' => $sector->id]);
+        Storage::disk('arquivos')->put('uploads/pessoal.docx', 'conteudo');
+        Arquivo::create([
+            'pasta_id' => $pasta->id,
+            'nome_original' => 'DocumentoPessoalDoDono.docx',
+            'caminho' => 'uploads/pessoal.docx',
+            'extensao' => 'docx',
+            'tamanho' => 8,
+            'is_private' => false,
+            'data' => now()->toDateString(),
+        ]);
+
+        $response = $this->actingAs($outro)->get(route('dashboard'));
+
+        $response->assertOk()->assertDontSee('DocumentoPessoalDoDono.docx');
+    }
 }
