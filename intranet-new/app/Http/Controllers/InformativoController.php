@@ -10,6 +10,7 @@ use App\Models\Sector;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
 class InformativoController extends Controller
@@ -275,18 +276,19 @@ class InformativoController extends Controller
             ]);
         }
 
+        $falhas = 0;
         foreach ($emails as $email) {
-            Mail::to($email)->send(new NovoInformativoMail($informativo));
-
-            InformativoEnvio::create([
-                'informativo_id' => $informativo->id,
-                'email' => $email,
-                'enviado_em' => now(),
-            ]);
+            if (!$this->enviarEmailInformativo($informativo, $email)) {
+                $falhas++;
+            }
         }
 
-        return redirect()->route('informativos.show', $informativo)
-            ->with('status', "E-mail reenviado para {$emails->count()} destinatário(s).");
+        $status = 'E-mail reenviado para ' . ($emails->count() - $falhas) . ' destinatário(s).';
+        if ($falhas > 0) {
+            $status .= " {$falhas} falha(s) no envio.";
+        }
+
+        return redirect()->route('informativos.show', $informativo)->with('status', $status);
     }
 
     private function enviarNotificacoes(Informativo $informativo): int
@@ -294,16 +296,48 @@ class InformativoController extends Controller
         $destinatarios = $this->destinatarios($informativo);
 
         foreach ($destinatarios as $usuario) {
-            Mail::to($usuario->email)->send(new NovoInformativoMail($informativo));
-
-            InformativoEnvio::create([
-                'informativo_id' => $informativo->id,
-                'email' => $usuario->email,
-                'enviado_em' => now(),
-            ]);
+            $this->enviarEmailInformativo($informativo, $usuario->email);
         }
 
         return $destinatarios->count();
+    }
+
+    /**
+     * Envia o e-mail de um informativo para um destinatário, sem deixar uma
+     * falha (SMTP fora do ar, e-mail inválido no servidor etc.) abortar o
+     * restante do lote. Sempre registra o resultado (sucesso ou falha) em
+     * InformativoEnvio, para dar visibilidade no monitoramento de saúde.
+     */
+    private function enviarEmailInformativo(Informativo $informativo, string $email): bool
+    {
+        try {
+            Mail::to($email)->send(new NovoInformativoMail($informativo));
+
+            InformativoEnvio::create([
+                'informativo_id' => $informativo->id,
+                'email' => $email,
+                'sucesso' => true,
+                'enviado_em' => now(),
+            ]);
+
+            return true;
+        } catch (\Throwable $e) {
+            Log::warning('Falha ao enviar e-mail de informativo', [
+                'informativo_id' => $informativo->id,
+                'email' => $email,
+                'erro' => $e->getMessage(),
+            ]);
+
+            InformativoEnvio::create([
+                'informativo_id' => $informativo->id,
+                'email' => $email,
+                'sucesso' => false,
+                'erro' => $e->getMessage(),
+                'enviado_em' => now(),
+            ]);
+
+            return false;
+        }
     }
 
     private function destinatarios(Informativo $informativo)

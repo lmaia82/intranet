@@ -172,6 +172,32 @@ class PaperlessServiceTest extends TestCase
         $this->assertEquals('pendente', $arquivo->fresh()->ocr_status);
     }
 
+    public function test_estaDisponivel_retorna_true_quando_paperless_responde_ok(): void
+    {
+        Config::set('services.paperless.internal_url', 'http://paperless-teste');
+        Config::set('services.paperless.token', 'token-teste');
+        Http::fake(['paperless-teste/*' => Http::response(['results' => []], 200)]);
+
+        $this->assertTrue(app(PaperlessService::class)->estaDisponivel());
+    }
+
+    public function test_estaDisponivel_retorna_false_quando_paperless_falha(): void
+    {
+        Config::set('services.paperless.internal_url', 'http://paperless-teste');
+        Config::set('services.paperless.token', 'token-teste');
+        Http::fake(['paperless-teste/*' => Http::response('erro', 500)]);
+
+        $this->assertFalse(app(PaperlessService::class)->estaDisponivel());
+    }
+
+    public function test_estaDisponivel_retorna_false_quando_nao_configurado(): void
+    {
+        Config::set('services.paperless.internal_url', null);
+        Config::set('services.paperless.token', null);
+
+        $this->assertFalse(app(PaperlessService::class)->estaDisponivel());
+    }
+
     public function test_arquivo_id_do_titulo(): void
     {
         $service = app(PaperlessService::class);

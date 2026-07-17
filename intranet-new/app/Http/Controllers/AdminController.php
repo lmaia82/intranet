@@ -8,10 +8,12 @@ use App\Models\Destaque;
 use App\Models\Evento;
 use App\Models\Group;
 use App\Models\Informativo;
+use App\Models\InformativoEnvio;
 use App\Models\Permission;
 use App\Models\Sector;
 use App\Models\Telefone;
 use App\Models\User;
+use App\Services\PaperlessService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
@@ -152,6 +154,48 @@ class AdminController extends Controller
         return view('admin.conteudo', compact(
             'informativosMaisLidos', 'arquivosMaisBaixados', 'termosMaisBuscados', 'buscasSemResultado',
             'maxInformativo', 'maxArquivo', 'maxTermo'
+        ));
+    }
+
+    public function saude()
+    {
+        $inicio30d = now()->subDays(29)->startOfDay();
+
+        $ocrPorStatus = Arquivo::where('extensao', 'pdf')
+            ->whereNotNull('ocr_status')
+            ->selectRaw('ocr_status, count(*) as total')
+            ->groupBy('ocr_status')
+            ->pluck('total', 'ocr_status');
+
+        $arquivosComFalhaOcr = Arquivo::where('ocr_status', 'falhou')
+            ->latest('updated_at')
+            ->take(10)
+            ->get(['id', 'nome_original', 'ocr_erro', 'updated_at']);
+
+        $paperlessDisponivel = app(PaperlessService::class)->estaDisponivel();
+
+        $enviosEmail = InformativoEnvio::where('created_at', '>=', $inicio30d)
+            ->selectRaw('sucesso, count(*) as total')
+            ->groupBy('sucesso')
+            ->get()
+            ->mapWithKeys(fn ($registro) => [$registro->sucesso ? 'sucesso' : 'falha' => $registro->total]);
+
+        $emailsComFalha = InformativoEnvio::where('sucesso', false)
+            ->where('created_at', '>=', $inicio30d)
+            ->with('informativo')
+            ->latest('created_at')
+            ->take(10)
+            ->get();
+
+        $setoresProximosDaCota = Sector::whereNotNull('quota_bytes')
+            ->get()
+            ->filter(fn ($sector) => $sector->percentualUso() !== null && $sector->percentualUso() >= 80)
+            ->sortByDesc(fn ($sector) => $sector->percentualUso())
+            ->values();
+
+        return view('admin.saude', compact(
+            'ocrPorStatus', 'arquivosComFalhaOcr', 'paperlessDisponivel',
+            'enviosEmail', 'emailsComFalha', 'setoresProximosDaCota'
         ));
     }
 

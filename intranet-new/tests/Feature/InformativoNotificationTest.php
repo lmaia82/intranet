@@ -148,6 +148,46 @@ class InformativoNotificationTest extends TestCase
         Mail::assertNothingSent();
     }
 
+    public function test_falha_no_envio_de_um_email_nao_aborta_o_restante_do_lote(): void
+    {
+        Mail::shouldReceive('to')->andReturnUsing(function ($email) {
+            return new class($email) {
+                public function __construct(private $email)
+                {
+                }
+
+                public function send($mailable)
+                {
+                    if ($this->email === 'falha@cetem.gov.br') {
+                        throw new \Exception('Falha simulada de SMTP');
+                    }
+
+                    return true;
+                }
+            };
+        });
+
+        $admin = User::factory()->create();
+        $informativo = Informativo::create([
+            'title' => 'Aviso',
+            'content' => 'Conteudo',
+            'published_at' => now(),
+        ]);
+
+        $response = $this->actingAs($admin)->post(route('informativos.reenviar', $informativo), [
+            'emails' => "ok@cetem.gov.br\nfalha@cetem.gov.br",
+        ]);
+
+        $response->assertRedirect(route('informativos.show', $informativo))
+            ->assertSessionHas('status', 'E-mail reenviado para 1 destinatário(s). 1 falha(s) no envio.');
+
+        $this->assertDatabaseHas('informativo_envios', ['email' => 'ok@cetem.gov.br', 'sucesso' => true]);
+        $this->assertDatabaseHas('informativo_envios', ['email' => 'falha@cetem.gov.br', 'sucesso' => false]);
+
+        $envioComFalha = InformativoEnvio::where('email', 'falha@cetem.gov.br')->first();
+        $this->assertStringContainsString('Falha simulada de SMTP', $envioComFalha->erro);
+    }
+
     public function test_pagina_show_exibe_historico_de_envios(): void
     {
         Mail::fake();

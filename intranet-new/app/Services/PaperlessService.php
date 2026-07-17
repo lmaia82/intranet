@@ -211,4 +211,27 @@ class PaperlessService
 
         return $response->successful() ? $response->body() : null;
     }
+
+    /**
+     * Verifica rapidamente se o paperless-ngx está acessível e autenticando
+     * com o token configurado. Usado no painel de Saúde do Sistema.
+     */
+    public function estaDisponivel(): bool
+    {
+        $url = config('services.paperless.internal_url');
+        $token = config('services.paperless.token');
+
+        if (!$url || !$token) {
+            return false;
+        }
+
+        try {
+            return Http::withToken($token, 'Token')
+                ->timeout(5)
+                ->get(rtrim($url, '/') . '/api/documents/', ['page_size' => 1])
+                ->successful();
+        } catch (\Throwable $e) {
+            return false;
+        }
+    }
 }
