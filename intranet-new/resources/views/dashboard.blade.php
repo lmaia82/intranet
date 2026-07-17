@@ -195,7 +195,7 @@
                         <div class="flex justify-between items-center border-b pb-2 last:border-0">
                             <span>{{ $arquivo->nome_original }}</span>
                             @if(in_array($arquivo->extensao, ['doc','docx','odt','xls','xlsx','ods','ppt','pptx','odp','pdf']))
-                                <a href="{{ route('onlyoffice.editor', $arquivo) }}" class="text-sm text-green-700">abrir</a>
+                                <a href="{{ route('onlyoffice.editor', $arquivo) }}" target="_blank" rel="noopener" class="text-sm text-green-700">abrir</a>
                             @else
                                 <a href="{{ route('repositorio.download', $arquivo) }}" class="text-sm text-blue-700">baixar</a>
                             @endif

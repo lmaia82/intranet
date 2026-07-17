@@ -4,7 +4,7 @@
     </x-slot>
     <div class="py-6 max-w-4xl mx-auto sm:px-6 lg:px-8">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-            <form method="POST" action="{{ route('onlyoffice.criar') }}" class="bg-white shadow rounded p-6 text-center space-y-3">
+            <form method="POST" action="{{ route('onlyoffice.criar') }}" target="_blank" class="bg-white shadow rounded p-6 text-center space-y-3">
                 @csrf
                 <input type="hidden" name="tipo" value="docx">
                 <div class="text-4xl">📄</div>
@@ -13,7 +13,7 @@
                 <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded w-full">Criar novo</button>
             </form>
 
-            <form method="POST" action="{{ route('onlyoffice.criar') }}" class="bg-white shadow rounded p-6 text-center space-y-3">
+            <form method="POST" action="{{ route('onlyoffice.criar') }}" target="_blank" class="bg-white shadow rounded p-6 text-center space-y-3">
                 @csrf
                 <input type="hidden" name="tipo" value="xlsx">
                 <div class="text-4xl">📊</div>
@@ -22,7 +22,7 @@
                 <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded w-full">Criar novo</button>
             </form>
 
-            <form method="POST" action="{{ route('onlyoffice.criar') }}" class="bg-white shadow rounded p-6 text-center space-y-3">
+            <form method="POST" action="{{ route('onlyoffice.criar') }}" target="_blank" class="bg-white shadow rounded p-6 text-center space-y-3">
                 @csrf
                 <input type="hidden" name="tipo" value="pptx">
                 <div class="text-4xl">📽️</div>
@@ -59,7 +59,7 @@
                             <td class="p-3 uppercase">{{ $doc->extensao }}</td>
                             <td class="p-3">{{ $doc->tamanhoFormatado() }}</td>
                             <td class="p-3 text-right">
-                                <a href="{{ route('onlyoffice.editor', $doc) }}" class="text-green-700">Abrir no editor</a>
+                                <a href="{{ route('onlyoffice.editor', $doc) }}" target="_blank" rel="noopener" class="text-green-700">Abrir no editor</a>
                             </td>
                         </tr>
                     @empty
