@@ -130,4 +130,22 @@ class PastaPessoalTest extends TestCase
 
         $response->assertOk()->assertDontSee('DocumentoPessoalDoDono.docx');
     }
+
+    public function test_outro_usuario_nao_abre_editor_de_documento_criado_pelas_aplicacoes(): void
+    {
+        Storage::fake('arquivos');
+        $sector = Sector::create(['sigla' => 'TI']);
+        $dono = User::factory()->create(['sector_id' => $sector->id]);
+        $outro = User::factory()->create(['sector_id' => $sector->id]);
+
+        $this->actingAs($dono)->post(route('onlyoffice.criar'), [
+            'tipo' => 'docx',
+            'titulo' => 'DocumentoDoDono',
+        ]);
+
+        $arquivo = Arquivo::where('nome_original', 'DocumentoDoDono.docx')->firstOrFail();
+
+        $this->actingAs($outro)->get(route('onlyoffice.editor', $arquivo))->assertForbidden();
+        $this->actingAs($dono)->get(route('onlyoffice.editor', $arquivo))->assertOk();
+    }
 }

@@ -23,6 +23,7 @@ class OnlyOfficeController extends Controller
     public function editor(Arquivo $arquivo)
     {
         abort_unless(in_array($arquivo->extensao, self::EXTENSOES_SUPORTADAS), 404, 'Este tipo de arquivo não pode ser aberto no editor.');
+        abort_unless($arquivo->visivelPara(auth()->user()), 403, 'Você não tem acesso a este arquivo.');
 
         $urlOriginal = URL::to('/');
         URL::forceRootUrl('http://app');
