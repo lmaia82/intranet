@@ -113,27 +113,8 @@
                             <td class="p-3">
                                 @if($arquivo->extensao === 'pdf')
                                     <div
-                                        x-data="{
-                                            status: @js($arquivo->ocr_status),
-                                            erro: @js($arquivo->ocr_erro),
-                                            tentativas: 0,
-                                        }"
-                                        @if($arquivo->ocr_status === 'pendente')
-                                            x-init="
-                                                const intervalo = setInterval(() => {
-                                                    tentativas++;
-                                                    if (tentativas > 120) { clearInterval(intervalo); return; }
-                                                    fetch('{{ route('repositorio.arquivos.ocr-status', $arquivo) }}')
-                                                        .then(r => r.json())
-                                                        .then(dados => {
-                                                            status = dados.status;
-                                                            erro = dados.erro;
-                                                            if (status !== 'pendente') clearInterval(intervalo);
-                                                        })
-                                                        .catch(() => {});
-                                                }, 5000);
-                                            "
-                                        @endif
+                                        x-data="ocrStatus(@js($arquivo->ocr_status), @js($arquivo->ocr_erro), @js(route('repositorio.arquivos.ocr-status', $arquivo)))"
+                                        @if($arquivo->ocr_status === 'pendente') x-init="iniciarPolling()" @endif
                                     >
                                         <span x-show="status === 'concluido'" x-cloak class="inline-block px-2 py-0.5 text-xs rounded bg-green-100 text-green-800" title="Arquivo já pesquisável e com texto selecionável">✅ Concluído</span>
                                         <span x-show="status === 'pendente'" x-cloak class="inline-block px-2 py-0.5 text-xs rounded bg-yellow-100 text-yellow-800" title="Processando em segundo plano — atualiza sozinho">⏳ Processando</span>

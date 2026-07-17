@@ -24,8 +24,8 @@
 
         @if($destaques->isNotEmpty())
         <div
-            x-data="{ atual: 0, total: {{ $destaques->count() }} }"
-            x-init="setInterval(() => { atual = (atual + 1) % total }, 5000)"
+            x-data="carrossel({{ $destaques->count() }})"
+            x-init="iniciar()"
             class="relative bg-white shadow rounded overflow-hidden"
         >
             @foreach($destaques as $i => $destaque)

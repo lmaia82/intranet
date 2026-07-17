@@ -52,16 +52,8 @@
             ]);
         @endphp
         <div class="bg-white shadow rounded overflow-hidden"
-            x-data="{
-                documentos: @json($documentosIniciais),
-                carregar() {
-                    fetch('{{ route('onlyoffice.aplicacoes.documentos') }}')
-                        .then(r => r.json())
-                        .then(dados => { this.documentos = dados; })
-                        .catch(() => {});
-                }
-            }"
-            x-init="setInterval(() => carregar(), 5000)"
+            x-data="meusDocumentos(@js($documentosIniciais), @js(route('onlyoffice.aplicacoes.documentos')))"
+            x-init="iniciarPolling()"
         >
             <table class="w-full text-left">
                 <thead class="bg-gray-50">

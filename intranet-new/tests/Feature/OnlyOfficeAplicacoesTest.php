@@ -38,7 +38,8 @@ class OnlyOfficeAplicacoesTest extends TestCase
 
         $this->actingAs($user)->get(route('onlyoffice.aplicacoes'))
             ->assertOk()
-            ->assertSee('Relatorio.docx');
+            ->assertSee('Relatorio.docx')
+            ->assertDontSee('"nome_original":"Relatorio.docx"', false);
     }
 
     public function test_documentos_retorna_json_com_arquivos_da_pasta_pessoal(): void
