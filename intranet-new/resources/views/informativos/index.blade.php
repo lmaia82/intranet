@@ -17,7 +17,10 @@
                 </select>
             </form>
             @if(auth()->user()->hasPermission('informativos.criar'))
-                <a href="{{ route('informativos.create') }}" class="px-4 py-2 bg-blue-600 text-white rounded">Novo informativo</a>
+                <div class="flex items-center gap-3">
+                    <a href="{{ route('informativos.lote.form') }}" class="text-blue-600 text-sm">Cadastro em lote</a>
+                    <a href="{{ route('informativos.create') }}" class="px-4 py-2 bg-blue-600 text-white rounded">Novo informativo</a>
+                </div>
             @endif
         </div>
 

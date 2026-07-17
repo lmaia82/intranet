@@ -7,6 +7,7 @@ use App\Models\Informativo;
 use App\Models\InformativoEnvio;
 use App\Models\Sector;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 
@@ -99,6 +100,135 @@ class InformativoController extends Controller
     {
         $informativo->delete();
         return redirect()->route('informativos.index')->with('status', 'Informativo removido.');
+    }
+
+    public function loteForm()
+    {
+        return view('informativos.lote');
+    }
+
+    public function loteTemplate()
+    {
+        $csv = "title,content,setor,publico,data_publicacao\n";
+        $csv .= "Exemplo de informativo,\"Conteúdo do informativo.\nPode ter várias linhas, desde que o texto fique entre aspas.\",,sim,31/12/2025\n";
+
+        return response($csv, 200, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="modelo_informativos.csv"',
+        ]);
+    }
+
+    public function loteImport(Request $request)
+    {
+        $request->validate(['csv' => 'required|file|mimes:csv,txt']);
+
+        $linhas = $this->lerLinhasDoCsv($request->file('csv')->getRealPath());
+
+        if (empty($linhas)) {
+            return redirect()->route('informativos.lote.form')
+                ->with('status', '0 informativo(s) importado(s) com sucesso.')
+                ->with('erros_lote', ['Arquivo vazio ou sem linhas de dados.']);
+        }
+
+        $header = array_map(fn ($h) => mb_strtolower(trim((string) $h)), array_shift($linhas));
+
+        $sucesso = 0;
+        $erros = [];
+        $linhaNum = 1;
+
+        foreach ($linhas as $row) {
+            $linhaNum++;
+
+            if (count(array_filter($row, fn ($v) => trim((string) $v) !== '')) === 0) {
+                continue;
+            }
+
+            $row = array_pad($row, count($header), null);
+            $dados = array_combine($header, $row);
+            $dados = array_map(fn ($v) => trim((string) $v), $dados);
+
+            $title = $dados['title'] ?? '';
+            $content = $dados['content'] ?? '';
+
+            if ($title === '' || $content === '') {
+                $erros[] = "Linha {$linhaNum}: campos obrigatórios (title, content) em branco.";
+                continue;
+            }
+
+            $sectorId = null;
+            $setorNome = $dados['setor'] ?? '';
+            if ($setorNome !== '') {
+                $sector = Sector::whereRaw('LOWER(sigla) = ?', [mb_strtolower($setorNome)])->first();
+
+                if (!$sector) {
+                    $erros[] = "Linha {$linhaNum}: setor '{$setorNome}' não encontrado.";
+                    continue;
+                }
+
+                $sectorId = $sector->id;
+            }
+
+            $dataTexto = $dados['data_publicacao'] ?? '';
+            $publishedAt = now();
+            if ($dataTexto !== '') {
+                $publishedAt = null;
+                foreach (['d/m/Y', 'Y-m-d'] as $formato) {
+                    try {
+                        $publishedAt = Carbon::createFromFormat($formato, $dataTexto)->startOfDay();
+                        break;
+                    } catch (\Exception $e) {
+                        $publishedAt = null;
+                    }
+                }
+
+                if (!$publishedAt) {
+                    $erros[] = "Linha {$linhaNum}: data '{$dataTexto}' inválida (use dd/mm/aaaa).";
+                    continue;
+                }
+            }
+
+            $publicoTexto = strtolower($dados['publico'] ?? 'sim');
+            $isPrivate = !in_array($publicoTexto, ['sim', 's', 'yes', '1', 'publico', 'público'], true);
+
+            Informativo::create([
+                'title' => $title,
+                'content' => $content,
+                'sector_id' => $sectorId,
+                'is_private' => $isPrivate,
+                'published_at' => $publishedAt,
+            ]);
+
+            $sucesso++;
+        }
+
+        return redirect()->route('informativos.lote.form')
+            ->with('status', "{$sucesso} informativo(s) importado(s) com sucesso.")
+            ->with('erros_lote', $erros);
+    }
+
+    /**
+     * Lê um CSV usando fgetcsv (em vez de dividir o arquivo por linha antes
+     * de interpretar), para respeitar corretamente campos entre aspas que
+     * contenham quebras de linha — comum no campo "content".
+     */
+    private function lerLinhasDoCsv(string $caminho): array
+    {
+        $conteudo = file_get_contents($caminho);
+        $conteudo = preg_replace('/^\xEF\xBB\xBF/', '', $conteudo);
+
+        $handle = fopen('php://temp', 'r+');
+        fwrite($handle, $conteudo);
+        rewind($handle);
+
+        $linhas = [];
+        while (($linha = fgetcsv($handle)) !== false) {
+            if (count(array_filter($linha, fn ($v) => trim((string) $v) !== '')) > 0) {
+                $linhas[] = $linha;
+            }
+        }
+        fclose($handle);
+
+        return $linhas;
     }
 
     public function reenviarForm(Informativo $informativo)

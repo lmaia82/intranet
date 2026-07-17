@@ -39,6 +39,9 @@ Route::middleware('auth')->group(function () {
         ->middlewareFor(['create', 'store', 'edit', 'update', 'destroy'], 'permission:informativos.criar');
     Route::get('informativos/{informativo}/reenviar', [InformativoController::class, 'reenviarForm'])->name('informativos.reenviar.form')->middleware('permission:informativos.criar');
     Route::post('informativos/{informativo}/reenviar', [InformativoController::class, 'reenviar'])->name('informativos.reenviar')->middleware('permission:informativos.criar');
+    Route::get('informativos-lote', [InformativoController::class, 'loteForm'])->name('informativos.lote.form')->middleware('permission:informativos.criar');
+    Route::post('informativos-lote', [InformativoController::class, 'loteImport'])->name('informativos.lote.import')->middleware('permission:informativos.criar');
+    Route::get('informativos-lote/template', [InformativoController::class, 'loteTemplate'])->name('informativos.lote.template')->middleware('permission:informativos.criar');
 });
 
 use App\Http\Controllers\EventoController;
