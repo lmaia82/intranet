@@ -79,7 +79,9 @@
                             <td class="p-3">—</td>
                             <td class="p-3">—</td>
                             <td class="p-3">
-                                @if($subpasta->is_private)
+                                @if($subpasta->user_id)
+                                    <span class="inline-block px-2 py-0.5 text-xs rounded bg-blue-100 text-blue-800">Pessoal</span>
+                                @elseif($subpasta->is_private)
                                     <span class="inline-block px-2 py-0.5 text-xs rounded bg-orange-100 text-orange-800">Restrito ({{ $subpasta->sector?->sigla }})</span>
                                 @else
                                     <span class="inline-block px-2 py-0.5 text-xs rounded bg-green-100 text-green-800">Público</span>
@@ -143,7 +145,9 @@
                                 @endif
                             </td>
                             <td class="p-3">
-                                @if($arquivo->is_private)
+                                @if($pastaAtual?->user_id)
+                                    <span class="inline-block px-2 py-0.5 text-xs rounded bg-blue-100 text-blue-800">Pessoal</span>
+                                @elseif($arquivo->is_private)
                                     <span class="inline-block px-2 py-0.5 text-xs rounded bg-orange-100 text-orange-800">Restrito ({{ $arquivo->sector?->sigla }})</span>
                                 @else
                                     <span class="inline-block px-2 py-0.5 text-xs rounded bg-green-100 text-green-800">Público</span>

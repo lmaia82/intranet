@@ -14,6 +14,10 @@ class Pasta extends Model
 
     public function visivelPara(User $user): bool
     {
+        if ($this->user_id !== null) {
+            return $this->user_id === $user->id || $user->is_admin;
+        }
+
         if (!$this->is_private) {
             return true;
         }

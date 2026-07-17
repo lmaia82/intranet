@@ -40,6 +40,7 @@ class RepositorioController extends Controller
             ->values()
             ->load('sector');
         $arquivos = ($pastaAtual ? $pastaAtual->arquivos : Arquivo::whereNull('pasta_id')->orderBy('nome_original')->get())
+            ->each(fn (Arquivo $a) => $pastaAtual ? $a->setRelation('pasta', $pastaAtual) : null)
             ->filter(fn (Arquivo $a) => $a->visivelPara($user))
             ->values()
             ->load('sector');
@@ -61,6 +62,13 @@ class RepositorioController extends Controller
             'is_private' => 'boolean',
         ]);
         $validated['is_private'] = $request->boolean('is_private');
+
+        if ($validated['parent_id'] ?? null) {
+            $pastaPai = Pasta::find($validated['parent_id']);
+            if ($pastaPai && $pastaPai->user_id !== null) {
+                $validated['user_id'] = $pastaPai->user_id;
+            }
+        }
 
         Pasta::create($validated);
 
