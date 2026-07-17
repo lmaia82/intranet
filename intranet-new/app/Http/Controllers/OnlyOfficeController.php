@@ -77,17 +77,35 @@ class OnlyOfficeController extends Controller
 
     public function aplicacoes()
     {
+        $documentos = $this->documentosDaPastaPessoal();
+
+        return view('repositorio.aplicacoes', compact('documentos'));
+    }
+
+    public function documentos()
+    {
+        $documentos = $this->documentosDaPastaPessoal()->map(fn (Arquivo $arquivo) => [
+            'id' => $arquivo->id,
+            'nome_original' => $arquivo->nome_original,
+            'extensao' => $arquivo->extensao,
+            'tamanho_formatado' => $arquivo->tamanhoFormatado(),
+            'editor_url' => route('onlyoffice.editor', $arquivo),
+        ]);
+
+        return response()->json($documentos);
+    }
+
+    private function documentosDaPastaPessoal()
+    {
         $pastaPessoal = Pasta::firstOrCreate(
             ['user_id' => auth()->id(), 'parent_id' => null],
             ['nome' => 'Meus Arquivos']
         );
 
-        $documentos = $pastaPessoal->arquivos()
+        return $pastaPessoal->arquivos()
             ->whereIn('extensao', self::EXTENSOES_SUPORTADAS)
             ->latest()
             ->get();
-
-        return view('repositorio.aplicacoes', compact('documentos'));
     }
 
     public function criar(Request $request)

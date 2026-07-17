@@ -42,7 +42,24 @@
         </div>
 
         <h3 class="font-semibold text-lg mb-3">Meus documentos</h3>
-        <div class="bg-white shadow rounded overflow-hidden">
+        <div class="bg-white shadow rounded overflow-hidden"
+            x-data="{
+                documentos: @json($documentos->map(fn ($d) => [
+                    'id' => $d->id,
+                    'nome_original' => $d->nome_original,
+                    'extensao' => $d->extensao,
+                    'tamanho_formatado' => $d->tamanhoFormatado(),
+                    'editor_url' => route('onlyoffice.editor', $d),
+                ])),
+                carregar() {
+                    fetch('{{ route('onlyoffice.aplicacoes.documentos') }}')
+                        .then(r => r.json())
+                        .then(dados => { this.documentos = dados; })
+                        .catch(() => {});
+                }
+            }"
+            x-init="setInterval(() => carregar(), 5000)"
+        >
             <table class="w-full text-left">
                 <thead class="bg-gray-50">
                     <tr>
@@ -53,18 +70,19 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse($documentos as $doc)
+                    <template x-if="documentos.length === 0">
+                        <tr><td colspan="4" class="p-3 text-gray-500">Nenhum documento ainda. Crie um acima!</td></tr>
+                    </template>
+                    <template x-for="doc in documentos" :key="doc.id">
                         <tr class="border-t">
-                            <td class="p-3">{{ $doc->nome_original }}</td>
-                            <td class="p-3 uppercase">{{ $doc->extensao }}</td>
-                            <td class="p-3">{{ $doc->tamanhoFormatado() }}</td>
+                            <td class="p-3" x-text="doc.nome_original"></td>
+                            <td class="p-3 uppercase" x-text="doc.extensao"></td>
+                            <td class="p-3" x-text="doc.tamanho_formatado"></td>
                             <td class="p-3 text-right">
-                                <a href="{{ route('onlyoffice.editor', $doc) }}" target="_blank" rel="noopener" class="text-green-700">Abrir no editor</a>
+                                <a :href="doc.editor_url" target="_blank" rel="noopener" class="text-green-700">Abrir no editor</a>
                             </td>
                         </tr>
-                    @empty
-                        <tr><td colspan="4" class="p-3 text-gray-500">Nenhum documento ainda. Crie um acima!</td></tr>
-                    @endforelse
+                    </template>
                 </tbody>
             </table>
         </div>

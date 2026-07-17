@@ -140,6 +140,7 @@ Route::post('webhooks/paperless', [PaperlessWebhookController::class, 'handle'])
 
 Route::middleware('auth')->group(function () {
     Route::get('aplicacoes', [OnlyOfficeController::class, 'aplicacoes'])->name('onlyoffice.aplicacoes');
+    Route::get('aplicacoes/documentos', [OnlyOfficeController::class, 'documentos'])->name('onlyoffice.aplicacoes.documentos');
     Route::post('aplicacoes/criar', [OnlyOfficeController::class, 'criar'])->name('onlyoffice.criar');
 });
 
