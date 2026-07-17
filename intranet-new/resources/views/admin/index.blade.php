@@ -33,8 +33,8 @@
                 <p class="text-sm text-gray-500">Eventos</p>
             </div>
             <div class="bg-white shadow rounded p-4 text-center">
-                <p class="text-3xl font-bold text-blue-600">{{ $stats['artigos'] }}</p>
-                <p class="text-sm text-gray-500">Artigos</p>
+                <p class="text-3xl font-bold text-blue-600">{{ $stats['destaques'] }}</p>
+                <p class="text-sm text-gray-500">Destaques</p>
             </div>
             <div class="bg-white shadow rounded p-4 text-center">
                 <p class="text-3xl font-bold text-blue-600">{{ $stats['arquivos'] }}</p>

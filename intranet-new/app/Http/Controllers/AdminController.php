@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Arquivo;
-use App\Models\Artigo;
+use App\Models\Destaque;
 use App\Models\Evento;
 use App\Models\Group;
 use App\Models\Informativo;
@@ -25,7 +25,7 @@ class AdminController extends Controller
             'ramais' => Telefone::count(),
             'informativos' => Informativo::count(),
             'eventos' => Evento::count(),
-            'artigos' => Artigo::count(),
+            'destaques' => Destaque::count(),
             'arquivos' => Arquivo::count(),
         ];
 
