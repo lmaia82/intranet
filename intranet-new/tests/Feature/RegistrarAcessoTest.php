@@ -3,11 +3,14 @@
 namespace Tests\Feature;
 
 use App\Models\Acesso;
+use App\Models\Arquivo;
 use App\Models\Group;
 use App\Models\Informativo;
 use App\Models\Permission;
+use App\Models\Sector;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class RegistrarAcessoTest extends TestCase
@@ -57,7 +60,7 @@ class RegistrarAcessoTest extends TestCase
         $this->assertDatabaseHas('acessos', ['user_id' => $user->id, 'modulo' => 'repositorio']);
     }
 
-    public function test_informativos_show_nao_registra_acesso_de_modulo(): void
+    public function test_informativos_show_registra_leitura_com_referencia_ao_item(): void
     {
         $permissao = Permission::where('key', 'informativos.ver')->first();
         $grupo = Group::create(['name' => 'Leitor de Informativos']);
@@ -67,6 +70,67 @@ class RegistrarAcessoTest extends TestCase
 
         $this->actingAs($user)->get(route('informativos.show', $informativo))->assertOk();
 
-        $this->assertEquals(0, Acesso::count());
+        $this->assertDatabaseHas('acessos', [
+            'user_id' => $user->id,
+            'modulo' => 'informativos',
+            'referencia_tipo' => 'informativo',
+            'referencia_id' => $informativo->id,
+        ]);
+        $this->assertEquals(1, Acesso::count());
+    }
+
+    public function test_download_de_arquivo_registra_referencia_ao_item(): void
+    {
+        Storage::fake('arquivos');
+        $permissao = Permission::where('key', 'repositorio.ver')->first();
+        $grupo = Group::create(['name' => 'Leitor de Repositorio 2']);
+        $grupo->permissions()->attach($permissao);
+        $user = User::factory()->create(['group_id' => $grupo->id]);
+        $sector = Sector::create(['sigla' => 'TI']);
+        Storage::disk('arquivos')->put('uploads/teste.pdf', 'conteudo');
+        $arquivo = Arquivo::create([
+            'nome_original' => 'teste.pdf',
+            'caminho' => 'uploads/teste.pdf',
+            'extensao' => 'pdf',
+            'tamanho' => 100,
+            'sector_id' => $sector->id,
+            'is_private' => false,
+        ]);
+
+        $this->actingAs($user)->get(route('repositorio.download', $arquivo))->assertOk();
+
+        $this->assertDatabaseHas('acessos', [
+            'user_id' => $user->id,
+            'modulo' => 'repositorio',
+            'referencia_tipo' => 'arquivo',
+            'referencia_id' => $arquivo->id,
+        ]);
+    }
+
+    public function test_busca_registra_termo_e_quantidade_de_resultados(): void
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user)->get(route('busca.index', ['q' => 'termo-que-nao-existe']))->assertOk();
+
+        $this->assertDatabaseHas('acessos', [
+            'user_id' => $user->id,
+            'modulo' => 'busca',
+            'termo' => 'termo-que-nao-existe',
+            'resultados' => 0,
+        ]);
+    }
+
+    public function test_busca_sem_termo_registra_visita_sem_contar_como_pesquisa(): void
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user)->get(route('busca.index'))->assertOk();
+
+        $this->assertDatabaseHas('acessos', [
+            'user_id' => $user->id,
+            'modulo' => 'busca',
+            'termo' => null,
+        ]);
     }
 }

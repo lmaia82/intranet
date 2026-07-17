@@ -63,6 +63,10 @@
                 <p class="font-semibold text-lg">📈 Engajamento</p>
                 <p class="text-sm text-gray-500">Usuários ativos e acessos por módulo ao longo do tempo</p>
             </a>
+            <a href="{{ route('admin.conteudo') }}" class="bg-white shadow rounded p-6 hover:bg-gray-50">
+                <p class="font-semibold text-lg">📚 Monitoramento de Conteúdo</p>
+                <p class="text-sm text-gray-500">Informativos mais lidos, arquivos mais baixados e buscas sem resultado</p>
+            </a>
         </div>
     </div>
 </x-app-layout>

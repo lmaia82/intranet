@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Acesso;
 use App\Models\Arquivo;
 use App\Models\Evento;
 use App\Models\EventoGravado;
@@ -67,6 +68,15 @@ class BuscaController extends Controller
                     ->take(20)
                     ->values();
             }
+        }
+
+        if ($user) {
+            Acesso::create([
+                'user_id' => $user->id,
+                'modulo' => 'busca',
+                'termo' => $q !== '' ? $q : null,
+                'resultados' => $q !== '' ? collect($resultados)->sum(fn ($lista) => $lista->count()) : null,
+            ]);
         }
 
         return view('busca.index', compact('q', 'resultados'));

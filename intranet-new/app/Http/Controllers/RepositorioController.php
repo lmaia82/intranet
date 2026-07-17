@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Acesso;
 use App\Models\Arquivo;
 use App\Models\Pasta;
 use App\Models\Sector;
@@ -146,6 +147,13 @@ class RepositorioController extends Controller
     public function download(Arquivo $arquivo)
     {
         abort_unless($arquivo->visivelPara(auth()->user()), 403, 'Você não tem acesso a este arquivo.');
+
+        Acesso::create([
+            'user_id' => auth()->id(),
+            'modulo' => 'repositorio',
+            'referencia_tipo' => 'arquivo',
+            'referencia_id' => $arquivo->id,
+        ]);
 
         return Storage::disk('arquivos')->download($arquivo->caminho, $arquivo->nome_original);
     }

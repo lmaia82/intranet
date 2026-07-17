@@ -92,6 +92,69 @@ class AdminController extends Controller
         ));
     }
 
+    public function conteudo()
+    {
+        $inicio30d = now()->subDays(29)->startOfDay();
+
+        $informativosMaisLidos = Acesso::where('modulo', 'informativos')
+            ->where('referencia_tipo', 'informativo')
+            ->where('created_at', '>=', $inicio30d)
+            ->selectRaw('referencia_id, count(*) as total')
+            ->groupBy('referencia_id')
+            ->orderByDesc('total')
+            ->take(10)
+            ->get()
+            ->map(fn ($registro) => (object) [
+                'total' => $registro->total,
+                'item' => Informativo::find($registro->referencia_id),
+            ])
+            ->filter(fn ($registro) => $registro->item !== null)
+            ->values();
+
+        $arquivosMaisBaixados = Acesso::where('modulo', 'repositorio')
+            ->where('referencia_tipo', 'arquivo')
+            ->where('created_at', '>=', $inicio30d)
+            ->selectRaw('referencia_id, count(*) as total')
+            ->groupBy('referencia_id')
+            ->orderByDesc('total')
+            ->take(10)
+            ->get()
+            ->map(fn ($registro) => (object) [
+                'total' => $registro->total,
+                'item' => Arquivo::find($registro->referencia_id),
+            ])
+            ->filter(fn ($registro) => $registro->item !== null)
+            ->values();
+
+        $termosMaisBuscados = Acesso::where('modulo', 'busca')
+            ->whereNotNull('termo')
+            ->where('created_at', '>=', $inicio30d)
+            ->selectRaw('LOWER(termo) as termo, count(*) as total')
+            ->groupBy('termo')
+            ->orderByDesc('total')
+            ->take(15)
+            ->get();
+
+        $buscasSemResultado = Acesso::where('modulo', 'busca')
+            ->whereNotNull('termo')
+            ->where('resultados', 0)
+            ->where('created_at', '>=', $inicio30d)
+            ->selectRaw('LOWER(termo) as termo, count(*) as total')
+            ->groupBy('termo')
+            ->orderByDesc('total')
+            ->take(15)
+            ->get();
+
+        $maxInformativo = max($informativosMaisLidos->max('total'), 1);
+        $maxArquivo = max($arquivosMaisBaixados->max('total'), 1);
+        $maxTermo = max($termosMaisBuscados->max('total'), 1);
+
+        return view('admin.conteudo', compact(
+            'informativosMaisLidos', 'arquivosMaisBaixados', 'termosMaisBuscados', 'buscasSemResultado',
+            'maxInformativo', 'maxArquivo', 'maxTermo'
+        ));
+    }
+
     public function storeSetor(Request $request)
     {
         $validated = $request->validate([

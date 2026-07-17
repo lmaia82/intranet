@@ -92,7 +92,7 @@ Route::middleware('auth')->group(function () {
 
 use App\Http\Controllers\BuscaController;
 
-Route::get('busca', [BuscaController::class, 'index'])->name('busca.index')->middleware(['auth', 'registrar.acesso:busca']);
+Route::get('busca', [BuscaController::class, 'index'])->name('busca.index')->middleware('auth');
 
 use App\Http\Controllers\ArtigoController;
 
@@ -155,6 +155,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 
     Route::get('armazenamento', [AdminController::class, 'armazenamento'])->name('armazenamento');
     Route::get('engajamento', [AdminController::class, 'engajamento'])->name('engajamento');
+    Route::get('conteudo', [AdminController::class, 'conteudo'])->name('conteudo');
 
     Route::get('grupos', [AdminController::class, 'grupos'])->name('grupos');
     Route::get('grupos/criar', [AdminController::class, 'criarGrupoForm'])->name('grupos.criar');

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Mail\NovoInformativoMail;
+use App\Models\Acesso;
 use App\Models\Informativo;
 use App\Models\InformativoEnvio;
 use App\Models\Sector;
@@ -30,6 +31,15 @@ class InformativoController extends Controller
     public function show(Informativo $informativo)
     {
         $informativo->load('sector', 'envios');
+
+        if (auth()->check()) {
+            Acesso::create([
+                'user_id' => auth()->id(),
+                'modulo' => 'informativos',
+                'referencia_tipo' => 'informativo',
+                'referencia_id' => $informativo->id,
+            ]);
+        }
 
         return view('informativos.show', compact('informativo'));
     }
