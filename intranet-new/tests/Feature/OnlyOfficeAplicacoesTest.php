@@ -13,6 +13,34 @@ class OnlyOfficeAplicacoesTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_pagina_de_aplicacoes_renderiza_sem_documentos(): void
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user)->get(route('onlyoffice.aplicacoes'))
+            ->assertOk()
+            ->assertSee('Nenhum documento ainda');
+    }
+
+    public function test_pagina_de_aplicacoes_renderiza_com_documentos(): void
+    {
+        Storage::fake('arquivos');
+        $user = User::factory()->create();
+        $pasta = Pasta::create(['user_id' => $user->id, 'parent_id' => null, 'nome' => 'Meus Arquivos']);
+        Storage::disk('arquivos')->put('uploads/doc.docx', 'conteudo');
+        Arquivo::create([
+            'pasta_id' => $pasta->id,
+            'nome_original' => 'Relatorio.docx',
+            'caminho' => 'uploads/doc.docx',
+            'extensao' => 'docx',
+            'tamanho' => 8,
+        ]);
+
+        $this->actingAs($user)->get(route('onlyoffice.aplicacoes'))
+            ->assertOk()
+            ->assertSee('Relatorio.docx');
+    }
+
     public function test_documentos_retorna_json_com_arquivos_da_pasta_pessoal(): void
     {
         Storage::fake('arquivos');

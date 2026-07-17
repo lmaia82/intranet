@@ -42,15 +42,18 @@
         </div>
 
         <h3 class="font-semibold text-lg mb-3">Meus documentos</h3>
+        @php
+            $documentosIniciais = $documentos->map(fn ($d) => [
+                'id' => $d->id,
+                'nome_original' => $d->nome_original,
+                'extensao' => $d->extensao,
+                'tamanho_formatado' => $d->tamanhoFormatado(),
+                'editor_url' => route('onlyoffice.editor', $d),
+            ]);
+        @endphp
         <div class="bg-white shadow rounded overflow-hidden"
             x-data="{
-                documentos: @json($documentos->map(fn ($d) => [
-                    'id' => $d->id,
-                    'nome_original' => $d->nome_original,
-                    'extensao' => $d->extensao,
-                    'tamanho_formatado' => $d->tamanhoFormatado(),
-                    'editor_url' => route('onlyoffice.editor', $d),
-                ])),
+                documentos: @json($documentosIniciais),
                 carregar() {
                     fetch('{{ route('onlyoffice.aplicacoes.documentos') }}')
                         .then(r => r.json())
