@@ -13,7 +13,7 @@ use App\Models\Permission;
 use App\Models\Sector;
 use App\Models\Telefone;
 use App\Models\User;
-use App\Services\PaperlessService;
+use App\Services\HealthCheckService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
@@ -172,7 +172,7 @@ class AdminController extends Controller
             ->take(10)
             ->get(['id', 'nome_original', 'ocr_erro', 'updated_at']);
 
-        $paperlessDisponivel = app(PaperlessService::class)->estaDisponivel();
+        $servicos = app(HealthCheckService::class)->verificarTodos();
 
         $enviosEmail = InformativoEnvio::where('created_at', '>=', $inicio30d)
             ->selectRaw('sucesso, count(*) as total')
@@ -194,7 +194,7 @@ class AdminController extends Controller
             ->values();
 
         return view('admin.saude', compact(
-            'ocrPorStatus', 'arquivosComFalhaOcr', 'paperlessDisponivel',
+            'servicos', 'ocrPorStatus', 'arquivosComFalhaOcr',
             'enviosEmail', 'emailsComFalha', 'setoresProximosDaCota'
         ));
     }

@@ -37,11 +37,13 @@ return [
 
     'onlyoffice' => [
         'url' => env('ONLYOFFICE_URL'),
+        'internal_url' => env('ONLYOFFICE_INTERNAL_URL', 'http://onlyoffice'),
         'jwt_secret' => env('ONLYOFFICE_JWT_SECRET'),
     ],
 
     'stirling_pdf' => [
         'url' => env('STIRLING_PDF_URL'),
+        'internal_url' => env('STIRLING_PDF_INTERNAL_URL', 'http://stirling-pdf:8080'),
     ],
 
     'paperless' => [

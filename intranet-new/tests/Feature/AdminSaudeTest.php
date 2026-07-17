@@ -85,6 +85,7 @@ class AdminSaudeTest extends TestCase
 
         $this->actingAs($admin)->get(route('admin.saude'))
             ->assertOk()
-            ->assertSee('Serviço indisponível');
+            ->assertSee('Paperless-ngx (OCR)')
+            ->assertSee('Indisponível');
     }
 }

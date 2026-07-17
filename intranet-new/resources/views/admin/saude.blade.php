@@ -5,13 +5,24 @@
     <div class="py-6 max-w-5xl mx-auto sm:px-6 lg:px-8 space-y-6">
 
         <div class="bg-white shadow rounded p-4">
+            <h3 class="font-semibold text-lg mb-4">🔌 Status dos Serviços</h3>
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                @foreach($servicos as $servico)
+                    <div class="flex justify-between items-center text-sm border rounded px-3 py-2" title="{{ $servico['detalhe'] }}">
+                        <span class="text-gray-800">{{ $servico['nome'] }}</span>
+                        @if($servico['disponivel'])
+                            <span class="inline-block px-2 py-0.5 text-xs rounded bg-green-100 text-green-800">🟢 Disponível</span>
+                        @else
+                            <span class="inline-block px-2 py-0.5 text-xs rounded bg-red-100 text-red-800">🔴 Indisponível</span>
+                        @endif
+                    </div>
+                @endforeach
+            </div>
+        </div>
+
+        <div class="bg-white shadow rounded p-4">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="font-semibold text-lg">📄 OCR (paperless-ngx)</h3>
-                @if($paperlessDisponivel)
-                    <span class="inline-block px-2 py-0.5 text-xs rounded bg-green-100 text-green-800">🟢 Serviço disponível</span>
-                @else
-                    <span class="inline-block px-2 py-0.5 text-xs rounded bg-red-100 text-red-800">🔴 Serviço indisponível</span>
-                @endif
             </div>
 
             <div class="grid grid-cols-3 gap-4 mb-4">
