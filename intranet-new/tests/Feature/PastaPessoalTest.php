@@ -54,7 +54,7 @@ class PastaPessoalTest extends TestCase
         $this->actingAs($outro)->get(route('repositorio.index', ['pasta' => $pasta->id]))->assertForbidden();
     }
 
-    public function test_admin_acessa_pasta_pessoal_de_outro_usuario(): void
+    public function test_admin_nao_acessa_pasta_pessoal_de_outro_usuario(): void
     {
         $sector = Sector::create(['sigla' => 'TI']);
         $dono = User::factory()->create(['sector_id' => $sector->id]);
@@ -62,7 +62,7 @@ class PastaPessoalTest extends TestCase
 
         $pasta = Pasta::create(['nome' => 'Meus Arquivos', 'user_id' => $dono->id, 'sector_id' => $sector->id]);
 
-        $this->actingAs($admin)->get(route('repositorio.index', ['pasta' => $pasta->id]))->assertOk();
+        $this->actingAs($admin)->get(route('repositorio.index', ['pasta' => $pasta->id]))->assertForbidden();
     }
 
     public function test_arquivo_dentro_da_pasta_pessoal_nao_e_visivel_para_outro_usuario_mesmo_publico(): void
@@ -85,6 +85,28 @@ class PastaPessoalTest extends TestCase
 
         $this->actingAs($outro)->get(route('repositorio.download', $arquivo))->assertForbidden();
         $this->actingAs($dono)->get(route('repositorio.download', $arquivo))->assertOk();
+    }
+
+    public function test_admin_nao_acessa_arquivo_dentro_da_pasta_pessoal_de_outro_usuario(): void
+    {
+        Storage::fake('arquivos');
+        $sector = Sector::create(['sigla' => 'TI']);
+        $dono = User::factory()->create(['sector_id' => $sector->id]);
+        $admin = User::factory()->create(['is_admin' => true]);
+
+        $pasta = Pasta::create(['nome' => 'Meus Arquivos', 'user_id' => $dono->id, 'sector_id' => $sector->id]);
+        Storage::disk('arquivos')->put('uploads/pessoal.docx', 'conteudo');
+        $arquivo = Arquivo::create([
+            'pasta_id' => $pasta->id,
+            'nome_original' => 'pessoal.docx',
+            'caminho' => 'uploads/pessoal.docx',
+            'extensao' => 'docx',
+            'tamanho' => 8,
+            'is_private' => false,
+        ]);
+
+        $this->actingAs($admin)->get(route('repositorio.download', $arquivo))->assertForbidden();
+        $this->actingAs($admin)->get(route('onlyoffice.editor', $arquivo))->assertForbidden();
     }
 
     public function test_subpasta_criada_dentro_da_pasta_pessoal_herda_dono_e_fica_privada(): void

@@ -16,7 +16,7 @@ class Arquivo extends Model
     public function visivelPara(User $user): bool
     {
         if ($this->pasta_id !== null && $this->pasta?->user_id !== null) {
-            return $this->pasta->user_id === $user->id || $user->is_admin;
+            return $this->pasta->user_id === $user->id;
         }
 
         if (!$this->is_private) {
