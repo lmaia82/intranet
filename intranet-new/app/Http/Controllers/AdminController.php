@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Acesso;
 use App\Models\Arquivo;
 use App\Models\Destaque;
 use App\Models\Evento;
@@ -36,6 +37,59 @@ class AdminController extends Controller
     {
         $setores = Sector::orderBy('sigla')->get();
         return view('admin.setores', compact('setores'));
+    }
+
+    public function engajamento()
+    {
+        $nomesModulos = [
+            'dashboard' => 'Tela Inicial',
+            'ramais' => 'Ramais',
+            'informativos' => 'Informativos',
+            'eventos' => 'Agenda',
+            'repositorio' => 'Repositório',
+            'tutoriais' => 'Tutoriais',
+            'destaques' => 'Destaques',
+            'busca' => 'Busca',
+        ];
+
+        $hoje = now()->startOfDay();
+        $inicio7d = now()->subDays(6)->startOfDay();
+        $inicio30d = now()->subDays(29)->startOfDay();
+        $inicioGrafico = now()->subDays(13)->startOfDay();
+
+        $usuariosAtivosHoje = Acesso::where('created_at', '>=', $hoje)->distinct('user_id')->count('user_id');
+        $usuariosAtivos7d = Acesso::where('created_at', '>=', $inicio7d)->distinct('user_id')->count('user_id');
+        $usuariosAtivos30d = Acesso::where('created_at', '>=', $inicio30d)->distinct('user_id')->count('user_id');
+
+        $acessosPorModulo = Acesso::where('created_at', '>=', $inicio30d)
+            ->selectRaw('modulo, count(*) as total')
+            ->groupBy('modulo')
+            ->orderByDesc('total')
+            ->get();
+
+        $registrosPorDia = Acesso::where('created_at', '>=', $inicioGrafico)
+            ->selectRaw('DATE(created_at) as dia, count(distinct user_id) as usuarios, count(*) as acessos')
+            ->groupBy('dia')
+            ->get()
+            ->keyBy('dia');
+
+        $dias = collect();
+        for ($dia = $inicioGrafico->copy(); $dia->lte($hoje); $dia->addDay()) {
+            $registro = $registrosPorDia->get($dia->toDateString());
+            $dias->push([
+                'data' => $dia->copy(),
+                'usuarios' => $registro->usuarios ?? 0,
+                'acessos' => $registro->acessos ?? 0,
+            ]);
+        }
+
+        $maxUsuariosDia = max($dias->max('usuarios'), 1);
+        $maxAcessosModulo = max($acessosPorModulo->max('total'), 1);
+
+        return view('admin.engajamento', compact(
+            'usuariosAtivosHoje', 'usuariosAtivos7d', 'usuariosAtivos30d',
+            'acessosPorModulo', 'dias', 'maxUsuariosDia', 'maxAcessosModulo', 'nomesModulos'
+        ));
     }
 
     public function storeSetor(Request $request)

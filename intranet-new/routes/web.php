@@ -8,7 +8,7 @@ Route::get('/', function () {
 });
 
 use App\Http\Controllers\DashboardController;
-Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['auth', 'verified', 'registrar.acesso:dashboard'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -22,7 +22,8 @@ use App\Http\Controllers\TelefoneController;
 
 Route::middleware('auth')->group(function () {
     Route::resource('telefones', TelefoneController::class)
-        ->middlewareFor(['index', 'show'], 'permission:ramais.ver')
+        ->middlewareFor(['index'], ['permission:ramais.ver', 'registrar.acesso:ramais'])
+        ->middlewareFor(['show'], 'permission:ramais.ver')
         ->middlewareFor(['create', 'store', 'edit', 'update', 'destroy'], 'permission:ramais.criar');
     Route::get('telefones-lote', [TelefoneController::class, 'loteForm'])->name('telefones.lote.form')->middleware('permission:ramais.criar');
     Route::post('telefones-lote', [TelefoneController::class, 'loteImport'])->name('telefones.lote.import')->middleware('permission:ramais.criar');
@@ -33,7 +34,8 @@ use App\Http\Controllers\InformativoController;
 
 Route::middleware('auth')->group(function () {
     Route::resource('informativos', InformativoController::class)
-        ->middlewareFor(['index', 'show'], 'permission:informativos.ver')
+        ->middlewareFor(['index'], ['permission:informativos.ver', 'registrar.acesso:informativos'])
+        ->middlewareFor(['show'], 'permission:informativos.ver')
         ->middlewareFor(['create', 'store', 'edit', 'update', 'destroy'], 'permission:informativos.criar');
     Route::get('informativos/{informativo}/reenviar', [InformativoController::class, 'reenviarForm'])->name('informativos.reenviar.form')->middleware('permission:informativos.criar');
     Route::post('informativos/{informativo}/reenviar', [InformativoController::class, 'reenviar'])->name('informativos.reenviar')->middleware('permission:informativos.criar');
@@ -43,7 +45,8 @@ use App\Http\Controllers\EventoController;
 
 Route::middleware('auth')->group(function () {
     Route::resource('eventos', EventoController::class)
-        ->middlewareFor(['index', 'show'], 'permission:eventos.ver')
+        ->middlewareFor(['index'], ['permission:eventos.ver', 'registrar.acesso:eventos'])
+        ->middlewareFor(['show'], 'permission:eventos.ver')
         ->middlewareFor(['create', 'store', 'edit', 'update', 'destroy'], 'permission:eventos.criar');
     Route::get('eventos-lote', [EventoController::class, 'loteForm'])->name('eventos.lote.form')->middleware('permission:eventos.criar');
     Route::post('eventos-lote', [EventoController::class, 'loteImport'])->name('eventos.lote.import')->middleware('permission:eventos.criar');
@@ -67,7 +70,8 @@ use App\Http\Controllers\TutorialController;
 Route::middleware('auth')->group(function () {
     Route::resource('tutoriais', TutorialController::class)
         ->parameters(['tutoriais' => 'tutorial'])
-        ->middlewareFor(['index', 'show'], 'permission:tutoriais.ver')
+        ->middlewareFor(['index'], ['permission:tutoriais.ver', 'registrar.acesso:tutoriais'])
+        ->middlewareFor(['show'], 'permission:tutoriais.ver')
         ->middlewareFor(['create', 'store', 'edit', 'update', 'destroy'], 'permission:tutoriais.criar');
     Route::get('tutoriais-lote', [TutorialController::class, 'loteForm'])->name('tutoriais.lote.form')->middleware('permission:tutoriais.criar');
     Route::post('tutoriais-lote', [TutorialController::class, 'loteImport'])->name('tutoriais.lote.import')->middleware('permission:tutoriais.criar');
@@ -78,13 +82,14 @@ use App\Http\Controllers\DestaqueController;
 
 Route::middleware('auth')->group(function () {
     Route::resource('destaques', DestaqueController::class)
-        ->middlewareFor(['index', 'show'], 'permission:destaques.ver')
+        ->middlewareFor(['index'], ['permission:destaques.ver', 'registrar.acesso:destaques'])
+        ->middlewareFor(['show'], 'permission:destaques.ver')
         ->middlewareFor(['create', 'store', 'edit', 'update', 'destroy'], 'permission:destaques.criar');
 });
 
 use App\Http\Controllers\BuscaController;
 
-Route::get('busca', [BuscaController::class, 'index'])->name('busca.index')->middleware('auth');
+Route::get('busca', [BuscaController::class, 'index'])->name('busca.index')->middleware(['auth', 'registrar.acesso:busca']);
 
 use App\Http\Controllers\ArtigoController;
 
@@ -96,7 +101,7 @@ use App\Http\Controllers\RepositorioController;
 
 Route::middleware(['auth', 'permission:repositorio.ver'])->group(function () {
     Route::get('meus-arquivos', [RepositorioController::class, 'meusArquivos'])->name('repositorio.meus');
-    Route::get('repositorio/{pasta?}', [RepositorioController::class, 'index'])->name('repositorio.index');
+    Route::get('repositorio/{pasta?}', [RepositorioController::class, 'index'])->name('repositorio.index')->middleware('registrar.acesso:repositorio');
     Route::get('repositorio/arquivos/{arquivo}/download', [RepositorioController::class, 'download'])->name('repositorio.download');
     Route::get('repositorio/arquivos/{arquivo}/ocr-status', [RepositorioController::class, 'ocrStatus'])->name('repositorio.arquivos.ocr-status');
 });
@@ -146,6 +151,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::delete('setores/{setor}', [AdminController::class, 'destroySetor'])->name('setores.destroy');
 
     Route::get('armazenamento', [AdminController::class, 'armazenamento'])->name('armazenamento');
+    Route::get('engajamento', [AdminController::class, 'engajamento'])->name('engajamento');
 
     Route::get('grupos', [AdminController::class, 'grupos'])->name('grupos');
     Route::get('grupos/criar', [AdminController::class, 'criarGrupoForm'])->name('grupos.criar');
