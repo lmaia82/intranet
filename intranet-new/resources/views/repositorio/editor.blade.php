@@ -12,7 +12,6 @@
 </head>
 <body>
     <div id="topbar">
-        <a href="{{ route('repositorio.index', $arquivo->pasta_id ? ['pasta' => $arquivo->pasta_id] : []) }}">&larr; Voltar ao Repositório</a>
         <span>{{ $arquivo->nome_original }}</span>
     </div>
     <div id="onlyoffice-editor"></div>
