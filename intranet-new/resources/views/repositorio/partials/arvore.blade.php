@@ -1,8 +1,7 @@
 <ul class="{{ $nivel > 0 ? 'ml-3 pl-2 border-l border-gray-200' : '' }}">
     @foreach($pastas as $pasta)
-        <li>
+        <li x-data="{ aberto: {{ in_array($pasta['id'], $pastasAbertas) ? 'true' : 'false' }} }">
             <div
-                x-data="{ aberto: {{ in_array($pasta['id'], $pastasAbertas) ? 'true' : 'false' }} }"
                 class="flex items-center gap-1 rounded {{ $pastaAtualId == $pasta['id'] ? 'bg-blue-100' : 'hover:bg-gray-100' }}"
             >
                 @if(count($pasta['filhas']))
