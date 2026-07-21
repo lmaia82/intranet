@@ -37,12 +37,17 @@
                 <input type="file" name="arquivo" required class="block w-full">
                 @error('arquivo') <p class="text-red-600 text-sm">{{ $message }}</p> @enderror
                 <label class="block text-sm font-medium">Pasta de destino</label>
-                <select name="pasta_id" class="block w-full border-gray-300 rounded">
-                    <option value="" @selected(old('pasta_id', $pastaAtual?->id) == null)>Raiz</option>
-                    @foreach($pastasParaSelecao as $opcao)
-                        <option value="{{ $opcao['id'] }}" @selected(old('pasta_id', $pastaAtual?->id) == $opcao['id'])>{{ $opcao['caminho'] }}</option>
-                    @endforeach
-                </select>
+                @if($pastasParaSelecao->isEmpty())
+                    <p class="text-sm text-red-600">Nenhuma pasta disponível. Crie uma pasta antes de enviar arquivos.</p>
+                @else
+                    <select name="pasta_id" required class="block w-full border-gray-300 rounded">
+                        <option value="" disabled @selected(!old('pasta_id', $pastaAtual?->id))>Selecione uma pasta</option>
+                        @foreach($pastasParaSelecao as $opcao)
+                            <option value="{{ $opcao['id'] }}" @selected(old('pasta_id', $pastaAtual?->id) == $opcao['id'])>{{ $opcao['caminho'] }}</option>
+                        @endforeach
+                    </select>
+                    @error('pasta_id') <p class="text-red-600 text-sm">{{ $message }}</p> @enderror
+                @endif
                 <input type="text" name="descricao" placeholder="Descrição (opcional)" class="block w-full border-gray-300 rounded">
                 <label class="block text-sm font-medium">Data do documento</label>
                 <input type="date" name="data" value="{{ old('data', now()->format('Y-m-d')) }}" class="block w-full border-gray-300 rounded">
@@ -53,7 +58,7 @@
                 </select>
                 <label class="flex items-center gap-2 text-sm"><input type="checkbox" name="is_private" value="1"> Restrito ao setor</label>
                 <p class="text-xs text-gray-500">Não marcado = arquivo público (visível a todos). Marcado = visível só para usuários do setor selecionado.</p>
-                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded">Enviar</button>
+                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded" @disabled($pastasParaSelecao->isEmpty())>Enviar</button>
             </form>
         </div>
         <p class="text-sm mb-6"><a href="{{ route('repositorio.arquivos.lote.form') }}" class="text-blue-600">📦 Cadastro em lote de arquivos</a></p>

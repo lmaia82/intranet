@@ -20,10 +20,12 @@ class RepositorioCriadoPorEDestinoTest extends TestCase
         Storage::fake('arquivos');
         $sector = Sector::create(['sigla' => 'TI']);
         $user = User::factory()->create(['sector_id' => $sector->id, 'email' => 'quemenviou@cetem.gov.br']);
+        $pasta = Pasta::create(['nome' => 'Notas Fiscais', 'sector_id' => $sector->id, 'is_private' => false]);
 
         $this->actingAs($user)->post(route('repositorio.arquivos.store'), [
             'arquivo' => UploadedFile::fake()->create('nota.pdf', 10),
             'sector_id' => $sector->id,
+            'pasta_id' => $pasta->id,
         ]);
 
         $arquivo = Arquivo::where('nome_original', 'nota.pdf')->firstOrFail();
@@ -35,15 +37,32 @@ class RepositorioCriadoPorEDestinoTest extends TestCase
         Storage::fake('arquivos');
         $sector = Sector::create(['sigla' => 'TI']);
         $user = User::factory()->create(['sector_id' => $sector->id, 'email' => 'quemenviou@cetem.gov.br']);
+        $pasta = Pasta::create(['nome' => 'Notas Fiscais', 'sector_id' => $sector->id, 'is_private' => false]);
 
         $this->actingAs($user)->post(route('repositorio.arquivos.store'), [
             'arquivo' => UploadedFile::fake()->create('nota.pdf', 10),
             'sector_id' => $sector->id,
+            'pasta_id' => $pasta->id,
         ]);
 
-        $response = $this->actingAs($user)->get(route('repositorio.index'));
+        $response = $this->actingAs($user)->get(route('repositorio.index', ['pasta' => $pasta->id]));
 
         $response->assertOk()->assertSee('quemenviou@cetem.gov.br');
+    }
+
+    public function test_upload_sem_pasta_e_bloqueado(): void
+    {
+        Storage::fake('arquivos');
+        $sector = Sector::create(['sigla' => 'TI']);
+        $user = User::factory()->create(['sector_id' => $sector->id]);
+
+        $response = $this->actingAs($user)->post(route('repositorio.arquivos.store'), [
+            'arquivo' => UploadedFile::fake()->create('nota.pdf', 10),
+            'sector_id' => $sector->id,
+        ]);
+
+        $response->assertSessionHasErrors('pasta_id');
+        $this->assertDatabaseCount('arquivos', 0);
     }
 
     public function test_documento_criado_pelas_aplicacoes_tambem_registra_criador(): void

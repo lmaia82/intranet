@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Arquivo;
+use App\Models\Pasta;
 use App\Models\Sector;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -53,6 +54,7 @@ class SectorQuotaTest extends TestCase
     {
         $user = User::factory()->create();
         $sector = Sector::create(['sigla' => 'TI', 'quota_bytes' => 1024]);
+        $pasta = Pasta::create(['nome' => 'Notas', 'sector_id' => $sector->id, 'is_private' => false]);
 
         Arquivo::create(['nome_original' => 'existente.pdf', 'caminho' => 'existente.pdf', 'extensao' => 'pdf', 'tamanho' => 900, 'sector_id' => $sector->id]);
 
@@ -61,6 +63,7 @@ class SectorQuotaTest extends TestCase
         $response = $this->actingAs($user)->post(route('repositorio.arquivos.store'), [
             'arquivo' => $file,
             'sector_id' => $sector->id,
+            'pasta_id' => $pasta->id,
         ]);
 
         $response->assertSessionHasErrors('arquivo');
@@ -73,12 +76,14 @@ class SectorQuotaTest extends TestCase
 
         $user = User::factory()->create();
         $sector = Sector::create(['sigla' => 'TI', 'quota_bytes' => 1048576]);
+        $pasta = Pasta::create(['nome' => 'Notas', 'sector_id' => $sector->id, 'is_private' => false]);
 
         $file = UploadedFile::fake()->create('novo.pdf', 100);
 
         $response = $this->actingAs($user)->post(route('repositorio.arquivos.store'), [
             'arquivo' => $file,
             'sector_id' => $sector->id,
+            'pasta_id' => $pasta->id,
         ]);
 
         $response->assertRedirect();

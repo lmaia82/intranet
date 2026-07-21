@@ -7,8 +7,9 @@
             <p class="text-sm text-gray-600">
                 Baixe o modelo de planilha CSV, preencha uma linha
                 por arquivo (coluna <strong>arquivo</strong> deve ter o nome exato do arquivo que será
-                selecionado abaixo; <strong>pasta</strong> aceita caminhos aninhados separados por "/",
-                ex: <em>Notas Fiscais/2024</em>, e é criada automaticamente se não existir; <strong>setor</strong>
+                selecionado abaixo; <strong>pasta</strong> é obrigatória (não é permitido enviar arquivos para
+                a raiz), aceita caminhos aninhados separados por "/", ex: <em>Notas Fiscais/2024</em>, e é
+                criada automaticamente se não existir; <strong>setor</strong>
                 deve corresponder a um setor já cadastrado; <strong>data</strong> no formato dd/mm/aaaa;
                 <strong>publico</strong> "sim" ou "nao") e envie o CSV junto com os arquivos correspondentes.
             </p>

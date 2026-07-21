@@ -32,19 +32,21 @@ class ArquivoLoteTest extends TestCase
 
         $csv = "arquivo,pasta,setor,data,publico,descricao\n";
         $csv .= "nota.pdf,Notas Fiscais/2024,Financeiro,31/12/2024,nao,Nota de exemplo\n";
-        $csv .= "orfao.pdf,,Financeiro,,sim,\n";
-        $csv .= "sem-arquivo.pdf,,Financeiro,,sim,\n";
-        $csv .= "setor-invalido.pdf,,Inexistente,,sim,\n";
+        $csv .= "diverso.pdf,Diversos,Financeiro,,sim,\n";
+        $csv .= "sem-pasta.pdf,,Financeiro,,sim,\n";
+        $csv .= "sem-arquivo.pdf,Diversos,Financeiro,,sim,\n";
+        $csv .= "setor-invalido.pdf,Diversos,Inexistente,,sim,\n";
 
         $arquivoNota = UploadedFile::fake()->create('nota.pdf', 50);
-        $arquivoOrfao = UploadedFile::fake()->create('orfao.pdf', 30);
+        $arquivoDiverso = UploadedFile::fake()->create('diverso.pdf', 30);
+        $arquivoSemPasta = UploadedFile::fake()->create('sem-pasta.pdf', 20);
         $arquivoSetorInvalido = UploadedFile::fake()->create('setor-invalido.pdf', 10);
 
         $file = UploadedFile::fake()->createWithContent('lote.csv', $csv);
 
         $response = $this->actingAs($user)->post(route('repositorio.arquivos.lote.import'), [
             'csv' => $file,
-            'arquivos' => [$arquivoNota, $arquivoOrfao, $arquivoSetorInvalido],
+            'arquivos' => [$arquivoNota, $arquivoDiverso, $arquivoSemPasta, $arquivoSetorInvalido],
         ]);
 
         $response->assertRedirect(route('repositorio.arquivos.lote.form'));
@@ -62,12 +64,13 @@ class ArquivoLoteTest extends TestCase
         $this->assertEquals('2024', $pastaAno->nome);
         $this->assertEquals('Notas Fiscais', $pastaAno->parent->nome);
 
-        $orfao = Arquivo::where('nome_original', 'orfao.pdf')->first();
-        $this->assertNotNull($orfao);
-        $this->assertFalse($orfao->is_private);
-        $this->assertNull($orfao->pasta_id);
-        $this->assertEquals(now()->toDateString(), $orfao->data->toDateString());
+        $diverso = Arquivo::where('nome_original', 'diverso.pdf')->first();
+        $this->assertNotNull($diverso);
+        $this->assertFalse($diverso->is_private);
+        $this->assertNotNull($diverso->pasta_id);
+        $this->assertEquals(now()->toDateString(), $diverso->data->toDateString());
 
+        $this->assertDatabaseMissing('arquivos', ['nome_original' => 'sem-pasta.pdf']);
         $this->assertDatabaseMissing('arquivos', ['nome_original' => 'sem-arquivo.pdf']);
         $this->assertDatabaseMissing('arquivos', ['nome_original' => 'setor-invalido.pdf']);
 

@@ -100,7 +100,7 @@ class RepositorioController extends Controller
     public function storeArquivo(Request $request)
     {
         $validated = $request->validate([
-            'pasta_id' => 'nullable|exists:pastas,id',
+            'pasta_id' => 'required|exists:pastas,id',
             'arquivo' => 'required|file|max:51200',
             'descricao' => 'nullable|string',
             'data' => 'nullable|date',
@@ -111,10 +111,8 @@ class RepositorioController extends Controller
         $file = $request->file('arquivo');
         $sector = Sector::find($validated['sector_id']);
 
-        if (!empty($validated['pasta_id'])) {
-            $pastaDestino = Pasta::find($validated['pasta_id']);
-            abort_unless($pastaDestino && $pastaDestino->visivelPara(auth()->user()), 403, 'Você não tem acesso a essa pasta.');
-        }
+        $pastaDestino = Pasta::find($validated['pasta_id']);
+        abort_unless($pastaDestino->visivelPara(auth()->user()), 403, 'Você não tem acesso a essa pasta.');
 
         if ($sector->quotaExcedida($file->getSize())) {
             return back()->withErrors([
@@ -125,7 +123,7 @@ class RepositorioController extends Controller
         $caminho = $file->store('uploads', 'arquivos');
 
         $arquivo = Arquivo::create([
-            'pasta_id' => $validated['pasta_id'] ?? null,
+            'pasta_id' => $validated['pasta_id'],
             'criado_por_id' => auth()->id(),
             'nome_original' => $file->getClientOriginalName(),
             'caminho' => $caminho,
@@ -254,9 +252,10 @@ class RepositorioController extends Controller
 
             $nomeArquivo = trim($dados['arquivo'] ?? '');
             $setorNome = trim($dados['setor'] ?? '');
+            $pastaTexto = trim($dados['pasta'] ?? '');
 
-            if ($nomeArquivo === '' || $setorNome === '') {
-                $erros[] = "Linha {$linhaNum}: campos obrigatórios em branco.";
+            if ($nomeArquivo === '' || $setorNome === '' || $pastaTexto === '') {
+                $erros[] = "Linha {$linhaNum}: campos obrigatórios em branco (arquivo, setor e pasta são obrigatórios).";
                 continue;
             }
 
@@ -300,24 +299,21 @@ class RepositorioController extends Controller
             $isPrivate = !in_array($publicoTexto, ['sim', 's', 'yes', '1', 'publico', 'público'], true);
 
             $pastaId = null;
-            $pastaTexto = trim($dados['pasta'] ?? '');
-            if ($pastaTexto !== '') {
-                foreach (explode('/', $pastaTexto) as $segmento) {
-                    $segmento = trim($segmento);
-                    if ($segmento === '') {
-                        continue;
-                    }
-
-                    $chave = $sector->id . ':' . $pastaId . ':' . mb_strtolower($segmento);
-                    if (!isset($pastasCriadas[$chave])) {
-                        $pastasCriadas[$chave] = Pasta::firstOrCreate(
-                            ['nome' => $segmento, 'parent_id' => $pastaId, 'sector_id' => $sector->id],
-                            ['is_private' => false]
-                        );
-                    }
-
-                    $pastaId = $pastasCriadas[$chave]->id;
+            foreach (explode('/', $pastaTexto) as $segmento) {
+                $segmento = trim($segmento);
+                if ($segmento === '') {
+                    continue;
                 }
+
+                $chave = $sector->id . ':' . $pastaId . ':' . mb_strtolower($segmento);
+                if (!isset($pastasCriadas[$chave])) {
+                    $pastasCriadas[$chave] = Pasta::firstOrCreate(
+                        ['nome' => $segmento, 'parent_id' => $pastaId, 'sector_id' => $sector->id],
+                        ['is_private' => false]
+                    );
+                }
+
+                $pastaId = $pastasCriadas[$chave]->id;
             }
 
             $caminho = $file->store('uploads', 'arquivos');
