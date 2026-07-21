@@ -31,14 +31,20 @@ class RepositorioController extends Controller
             ->each(fn (Arquivo $a) => $pastaAtual ? $a->setRelation('pasta', $pastaAtual) : null)
             ->filter(fn (Arquivo $a) => $a->visivelPara($user))
             ->values()
-            ->load('sector');
+            ->load(['sector', 'criadoPor']);
 
         $arquivos->where('ocr_status', 'pendente')->each(fn (Arquivo $a) => $this->paperless->sincronizarPendente($a));
 
         $sectors = Sector::orderBy('sigla')->get();
         $breadcrumb = $pastaAtual ? $pastaAtual->breadcrumb() : collect();
 
-        return view('repositorio.index', compact('pastaAtual', 'subpastas', 'arquivos', 'sectors', 'breadcrumb'));
+        $pastasParaSelecao = Pasta::orderBy('nome')->get()
+            ->filter(fn (Pasta $p) => $p->visivelPara($user))
+            ->map(fn (Pasta $p) => ['id' => $p->id, 'caminho' => $p->breadcrumb()->pluck('nome')->implode(' / ')])
+            ->sortBy('caminho')
+            ->values();
+
+        return view('repositorio.index', compact('pastaAtual', 'subpastas', 'arquivos', 'sectors', 'breadcrumb', 'pastasParaSelecao'));
     }
 
     public function storePasta(Request $request)
@@ -105,6 +111,11 @@ class RepositorioController extends Controller
         $file = $request->file('arquivo');
         $sector = Sector::find($validated['sector_id']);
 
+        if (!empty($validated['pasta_id'])) {
+            $pastaDestino = Pasta::find($validated['pasta_id']);
+            abort_unless($pastaDestino && $pastaDestino->visivelPara(auth()->user()), 403, 'Você não tem acesso a essa pasta.');
+        }
+
         if ($sector->quotaExcedida($file->getSize())) {
             return back()->withErrors([
                 'arquivo' => "O setor \"{$sector->sigla}\" atingiria a cota de armazenamento ({$sector->quotaFormatada()}) com este envio. Uso atual: {$sector->usoFormatado()}.",
@@ -115,6 +126,7 @@ class RepositorioController extends Controller
 
         $arquivo = Arquivo::create([
             'pasta_id' => $validated['pasta_id'] ?? null,
+            'criado_por_id' => auth()->id(),
             'nome_original' => $file->getClientOriginalName(),
             'caminho' => $caminho,
             'extensao' => strtolower($file->getClientOriginalExtension()),
@@ -312,6 +324,7 @@ class RepositorioController extends Controller
 
             $arquivo = Arquivo::create([
                 'pasta_id' => $pastaId,
+                'criado_por_id' => auth()->id(),
                 'nome_original' => $file->getClientOriginalName(),
                 'caminho' => $caminho,
                 'extensao' => strtolower($file->getClientOriginalExtension()),

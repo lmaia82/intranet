@@ -118,6 +118,7 @@ class OnlyOfficeController extends Controller
 
         $arquivo = Arquivo::create([
             'pasta_id' => $pastaTemporaria->id,
+            'criado_por_id' => auth()->id(),
             'nome_original' => $nomeArquivo,
             'caminho' => $caminhoStorage,
             'extensao' => $request->tipo,

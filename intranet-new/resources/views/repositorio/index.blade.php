@@ -33,10 +33,16 @@
 
             <form method="POST" action="{{ route('repositorio.arquivos.store') }}" enctype="multipart/form-data" class="bg-white shadow rounded p-4 space-y-2">
                 @csrf
-                <input type="hidden" name="pasta_id" value="{{ $pastaAtual?->id }}">
                 <label class="block text-sm font-medium">Enviar arquivo</label>
                 <input type="file" name="arquivo" required class="block w-full">
                 @error('arquivo') <p class="text-red-600 text-sm">{{ $message }}</p> @enderror
+                <label class="block text-sm font-medium">Pasta de destino</label>
+                <select name="pasta_id" class="block w-full border-gray-300 rounded">
+                    <option value="" @selected(old('pasta_id', $pastaAtual?->id) == null)>Raiz</option>
+                    @foreach($pastasParaSelecao as $opcao)
+                        <option value="{{ $opcao['id'] }}" @selected(old('pasta_id', $pastaAtual?->id) == $opcao['id'])>{{ $opcao['caminho'] }}</option>
+                    @endforeach
+                </select>
                 <input type="text" name="descricao" placeholder="Descrição (opcional)" class="block w-full border-gray-300 rounded">
                 <label class="block text-sm font-medium">Data do documento</label>
                 <input type="date" name="data" value="{{ old('data', now()->format('Y-m-d')) }}" class="block w-full border-gray-300 rounded">
@@ -63,6 +69,7 @@
                         <th class="p-3">Data</th>
                         <th class="p-3">OCR</th>
                         <th class="p-3">Visibilidade</th>
+                        <th class="p-3">Criado por</th>
                         @if(auth()->user()->hasPermission('repositorio.criar'))
                             <th class="p-3"></th>
                         @endif
@@ -83,6 +90,7 @@
                                     <span class="inline-block px-2 py-0.5 text-xs rounded bg-green-100 text-green-800">Público</span>
                                 @endif
                             </td>
+                            <td class="p-3">—</td>
                             @if(auth()->user()->hasPermission('repositorio.criar'))
                                 <td class="p-3 text-right whitespace-nowrap">
                                     <a href="{{ route('repositorio.pastas.editar', $subpasta) }}" class="text-blue-600">Editar</a>
@@ -128,6 +136,7 @@
                                     <span class="inline-block px-2 py-0.5 text-xs rounded bg-green-100 text-green-800">Público</span>
                                 @endif
                             </td>
+                            <td class="p-3 text-sm text-gray-600">{{ $arquivo->criadoPor?->email ?? '—' }}</td>
                             @if(auth()->user()->hasPermission('repositorio.criar'))
                                 <td class="p-3 text-right whitespace-nowrap">
                                     <a href="{{ route('repositorio.arquivos.editar', $arquivo) }}" class="text-blue-600">Editar</a>

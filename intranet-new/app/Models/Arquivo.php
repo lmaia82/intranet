@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Arquivo extends Model
 {
-    protected $fillable = ['pasta_id', 'nome_original', 'caminho', 'extensao', 'tamanho', 'descricao', 'data', 'sector_id', 'is_private', 'paperless_document_id', 'conteudo_ocr', 'ocr_status', 'paperless_task_id', 'ocr_erro'];
+    protected $fillable = ['pasta_id', 'criado_por_id', 'nome_original', 'caminho', 'extensao', 'tamanho', 'descricao', 'data', 'sector_id', 'is_private', 'paperless_document_id', 'conteudo_ocr', 'ocr_status', 'paperless_task_id', 'ocr_erro'];
 
     protected $casts = [
         'is_private' => 'boolean',
@@ -29,6 +29,11 @@ class Arquivo extends Model
     public function pasta()
     {
         return $this->belongsTo(Pasta::class);
+    }
+
+    public function criadoPor()
+    {
+        return $this->belongsTo(User::class, 'criado_por_id');
     }
 
     public function sector()
