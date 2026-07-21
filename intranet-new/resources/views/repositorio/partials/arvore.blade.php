@@ -12,12 +12,17 @@
                 @else
                     <span class="w-4 shrink-0"></span>
                 @endif
+                @if(count($pasta['filhas']))
+                    <button type="button" @click="aberto = !aberto" class="shrink-0" title="Exibir/ocultar subpastas">📁</button>
+                @else
+                    <span class="shrink-0">📁</span>
+                @endif
                 <a
                     href="{{ route('repositorio.index', ['pasta' => $pasta['id']]) }}"
-                    class="flex-1 flex items-center gap-1 py-1 pr-2 text-sm truncate {{ $pastaAtualId == $pasta['id'] ? 'font-semibold text-blue-800' : 'text-gray-700' }}"
+                    class="flex-1 py-1 pr-2 text-sm truncate {{ $pastaAtualId == $pasta['id'] ? 'font-semibold text-blue-800' : 'text-gray-700' }}"
                     title="{{ $pasta['nome'] }}"
                 >
-                    <span>📁</span> {{ $pasta['nome'] }}
+                    {{ $pasta['nome'] }}
                 </a>
             </div>
             @if(count($pasta['filhas']))

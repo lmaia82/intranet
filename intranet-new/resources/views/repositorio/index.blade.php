@@ -20,11 +20,12 @@
                     <button type="button" @click="aberto = !aberto" class="w-4 shrink-0 text-gray-400 text-xs leading-none">
                         <span x-text="aberto ? '▾' : '▸'"></span>
                     </button>
+                    <button type="button" @click="aberto = !aberto" class="shrink-0" title="Exibir/ocultar pastas">🗄️</button>
                     <a
                         href="{{ route('repositorio.index') }}"
-                        class="flex-1 flex items-center gap-1 py-1 pr-2 text-sm {{ !$pastaAtual ? 'font-semibold text-blue-800' : 'text-gray-700' }}"
+                        class="flex-1 py-1 pr-2 text-sm {{ !$pastaAtual ? 'font-semibold text-blue-800' : 'text-gray-700' }}"
                     >
-                        🗄️ Raiz
+                        Raiz
                     </a>
                 </div>
                 <div x-show="aberto" x-cloak>
