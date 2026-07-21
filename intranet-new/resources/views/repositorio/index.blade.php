@@ -166,6 +166,7 @@
                             @if(auth()->user()->hasPermission('repositorio.criar'))
                                 <td class="p-3 text-right whitespace-nowrap">
                                     <a href="{{ route('repositorio.arquivos.editar', $arquivo) }}" class="text-blue-600">Editar</a>
+                                    <a href="{{ route('repositorio.arquivos.mover.form', $arquivo) }}" class="text-blue-600 ml-2">Mover</a>
                                     <form action="{{ route('repositorio.arquivos.destroy', $arquivo) }}" method="POST" class="inline" onsubmit="return confirm('Remover este arquivo?')">
                                         @csrf
                                         @method('DELETE')

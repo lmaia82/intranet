@@ -117,6 +117,8 @@ Route::middleware(['auth', 'permission:repositorio.criar'])->group(function () {
     Route::post('repositorio/arquivos', [RepositorioController::class, 'storeArquivo'])->name('repositorio.arquivos.store');
     Route::get('repositorio/arquivos/{arquivo}/editar', [RepositorioController::class, 'editArquivo'])->name('repositorio.arquivos.editar');
     Route::put('repositorio/arquivos/{arquivo}', [RepositorioController::class, 'updateArquivo'])->name('repositorio.arquivos.update');
+    Route::get('repositorio/arquivos/{arquivo}/mover', [RepositorioController::class, 'moverArquivoForm'])->name('repositorio.arquivos.mover.form');
+    Route::put('repositorio/arquivos/{arquivo}/mover', [RepositorioController::class, 'moverArquivo'])->name('repositorio.arquivos.mover');
     Route::delete('repositorio/arquivos/{arquivo}', [RepositorioController::class, 'destroyArquivo'])->name('repositorio.arquivos.destroy');
 
     Route::get('repositorio-arquivos-lote', [RepositorioController::class, 'loteArquivosForm'])->name('repositorio.arquivos.lote.form');

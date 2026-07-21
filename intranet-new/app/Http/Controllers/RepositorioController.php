@@ -38,11 +38,7 @@ class RepositorioController extends Controller
         $sectors = Sector::orderBy('sigla')->get();
         $breadcrumb = $pastaAtual ? $pastaAtual->breadcrumb() : collect();
 
-        $pastasParaSelecao = Pasta::orderBy('nome')->get()
-            ->filter(fn (Pasta $p) => $p->visivelPara($user))
-            ->map(fn (Pasta $p) => ['id' => $p->id, 'caminho' => $p->breadcrumb()->pluck('nome')->implode(' / ')])
-            ->sortBy('caminho')
-            ->values();
+        $pastasParaSelecao = $this->pastasParaSelecao($user);
 
         $todasPastasVisiveis = Pasta::orderBy('nome')->get()->filter(fn (Pasta $p) => $p->visivelPara($user));
         $arvorePastas = $this->construirArvore($todasPastasVisiveis, null);
@@ -52,6 +48,15 @@ class RepositorioController extends Controller
             'pastaAtual', 'subpastas', 'arquivos', 'sectors', 'breadcrumb', 'pastasParaSelecao',
             'arvorePastas', 'pastasAbertas'
         ));
+    }
+
+    private function pastasParaSelecao($user)
+    {
+        return Pasta::orderBy('nome')->get()
+            ->filter(fn (Pasta $p) => $p->visivelPara($user))
+            ->map(fn (Pasta $p) => ['id' => $p->id, 'caminho' => $p->breadcrumb()->pluck('nome')->implode(' / ')])
+            ->sortBy('caminho')
+            ->values();
     }
 
     private function construirArvore($pastas, ?int $parentId)
@@ -217,6 +222,31 @@ class RepositorioController extends Controller
 
         return redirect()->route('repositorio.index', $arquivo->pasta_id ? ['pasta' => $arquivo->pasta_id] : [])
             ->with('status', 'Arquivo atualizado com sucesso.');
+    }
+
+    public function moverArquivoForm(Arquivo $arquivo)
+    {
+        abort_unless($arquivo->visivelPara(auth()->user()), 403, 'Você não tem acesso a este arquivo.');
+
+        $pastasParaSelecao = $this->pastasParaSelecao(auth()->user());
+        return view('repositorio.mover-arquivo', compact('arquivo', 'pastasParaSelecao'));
+    }
+
+    public function moverArquivo(Request $request, Arquivo $arquivo)
+    {
+        abort_unless($arquivo->visivelPara(auth()->user()), 403, 'Você não tem acesso a este arquivo.');
+
+        $validated = $request->validate([
+            'pasta_id' => 'required|exists:pastas,id',
+        ]);
+
+        $pastaDestino = Pasta::find($validated['pasta_id']);
+        abort_unless($pastaDestino->visivelPara(auth()->user()), 403, 'Você não tem acesso a essa pasta.');
+
+        $arquivo->update(['pasta_id' => $pastaDestino->id]);
+
+        return redirect()->route('repositorio.index', ['pasta' => $pastaDestino->id])
+            ->with('status', 'Arquivo movido com sucesso.');
     }
 
     public function destroyArquivo(Arquivo $arquivo)
