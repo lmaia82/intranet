@@ -31,14 +31,14 @@
             <table class="w-full table-fixed text-left text-sm">
                 <colgroup>
                     <col class="w-[18%]">
-                    <col class="w-[9%]">
-                    <col class="w-[7%]">
+                    <col class="w-[8%]">
+                    <col class="w-[6%]">
                     <col class="w-[9%]">
                     <col class="w-[18%]">
                     <col class="w-[19%]">
-                    <col class="w-[11%]">
+                    <col class="w-[10%]">
                     @if(auth()->user()->hasPermission('ramais.criar'))
-                        <col class="w-[9%]">
+                        <col class="w-[12%]">
                     @endif
                 </colgroup>
                 <thead class="bg-gray-50">
