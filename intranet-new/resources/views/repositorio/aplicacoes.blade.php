@@ -8,7 +8,7 @@
                 @csrf
                 <input type="hidden" name="tipo" value="docx">
                 <div class="text-4xl">📄</div>
-                <p class="font-semibold">Documento Word</p>
+                <p class="font-semibold">Documento</p>
                 <input type="text" name="titulo" placeholder="Nome do documento" class="block w-full border-gray-300 rounded text-sm">
                 <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded w-full">Criar novo</button>
             </form>
@@ -17,7 +17,7 @@
                 @csrf
                 <input type="hidden" name="tipo" value="xlsx">
                 <div class="text-4xl">📊</div>
-                <p class="font-semibold">Planilha Excel</p>
+                <p class="font-semibold">Planilha</p>
                 <input type="text" name="titulo" placeholder="Nome da planilha" class="block w-full border-gray-300 rounded text-sm">
                 <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded w-full">Criar novo</button>
             </form>
@@ -26,7 +26,7 @@
                 @csrf
                 <input type="hidden" name="tipo" value="pptx">
                 <div class="text-4xl">📽️</div>
-                <p class="font-semibold">Apresentação PowerPoint</p>
+                <p class="font-semibold">Apresentação</p>
                 <input type="text" name="titulo" placeholder="Nome da apresentação" class="block w-full border-gray-300 rounded text-sm">
                 <button type="submit" class="px-4 py-2 bg-orange-600 text-white rounded w-full">Criar novo</button>
             </form>
@@ -34,10 +34,10 @@
             <div class="bg-white shadow rounded p-6 text-center space-y-3 flex flex-col justify-between">
                 <div class="space-y-3">
                     <div class="text-4xl">📕</div>
-                    <p class="font-semibold">Stirling PDF</p>
+                    <p class="font-semibold">Editor PDF</p>
                     <p class="text-xs text-gray-500">Mesclar, dividir, comprimir, assinar, converter e outras ferramentas de PDF.</p>
                 </div>
-                <a href="{{ config('services.stirling_pdf.url') }}" target="_blank" rel="noopener" class="block px-4 py-2 bg-red-600 text-white rounded w-full">Abrir Stirling PDF</a>
+                <a href="{{ config('services.stirling_pdf.url') }}" target="_blank" rel="noopener" class="block px-4 py-2 bg-red-600 text-white rounded w-full">Abrir Editor PDF</a>
             </div>
         </div>
 
