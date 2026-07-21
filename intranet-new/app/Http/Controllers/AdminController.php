@@ -343,6 +343,33 @@ class AdminController extends Controller
         return redirect()->route('admin.usuarios')->with('status', 'Usuário criado com sucesso.');
     }
 
+    public function editarUsuarioForm(User $usuario)
+    {
+        $setores = Sector::orderBy('sigla')->get();
+        $grupos = Group::orderBy('name')->get();
+        return view('admin.editar-usuario', compact('usuario', 'setores', 'grupos'));
+    }
+
+    public function updateUsuario(Request $request, User $usuario)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users,email,' . $usuario->id,
+            'password' => 'nullable|confirmed|min:8',
+        ]);
+
+        $usuario->name = $validated['name'];
+        $usuario->email = $validated['email'];
+
+        if (!empty($validated['password'])) {
+            $usuario->password = Hash::make($validated['password']);
+        }
+
+        $usuario->save();
+
+        return redirect()->route('admin.usuarios')->with('status', 'Usuário atualizado com sucesso.');
+    }
+
     public function updateUsuarioSetor(Request $request, User $usuario)
     {
         $validated = $request->validate(['sector_id' => 'nullable|exists:sectors,id']);

@@ -55,10 +55,11 @@
                             </td>
                             <td class="p-3">{{ $usuario->is_admin ? 'Sim' : 'Não' }}</td>
                             <td class="p-3 text-right whitespace-nowrap">
+                                <a href="{{ route('admin.usuarios.editar', $usuario) }}" class="text-blue-600">Editar</a>
                                 @if($usuario->id !== auth()->id())
                                     <form action="{{ route('admin.usuarios.toggle', $usuario) }}" method="POST" class="inline">
                                         @csrf
-                                        <button type="submit" class="text-blue-600">{{ $usuario->is_admin ? 'Remover admin' : 'Tornar admin' }}</button>
+                                        <button type="submit" class="text-blue-600 ml-2">{{ $usuario->is_admin ? 'Remover admin' : 'Tornar admin' }}</button>
                                     </form>
                                     <form action="{{ route('admin.usuarios.destroy', $usuario) }}" method="POST" class="inline" onsubmit="return confirm('Remover este usuário?')">
                                         @csrf
@@ -66,7 +67,7 @@
                                         <button type="submit" class="text-red-600 ml-2">Remover</button>
                                     </form>
                                 @else
-                                    <span class="text-gray-400 text-sm">(você)</span>
+                                    <span class="text-gray-400 text-sm ml-2">(você)</span>
                                 @endif
                             </td>
                         </tr>
