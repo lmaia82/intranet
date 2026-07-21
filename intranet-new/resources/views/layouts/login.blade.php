@@ -31,13 +31,36 @@
                     </div>
                 </header>
 
-                <div class="w-full h-[0.7cm] bg-[#166F9E]"></div>
-
-                <main class="flex-1 flex flex-col items-center justify-center px-4 py-12">
-                    <div class="w-full sm:max-w-md px-6 py-8 bg-white shadow-md overflow-hidden sm:rounded-lg">
-                        {{ $slot }}
+                @if($asModal)
+                    <div class="w-full h-14 bg-[#166F9E] flex items-center">
+                        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full flex justify-end">
+                            <button
+                                type="button"
+                                x-data
+                                x-on:click="$dispatch('open-modal', 'login')"
+                                class="px-4 py-1.5 bg-white text-[#166F9E] text-sm font-semibold rounded hover:bg-blue-50 transition"
+                            >
+                                Entrar
+                            </button>
+                        </div>
                     </div>
-                </main>
+
+                    <main class="flex-1"></main>
+
+                    <x-modal name="login" :show="$errors->any() || session('status')" maxWidth="md">
+                        <div class="px-6 py-8">
+                            {{ $slot }}
+                        </div>
+                    </x-modal>
+                @else
+                    <div class="w-full h-[0.7cm] bg-[#166F9E]"></div>
+
+                    <main class="flex-1 flex flex-col items-center justify-center px-4 py-12">
+                        <div class="w-full sm:max-w-md px-6 py-8 bg-white shadow-md overflow-hidden sm:rounded-lg">
+                            {{ $slot }}
+                        </div>
+                    </main>
+                @endif
             </div>
         </div>
     </body>

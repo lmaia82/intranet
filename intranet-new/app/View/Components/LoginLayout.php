@@ -7,6 +7,10 @@ use Illuminate\View\View;
 
 class LoginLayout extends Component
 {
+    public function __construct(public bool $asModal = false)
+    {
+    }
+
     /**
      * Get the view / contents that represents the component.
      */

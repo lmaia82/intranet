@@ -14,7 +14,25 @@ class AuthenticationTest extends TestCase
     {
         $response = $this->get('/login');
 
-        $response->assertStatus(200);
+        $response->assertStatus(200)
+            ->assertSee("dispatch('open-modal', 'login')", false)
+            ->assertSee('style="display: none;"', false);
+    }
+
+    public function test_login_com_credenciais_invalidas_abre_o_popup_com_o_erro(): void
+    {
+        $user = User::factory()->create();
+
+        $this->post('/login', [
+            'email' => $user->email,
+            'password' => 'wrong-password',
+        ]);
+
+        $response = $this->get('/login');
+
+        $response->assertOk()
+            ->assertSee('style="display: block;"', false)
+            ->assertSee('These credentials do not match our records.');
     }
 
     public function test_users_can_authenticate_using_the_login_screen(): void
