@@ -46,6 +46,33 @@ class AuthenticationTest extends TestCase
         $response->assertOk()->assertSee('destaques/campanha.jpg', false);
     }
 
+    public function test_visualizar_imagem_publica_de_destaque_nao_atrapalha_redirecionamento_pos_login(): void
+    {
+        $sector = Sector::create(['sigla' => 'TI']);
+        $user = User::factory()->create(['sector_id' => $sector->id]);
+
+        $this->actingAs($user)->post(route('destaques.store'), [
+            'titulo' => 'Campanha',
+            'imagem' => \Illuminate\Http\UploadedFile::fake()->image('banner.png', 1600, 500),
+            'inicio_em' => now()->format('Y-m-d\TH:i'),
+            'fim_em' => now()->addDays(30)->format('Y-m-d\TH:i'),
+        ]);
+        $this->post('/logout');
+
+        $destaque = Destaque::first();
+
+        // Simula o navegador carregando a imagem do destaque na tela de
+        // login, deslogado — isso não pode gravar essa URL como "intended".
+        $this->get($destaque->imagemUrl())->assertOk();
+
+        $response = $this->post('/login', [
+            'email' => $user->email,
+            'password' => 'password',
+        ]);
+
+        $response->assertRedirect(route('dashboard', absolute: false));
+    }
+
     public function test_login_com_credenciais_invalidas_abre_o_popup_com_o_erro(): void
     {
         $user = User::factory()->create();

@@ -41,6 +41,43 @@ class DestaqueTest extends TestCase
         Storage::disk('arquivos')->assertExists($destaque->arquivo->caminho);
     }
 
+    public function test_imagem_do_destaque_e_acessivel_sem_login(): void
+    {
+        Storage::fake('arquivos');
+        $sector = \App\Models\Sector::create(['sigla' => 'TI']);
+        $user = User::factory()->create(['sector_id' => $sector->id]);
+
+        $this->actingAs($user)->post(route('destaques.store'), [
+            'titulo' => 'Campanha',
+            'imagem' => UploadedFile::fake()->image('banner.png', 1600, 500),
+            'inicio_em' => now()->format('Y-m-d\TH:i'),
+            'fim_em' => now()->addDays(30)->format('Y-m-d\TH:i'),
+        ]);
+
+        $destaque = Destaque::first();
+
+        $this->assertStringContainsString('/publico', $destaque->imagemUrl());
+
+        // Sem login (guest), sem seguir redirecionamento: precisa dar 200,
+        // nunca um redirect para /login (o que poluiria a "intended url").
+        $this->get($destaque->imagemUrl())->assertOk();
+    }
+
+    public function test_arquivo_privado_nao_e_servido_pela_rota_publica(): void
+    {
+        Storage::fake('arquivos');
+        Storage::disk('arquivos')->put('uploads/privado.png', 'conteudo');
+        $arquivo = \App\Models\Arquivo::create([
+            'nome_original' => 'privado.png',
+            'caminho' => 'uploads/privado.png',
+            'extensao' => 'png',
+            'tamanho' => 10,
+            'is_private' => true,
+        ]);
+
+        $this->get(route('repositorio.arquivos.visualizar-publico', $arquivo))->assertForbidden();
+    }
+
     public function test_imagem_e_obrigatoria_na_criacao(): void
     {
         $user = User::factory()->create();

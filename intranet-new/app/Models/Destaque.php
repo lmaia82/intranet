@@ -38,7 +38,7 @@ class Destaque extends Model
     public function imagemUrl(): ?string
     {
         if ($this->arquivo_id) {
-            return route('repositorio.arquivos.visualizar', $this->arquivo_id);
+            return route('repositorio.arquivos.visualizar-publico', $this->arquivo_id);
         }
 
         return $this->imagem ? Storage::url($this->imagem) : null;

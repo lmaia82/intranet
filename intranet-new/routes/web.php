@@ -136,6 +136,8 @@ Route::middleware('auth')->group(function () {
 Route::get('onlyoffice/documento/{arquivo}', [OnlyOfficeController::class, 'documento'])->name('onlyoffice.documento')->middleware('signed');
 Route::post('onlyoffice/callback/{arquivo}', [OnlyOfficeController::class, 'callback'])->name('onlyoffice.callback')->middleware('signed');
 
+Route::get('arquivos/{arquivo}/publico', [RepositorioController::class, 'visualizarPublico'])->name('repositorio.arquivos.visualizar-publico');
+
 use App\Http\Controllers\PaperlessWebhookController;
 
 Route::post('webhooks/paperless', [PaperlessWebhookController::class, 'handle'])->name('webhooks.paperless');

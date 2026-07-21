@@ -187,6 +187,18 @@ class RepositorioController extends Controller
         return Storage::disk('arquivos')->response($arquivo->caminho);
     }
 
+    /**
+     * Serve um arquivo público sem exigir login — usado para exibir imagens
+     * de Destaques/Informativos em páginas públicas (ex.: tela de login).
+     * Nunca serve arquivos restritos, autenticado ou não.
+     */
+    public function visualizarPublico(Arquivo $arquivo)
+    {
+        abort_if($arquivo->is_private, 403);
+
+        return Storage::disk('arquivos')->response($arquivo->caminho);
+    }
+
     public function ocrStatus(Arquivo $arquivo)
     {
         abort_unless($arquivo->visivelPara(auth()->user()), 403, 'Você não tem acesso a este arquivo.');
