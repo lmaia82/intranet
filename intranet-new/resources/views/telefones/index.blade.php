@@ -51,7 +51,7 @@
                         <th class="p-3 truncate">E-mail</th>
                         <th class="p-3 truncate">Telefone Externo</th>
                         @if(auth()->user()->hasPermission('ramais.criar'))
-                            <th class="p-3"></th>
+                            <th class="p-3 pr-6"></th>
                         @endif
                     </tr>
                 </thead>
@@ -66,7 +66,7 @@
                             <td class="p-3 truncate" title="{{ $telefone->email }}">{{ $telefone->email }}</td>
                             <td class="p-3 truncate" title="{{ $telefone->telefone_externo }}">{{ $telefone->telefone_externo }}</td>
                             @if(auth()->user()->hasPermission('ramais.criar'))
-                                <td class="p-3 text-right whitespace-nowrap">
+                                <td class="p-3 pr-6 text-right whitespace-nowrap">
                                     <a href="{{ route('telefones.edit', $telefone) }}" class="text-blue-600">Editar</a>
                                     <form action="{{ route('telefones.destroy', $telefone) }}" method="POST" class="inline" onsubmit="return confirm('Remover este ramal?')">
                                         @csrf
