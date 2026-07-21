@@ -15,8 +15,9 @@ class DestaqueTest extends TestCase
 
     public function test_pode_criar_destaque_com_imagem(): void
     {
-        Storage::fake('public');
-        $user = User::factory()->create();
+        Storage::fake('arquivos');
+        $sector = \App\Models\Sector::create(['sigla' => 'TI']);
+        $user = User::factory()->create(['sector_id' => $sector->id]);
 
         $this->actingAs($user)->post(route('destaques.store'), [
             'titulo' => 'Campanha de vacinação',
@@ -32,10 +33,12 @@ class DestaqueTest extends TestCase
             'titulo' => 'Campanha de vacinação',
             'link' => 'https://cetem.gov.br',
             'ativo' => true,
+            'sector_id' => $sector->id,
         ]);
 
         $destaque = Destaque::first();
-        Storage::disk('public')->assertExists($destaque->imagem);
+        $this->assertNotNull($destaque->arquivo_id);
+        Storage::disk('arquivos')->assertExists($destaque->arquivo->caminho);
     }
 
     public function test_imagem_e_obrigatoria_na_criacao(): void
@@ -45,6 +48,22 @@ class DestaqueTest extends TestCase
         $this->actingAs($user)->post(route('destaques.store'), [
             'titulo' => 'Sem imagem',
         ])->assertSessionHasErrors('imagem');
+    }
+
+    public function test_criar_destaque_sem_setor_falha(): void
+    {
+        Storage::fake('arquivos');
+        $user = User::factory()->create(['sector_id' => null]);
+
+        $response = $this->actingAs($user)->post(route('destaques.store'), [
+            'titulo' => 'Campanha de vacinação',
+            'imagem' => UploadedFile::fake()->image('banner.png', 1600, 500),
+            'inicio_em' => now()->format('Y-m-d\TH:i'),
+            'fim_em' => now()->addDays(30)->format('Y-m-d\TH:i'),
+        ]);
+
+        $response->assertStatus(422);
+        $this->assertDatabaseCount('destaques', 0);
     }
 
     public function test_pode_editar_destaque_sem_trocar_imagem(): void

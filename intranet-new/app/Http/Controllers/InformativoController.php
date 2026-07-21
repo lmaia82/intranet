@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Mail\NovoInformativoMail;
 use App\Models\Acesso;
+use App\Models\Arquivo;
 use App\Models\Informativo;
 use App\Models\InformativoEnvio;
 use App\Models\Sector;
@@ -61,11 +62,12 @@ class InformativoController extends Controller
             'image' => 'nullable|image|max:4096',
         ]);
 
+        unset($validated['image']);
         $validated['is_private'] = $request->boolean('is_private');
         $validated['published_at'] = now();
 
         if ($request->hasFile('image')) {
-            $validated['image'] = $request->file('image')->store('informativos', 'public');
+            $validated['arquivo_id'] = $this->salvarImagem($request->file('image'));
         }
 
         $informativo = Informativo::create($validated);
@@ -96,15 +98,43 @@ class InformativoController extends Controller
             'image' => 'nullable|image|max:4096',
         ]);
 
+        unset($validated['image']);
         $validated['is_private'] = $request->boolean('is_private');
 
         if ($request->hasFile('image')) {
-            $validated['image'] = $request->file('image')->store('informativos', 'public');
+            $validated['arquivo_id'] = $this->salvarImagem($request->file('image'));
         }
 
         $informativo->update($validated);
 
         return redirect()->route('informativos.index')->with('status', 'Informativo atualizado com sucesso.');
+    }
+
+    /**
+     * Salva a imagem do informativo no MinIO (disco "arquivos"), na pasta
+     * "Imagens Informativos" do setor do usuário logado, e registra o
+     * arquivo no Repositório. Retorna o id do Arquivo criado.
+     */
+    private function salvarImagem($file): int
+    {
+        $sector = auth()->user()->sector;
+        abort_unless($sector, 422, 'Você precisa estar vinculado a um setor (lotação) para enviar imagens. Atualize seu perfil.');
+
+        $pasta = $sector->pastaImagensInformativos();
+        $caminho = $file->store('uploads', 'arquivos');
+
+        $arquivo = Arquivo::create([
+            'pasta_id' => $pasta->id,
+            'criado_por_id' => auth()->id(),
+            'nome_original' => $file->getClientOriginalName(),
+            'caminho' => $caminho,
+            'extensao' => strtolower($file->getClientOriginalExtension()),
+            'tamanho' => $file->getSize(),
+            'sector_id' => $sector->id,
+            'is_private' => false,
+        ]);
+
+        return $arquivo->id;
     }
 
     public function destroy(Informativo $informativo)

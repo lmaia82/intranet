@@ -25,14 +25,33 @@ class Sector extends Model
 
     public function pastaTemporaria(): Pasta
     {
-        $raiz = Pasta::firstOrCreate(
-            ['nome' => $this->sigla, 'parent_id' => null],
+        return Pasta::firstOrCreate(
+            ['nome' => 'Temporário', 'parent_id' => $this->pastaRaiz()->id],
+            ['sector_id' => $this->id, 'is_private' => true]
+        );
+    }
+
+    public function pastaImagensInformativos(): Pasta
+    {
+        return Pasta::firstOrCreate(
+            ['nome' => 'Imagens Informativos', 'parent_id' => $this->pastaRaiz()->id],
             ['sector_id' => $this->id, 'is_private' => false]
         );
+    }
 
+    public function pastaDestaques(): Pasta
+    {
         return Pasta::firstOrCreate(
-            ['nome' => 'Temporário', 'parent_id' => $raiz->id],
-            ['sector_id' => $this->id, 'is_private' => true]
+            ['nome' => 'Destaques', 'parent_id' => $this->pastaRaiz()->id],
+            ['sector_id' => $this->id, 'is_private' => false]
+        );
+    }
+
+    private function pastaRaiz(): Pasta
+    {
+        return Pasta::firstOrCreate(
+            ['nome' => $this->sigla, 'parent_id' => null],
+            ['sector_id' => $this->id, 'is_private' => false]
         );
     }
 

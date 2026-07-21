@@ -22,8 +22,8 @@
     <label class="block text-sm font-medium">Imagem de capa (opcional)</label>
     <input type="file" name="image" accept="image/*" class="mt-1 block w-full">
     @error('image') <p class="text-red-600 text-sm">{{ $message }}</p> @enderror
-    @if(!empty($informativo?->image))
-        <img src="{{ Storage::url($informativo->image) }}" class="mt-2 h-24 rounded">
+    @if($informativo?->imagemUrl())
+        <img src="{{ $informativo->imagemUrl() }}" class="mt-2 h-24 rounded">
     @endif
 </div>
 <div class="flex items-center gap-2">

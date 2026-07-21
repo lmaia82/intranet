@@ -32,10 +32,10 @@
                 <div x-show="atual === {{ $i }}" x-cloak>
                     @if($destaque->link)
                         <a href="{{ $destaque->link }}" target="_blank" rel="noopener">
-                            <img src="{{ Storage::url($destaque->imagem) }}" alt="{{ $destaque->titulo }}" class="w-full h-auto block">
+                            <img src="{{ $destaque->imagemUrl() }}" alt="{{ $destaque->titulo }}" class="w-full h-auto block">
                         </a>
                     @else
-                        <img src="{{ Storage::url($destaque->imagem) }}" alt="{{ $destaque->titulo }}" class="w-full h-auto block">
+                        <img src="{{ $destaque->imagemUrl() }}" alt="{{ $destaque->titulo }}" class="w-full h-auto block">
                     @endif
                 </div>
             @endforeach

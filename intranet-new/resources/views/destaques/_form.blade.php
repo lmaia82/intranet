@@ -20,8 +20,8 @@
     <label class="block text-sm font-medium">Imagem (1600×500px) {{ $destaque ? '(opcional na edição)' : '' }}</label>
     <input type="file" name="imagem" accept="image/*" class="mt-1 block w-full">
     @error('imagem') <p class="text-red-600 text-sm">{{ $message }}</p> @enderror
-    @if(!empty($destaque?->imagem))
-        <img src="{{ Storage::url($destaque->imagem) }}" class="mt-2 h-24 rounded border">
+    @if($destaque?->imagemUrl())
+        <img src="{{ $destaque->imagemUrl() }}" class="mt-2 h-24 rounded border">
     @endif
 </div>
 <div>

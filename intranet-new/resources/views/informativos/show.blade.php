@@ -8,8 +8,8 @@
         @endif
 
         <div class="bg-white shadow rounded p-6">
-            @if($informativo->image)
-                <img src="{{ Storage::url($informativo->image) }}" class="w-full rounded mb-4">
+            @if($informativo->imagemUrl())
+                <img src="{{ $informativo->imagemUrl() }}" class="w-full rounded mb-4">
             @endif
             <p class="text-sm text-gray-500 mb-4">
                 {{ $informativo->sector->sigla ?? 'Geral' }} — {{ $informativo->published_at?->format('d/m/Y H:i') }}

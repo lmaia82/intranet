@@ -3,10 +3,11 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class Destaque extends Model
 {
-    protected $fillable = ['titulo', 'imagem', 'link', 'ordem', 'ativo', 'inicio_em', 'fim_em'];
+    protected $fillable = ['titulo', 'imagem', 'arquivo_id', 'sector_id', 'link', 'ordem', 'ativo', 'inicio_em', 'fim_em'];
 
     protected $casts = [
         'ativo' => 'boolean',
@@ -22,6 +23,25 @@ class Destaque extends Model
             ->where(fn ($q) => $q->whereNull('inicio_em')->orWhere('inicio_em', '<=', $agora))
             ->where(fn ($q) => $q->whereNull('fim_em')->orWhere('fim_em', '>=', $agora))
             ->orderBy('ordem');
+    }
+
+    public function sector()
+    {
+        return $this->belongsTo(Sector::class);
+    }
+
+    public function arquivo()
+    {
+        return $this->belongsTo(Arquivo::class);
+    }
+
+    public function imagemUrl(): ?string
+    {
+        if ($this->arquivo_id) {
+            return route('repositorio.arquivos.visualizar', $this->arquivo_id);
+        }
+
+        return $this->imagem ? Storage::url($this->imagem) : null;
     }
 
     public function expirado(): bool

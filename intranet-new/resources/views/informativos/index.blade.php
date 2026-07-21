@@ -27,8 +27,8 @@
         <div class="space-y-4">
             @forelse($informativos as $informativo)
                 <div class="bg-white shadow rounded p-4 flex gap-4">
-                    @if($informativo->image)
-                        <img src="{{ Storage::url($informativo->image) }}" class="w-24 h-24 object-cover rounded">
+                    @if($informativo->imagemUrl())
+                        <img src="{{ $informativo->imagemUrl() }}" class="w-24 h-24 object-cover rounded">
                     @endif
                     <div class="flex-1">
                         <a href="{{ route('informativos.show', $informativo) }}" class="text-lg font-semibold text-blue-700">{{ $informativo->title }}</a>

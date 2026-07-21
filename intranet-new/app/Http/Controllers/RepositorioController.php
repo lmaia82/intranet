@@ -175,6 +175,13 @@ class RepositorioController extends Controller
         return Storage::disk('arquivos')->download($arquivo->caminho, $arquivo->nome_original);
     }
 
+    public function visualizar(Arquivo $arquivo)
+    {
+        abort_unless($arquivo->visivelPara(auth()->user()), 403, 'Você não tem acesso a este arquivo.');
+
+        return Storage::disk('arquivos')->response($arquivo->caminho);
+    }
+
     public function ocrStatus(Arquivo $arquivo)
     {
         abort_unless($arquivo->visivelPara(auth()->user()), 403, 'Você não tem acesso a este arquivo.');

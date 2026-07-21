@@ -40,7 +40,7 @@
                 <tbody>
                     @forelse($destaques as $destaque)
                         <tr class="border-t">
-                            <td class="p-3"><img src="{{ Storage::url($destaque->imagem) }}" class="h-12 rounded border"></td>
+                            <td class="p-3"><img src="{{ $destaque->imagemUrl() }}" class="h-12 rounded border"></td>
                             <td class="p-3 truncate" title="{{ $destaque->titulo }}">{{ $destaque->titulo ?: '—' }}</td>
                             <td class="p-3 text-xs whitespace-nowrap">
                                 {{ optional($destaque->inicio_em)->format('d/m/Y H:i') ?? '—' }}

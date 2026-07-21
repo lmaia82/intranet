@@ -128,6 +128,7 @@ use App\Http\Controllers\OnlyOfficeController;
 
 Route::middleware('auth')->group(function () {
     Route::get('repositorio/arquivos/{arquivo}/editor', [OnlyOfficeController::class, 'editor'])->name('onlyoffice.editor');
+    Route::get('repositorio/arquivos/{arquivo}/visualizar', [RepositorioController::class, 'visualizar'])->name('repositorio.arquivos.visualizar');
 });
 
 Route::get('onlyoffice/documento/{arquivo}', [OnlyOfficeController::class, 'documento'])->name('onlyoffice.documento')->middleware('signed');
