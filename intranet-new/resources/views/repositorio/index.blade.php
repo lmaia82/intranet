@@ -15,14 +15,21 @@
         </nav>
 
         <div class="flex gap-6 items-start">
-            <aside class="hidden md:block w-64 shrink-0 bg-white shadow rounded p-3 max-h-[75vh] overflow-y-auto">
-                <a
-                    href="{{ route('repositorio.index') }}"
-                    class="flex items-center gap-1 py-1 px-2 rounded text-sm mb-1 {{ !$pastaAtual ? 'bg-blue-100 font-semibold text-blue-800' : 'text-gray-700 hover:bg-gray-100' }}"
-                >
-                    🗄️ Raiz
-                </a>
-                @include('repositorio.partials.arvore', ['pastas' => $arvorePastas, 'pastaAtualId' => $pastaAtual?->id, 'pastasAbertas' => $pastasAbertas, 'nivel' => 0])
+            <aside class="hidden md:block w-64 shrink-0 bg-white shadow rounded p-3 max-h-[75vh] overflow-y-auto" x-data="{ aberto: true }">
+                <div class="flex items-center gap-1 rounded {{ !$pastaAtual ? 'bg-blue-100' : 'hover:bg-gray-100' }}">
+                    <button type="button" @click="aberto = !aberto" class="w-4 shrink-0 text-gray-400 text-xs leading-none">
+                        <span x-text="aberto ? '▾' : '▸'"></span>
+                    </button>
+                    <a
+                        href="{{ route('repositorio.index') }}"
+                        class="flex-1 flex items-center gap-1 py-1 pr-2 text-sm {{ !$pastaAtual ? 'font-semibold text-blue-800' : 'text-gray-700' }}"
+                    >
+                        🗄️ Raiz
+                    </a>
+                </div>
+                <div x-show="aberto" x-cloak>
+                    @include('repositorio.partials.arvore', ['pastas' => $arvorePastas, 'pastaAtualId' => $pastaAtual?->id, 'pastasAbertas' => $pastasAbertas, 'nivel' => 0])
+                </div>
             </aside>
 
             <div class="flex-1 min-w-0">
