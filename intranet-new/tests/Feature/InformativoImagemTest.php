@@ -91,6 +91,57 @@ class InformativoImagemTest extends TestCase
         $this->assertStringContainsString('informativos/antigo.jpg', $informativo->imagemUrl());
     }
 
+    public function test_excluir_informativo_remove_a_imagem_do_minio(): void
+    {
+        Storage::fake('arquivos');
+        $sector = Sector::create(['sigla' => 'TI']);
+        $user = User::factory()->create(['sector_id' => $sector->id]);
+
+        $this->actingAs($user)->post(route('informativos.store'), [
+            'title' => 'Aviso com imagem',
+            'content' => 'Conteúdo.',
+            'image' => UploadedFile::fake()->image('capa.png'),
+        ]);
+
+        $informativo = Informativo::where('title', 'Aviso com imagem')->firstOrFail();
+        $caminho = $informativo->arquivo->caminho;
+        $arquivoId = $informativo->arquivo_id;
+
+        $this->actingAs($user)->delete(route('informativos.destroy', $informativo));
+
+        $this->assertDatabaseMissing('arquivos', ['id' => $arquivoId]);
+        Storage::disk('arquivos')->assertMissing($caminho);
+    }
+
+    public function test_trocar_imagem_na_edicao_remove_a_imagem_anterior_do_minio(): void
+    {
+        Storage::fake('arquivos');
+        $sector = Sector::create(['sigla' => 'TI']);
+        $user = User::factory()->create(['sector_id' => $sector->id]);
+
+        $this->actingAs($user)->post(route('informativos.store'), [
+            'title' => 'Aviso com imagem',
+            'content' => 'Conteúdo.',
+            'image' => UploadedFile::fake()->image('capa.png'),
+        ]);
+
+        $informativo = Informativo::where('title', 'Aviso com imagem')->firstOrFail();
+        $caminhoAntigo = $informativo->arquivo->caminho;
+        $arquivoIdAntigo = $informativo->arquivo_id;
+
+        $this->actingAs($user)->put(route('informativos.update', $informativo), [
+            'title' => 'Aviso com imagem',
+            'content' => 'Conteúdo.',
+            'image' => UploadedFile::fake()->image('nova.png'),
+        ]);
+
+        $informativo->refresh();
+        $this->assertNotEquals($arquivoIdAntigo, $informativo->arquivo_id);
+        $this->assertDatabaseMissing('arquivos', ['id' => $arquivoIdAntigo]);
+        Storage::disk('arquivos')->assertMissing($caminhoAntigo);
+        Storage::disk('arquivos')->assertExists($informativo->arquivo->caminho);
+    }
+
     public function test_outro_usuario_do_mesmo_setor_visualiza_a_imagem(): void
     {
         Storage::fake('arquivos');

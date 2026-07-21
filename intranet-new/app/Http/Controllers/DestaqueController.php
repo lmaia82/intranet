@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Arquivo;
 use App\Models\Destaque;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class DestaqueController extends Controller
 {
@@ -72,6 +73,7 @@ class DestaqueController extends Controller
             $sector = auth()->user()->sector;
             abort_unless($sector, 422, 'Você precisa estar vinculado a um setor (lotação) para atualizar destaques. Atualize seu perfil.');
 
+            $this->removerImagem($destaque);
             $validated['sector_id'] = $sector->id;
             $validated['arquivo_id'] = $this->salvarImagem($request->file('imagem'), $sector);
         }
@@ -83,8 +85,22 @@ class DestaqueController extends Controller
 
     public function destroy(Destaque $destaque)
     {
+        $this->removerImagem($destaque);
         $destaque->delete();
         return redirect()->route('destaques.index')->with('status', 'Destaque removido.');
+    }
+
+    /**
+     * Remove do MinIO e do Repositório a imagem atualmente associada ao
+     * destaque, para não deixar arquivo órfão ao excluir ou substituir a
+     * imagem.
+     */
+    private function removerImagem(Destaque $destaque): void
+    {
+        if ($destaque->arquivo) {
+            Storage::disk('arquivos')->delete($destaque->arquivo->caminho);
+            $destaque->arquivo->delete();
+        }
     }
 
     /**

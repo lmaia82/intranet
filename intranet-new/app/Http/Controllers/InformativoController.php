@@ -13,6 +13,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
 
 class InformativoController extends Controller
 {
@@ -102,6 +103,7 @@ class InformativoController extends Controller
         $validated['is_private'] = $request->boolean('is_private');
 
         if ($request->hasFile('image')) {
+            $this->removerImagem($informativo);
             $validated['arquivo_id'] = $this->salvarImagem($request->file('image'));
         }
 
@@ -137,8 +139,22 @@ class InformativoController extends Controller
         return $arquivo->id;
     }
 
+    /**
+     * Remove do MinIO e do Repositório a imagem atualmente associada ao
+     * informativo, para não deixar arquivo órfão ao excluir ou substituir
+     * a imagem de capa.
+     */
+    private function removerImagem(Informativo $informativo): void
+    {
+        if ($informativo->arquivo) {
+            Storage::disk('arquivos')->delete($informativo->arquivo->caminho);
+            $informativo->arquivo->delete();
+        }
+    }
+
     public function destroy(Informativo $informativo)
     {
+        $this->removerImagem($informativo);
         $informativo->delete();
         return redirect()->route('informativos.index')->with('status', 'Informativo removido.');
     }

@@ -66,6 +66,60 @@ class DestaqueTest extends TestCase
         $this->assertDatabaseCount('destaques', 0);
     }
 
+    public function test_excluir_destaque_remove_a_imagem_do_minio(): void
+    {
+        Storage::fake('arquivos');
+        $sector = \App\Models\Sector::create(['sigla' => 'TI']);
+        $user = User::factory()->create(['sector_id' => $sector->id]);
+
+        $this->actingAs($user)->post(route('destaques.store'), [
+            'titulo' => 'Campanha',
+            'imagem' => UploadedFile::fake()->image('banner.png', 1600, 500),
+            'inicio_em' => now()->format('Y-m-d\TH:i'),
+            'fim_em' => now()->addDays(30)->format('Y-m-d\TH:i'),
+        ]);
+
+        $destaque = Destaque::first();
+        $caminho = $destaque->arquivo->caminho;
+        $arquivoId = $destaque->arquivo_id;
+
+        $this->actingAs($user)->delete(route('destaques.destroy', $destaque));
+
+        $this->assertDatabaseMissing('arquivos', ['id' => $arquivoId]);
+        Storage::disk('arquivos')->assertMissing($caminho);
+    }
+
+    public function test_trocar_imagem_na_edicao_remove_a_anterior_do_minio(): void
+    {
+        Storage::fake('arquivos');
+        $sector = \App\Models\Sector::create(['sigla' => 'TI']);
+        $user = User::factory()->create(['sector_id' => $sector->id]);
+
+        $this->actingAs($user)->post(route('destaques.store'), [
+            'titulo' => 'Campanha',
+            'imagem' => UploadedFile::fake()->image('banner.png', 1600, 500),
+            'inicio_em' => now()->format('Y-m-d\TH:i'),
+            'fim_em' => now()->addDays(30)->format('Y-m-d\TH:i'),
+        ]);
+
+        $destaque = Destaque::first();
+        $caminhoAntigo = $destaque->arquivo->caminho;
+        $arquivoIdAntigo = $destaque->arquivo_id;
+
+        $this->actingAs($user)->put(route('destaques.update', $destaque), [
+            'titulo' => 'Campanha',
+            'imagem' => UploadedFile::fake()->image('nova.png', 1600, 500),
+            'inicio_em' => now()->format('Y-m-d\TH:i'),
+            'fim_em' => now()->addDays(30)->format('Y-m-d\TH:i'),
+        ]);
+
+        $destaque->refresh();
+        $this->assertNotEquals($arquivoIdAntigo, $destaque->arquivo_id);
+        $this->assertDatabaseMissing('arquivos', ['id' => $arquivoIdAntigo]);
+        Storage::disk('arquivos')->assertMissing($caminhoAntigo);
+        Storage::disk('arquivos')->assertExists($destaque->arquivo->caminho);
+    }
+
     public function test_pode_editar_destaque_sem_trocar_imagem(): void
     {
         Storage::fake('public');
