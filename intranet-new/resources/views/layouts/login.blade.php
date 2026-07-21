@@ -32,7 +32,7 @@
                 </header>
 
                 @if($asModal)
-                    <div class="w-full h-16 bg-[#166F9E] flex items-center">
+                    <div class="w-full h-14 bg-[#166F9E] flex items-center">
                         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full flex justify-end">
                             <button
                                 type="button"
