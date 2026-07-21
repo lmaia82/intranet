@@ -1,10 +1,10 @@
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6" x-data>
-    <div class="bg-white/95 shadow rounded p-4 text-center">
+    <div class="bg-white/80 backdrop-blur-sm shadow rounded p-4 text-center">
         <p class="text-gray-700 font-medium">Conheça o que a Intranet CETEM oferece</p>
         <p class="text-sm text-gray-500">Entre para acessar todas as funcionalidades abaixo.</p>
     </div>
 
-    <form @submit.prevent="$dispatch('open-modal', 'login')" class="bg-white shadow rounded p-4">
+    <form @submit.prevent="$dispatch('open-modal', 'login')" class="bg-white/80 backdrop-blur-sm shadow rounded p-4">
         <input type="text" placeholder="🔎 Buscar por pessoas, documentos, ramais, informativos..."
             class="block w-full border-gray-300 rounded" @focus="$dispatch('open-modal', 'login')" readonly>
     </form>
@@ -13,7 +13,7 @@
     <div
         x-data="carrossel({{ $destaques->count() }})"
         x-init="iniciar()"
-        class="relative bg-white shadow rounded overflow-hidden"
+        class="relative bg-white/80 backdrop-blur-sm shadow rounded overflow-hidden"
     >
         @foreach($destaques as $i => $destaque)
             <div x-show="atual === {{ $i }}" x-cloak>
@@ -35,7 +35,7 @@
     </div>
     @endif
 
-    <div class="bg-white shadow rounded p-4">
+    <div class="bg-white/80 backdrop-blur-sm shadow rounded p-4">
         <h3 class="font-semibold text-lg mb-3">Aplicações</h3>
         <div class="flex flex-wrap gap-3">
             <a href="#" @click.prevent="$dispatch('open-modal', 'login')" class="px-4 py-2 bg-blue-600 text-white rounded">📄 Documento Word</a>
@@ -49,7 +49,7 @@
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-        <div class="bg-white shadow rounded p-4">
+        <div class="bg-white/80 backdrop-blur-sm shadow rounded p-4">
             <div class="flex justify-between items-center mb-3">
                 <h3 class="font-semibold text-lg">📢 Mural de Avisos</h3>
                 <a href="#" @click.prevent="$dispatch('open-modal', 'login')" class="text-sm text-blue-600">Ver todos</a>
@@ -66,7 +66,7 @@
             </div>
         </div>
 
-        <div class="bg-white shadow rounded p-4">
+        <div class="bg-white/80 backdrop-blur-sm shadow rounded p-4">
             <div class="flex justify-between items-center mb-3">
                 <h3 class="font-semibold text-lg">📅 Agenda</h3>
                 <a href="#" @click.prevent="$dispatch('open-modal', 'login')" class="text-sm text-blue-600">Ver todos</a>
@@ -83,7 +83,7 @@
             </div>
         </div>
 
-        <div class="bg-white shadow rounded p-4">
+        <div class="bg-white/80 backdrop-blur-sm shadow rounded p-4">
             <div class="flex justify-between items-center mb-3">
                 <h3 class="font-semibold text-lg">🔬 Publicações</h3>
                 <a href="#" @click.prevent="$dispatch('open-modal', 'login')" class="text-sm text-blue-600">Ver mais</a>
@@ -103,7 +103,7 @@
             </div>
         </div>
 
-        <div class="bg-white shadow rounded p-4">
+        <div class="bg-white/80 backdrop-blur-sm shadow rounded p-4">
             <div class="flex justify-between items-center mb-3">
                 <h3 class="font-semibold text-lg">🎬 Últimos Tutoriais</h3>
                 <a href="#" @click.prevent="$dispatch('open-modal', 'login')" class="text-sm text-blue-600">Ver todos</a>
@@ -120,7 +120,7 @@
             </div>
         </div>
 
-        <div class="bg-white shadow rounded p-4">
+        <div class="bg-white/80 backdrop-blur-sm shadow rounded p-4">
             <div class="flex justify-between items-center mb-3">
                 <h3 class="font-semibold text-lg">🎥 Últimos Eventos Gravados</h3>
                 <a href="#" @click.prevent="$dispatch('open-modal', 'login')" class="text-sm text-blue-600">Ver todos</a>
@@ -137,7 +137,7 @@
             </div>
         </div>
 
-        <div class="bg-white shadow rounded p-4">
+        <div class="bg-white/80 backdrop-blur-sm shadow rounded p-4">
             <div class="flex justify-between items-center mb-3">
                 <h3 class="font-semibold text-lg">📁 Documentos públicos recentes</h3>
                 <a href="#" @click.prevent="$dispatch('open-modal', 'login')" class="text-sm text-blue-600">Ver repositório</a>
