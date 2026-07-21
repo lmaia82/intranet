@@ -2,7 +2,7 @@
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">Repositório de Arquivos</h2>
     </x-slot>
-    <div class="py-6 max-w-5xl mx-auto sm:px-6 lg:px-8">
+    <div class="py-6 max-w-7xl mx-auto sm:px-6 lg:px-8">
         @if(session('status'))
             <div class="mb-4 p-4 bg-green-100 text-green-800 rounded">{{ session('status') }}</div>
         @endif
@@ -13,6 +13,19 @@
                 / <a href="{{ route('repositorio.index', ['pasta' => $item->id]) }}" class="text-blue-600">{{ $item->nome }}</a>
             @endforeach
         </nav>
+
+        <div class="flex gap-6 items-start">
+            <aside class="hidden md:block w-64 shrink-0 bg-white shadow rounded p-3 max-h-[75vh] overflow-y-auto">
+                <a
+                    href="{{ route('repositorio.index') }}"
+                    class="flex items-center gap-1 py-1 px-2 rounded text-sm mb-1 {{ !$pastaAtual ? 'bg-blue-100 font-semibold text-blue-800' : 'text-gray-700 hover:bg-gray-100' }}"
+                >
+                    🗄️ Raiz
+                </a>
+                @include('repositorio.partials.arvore', ['pastas' => $arvorePastas, 'pastaAtualId' => $pastaAtual?->id, 'pastasAbertas' => $pastasAbertas, 'nivel' => 0])
+            </aside>
+
+            <div class="flex-1 min-w-0">
 
         @if(auth()->user()->hasPermission('repositorio.criar'))
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
@@ -155,10 +168,13 @@
                         </tr>
                     @endforeach
                     @if($subpastas->isEmpty() && $arquivos->isEmpty())
-                        <tr><td colspan="{{ auth()->user()->hasPermission('repositorio.criar') ? 7 : 6 }}" class="p-3 text-gray-500">Pasta vazia.</td></tr>
+                        <tr><td colspan="{{ auth()->user()->hasPermission('repositorio.criar') ? 8 : 7 }}" class="p-3 text-gray-500">Pasta vazia.</td></tr>
                     @endif
                 </tbody>
             </table>
+        </div>
+
+            </div>
         </div>
     </div>
 </x-app-layout>

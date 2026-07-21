@@ -44,7 +44,25 @@ class RepositorioController extends Controller
             ->sortBy('caminho')
             ->values();
 
-        return view('repositorio.index', compact('pastaAtual', 'subpastas', 'arquivos', 'sectors', 'breadcrumb', 'pastasParaSelecao'));
+        $todasPastasVisiveis = Pasta::orderBy('nome')->get()->filter(fn (Pasta $p) => $p->visivelPara($user));
+        $arvorePastas = $this->construirArvore($todasPastasVisiveis, null);
+        $pastasAbertas = $breadcrumb->pluck('id')->toArray();
+
+        return view('repositorio.index', compact(
+            'pastaAtual', 'subpastas', 'arquivos', 'sectors', 'breadcrumb', 'pastasParaSelecao',
+            'arvorePastas', 'pastasAbertas'
+        ));
+    }
+
+    private function construirArvore($pastas, ?int $parentId)
+    {
+        return $pastas->where('parent_id', $parentId)
+            ->map(fn (Pasta $p) => [
+                'id' => $p->id,
+                'nome' => $p->nome,
+                'filhas' => $this->construirArvore($pastas, $p->id),
+            ])
+            ->values();
     }
 
     public function storePasta(Request $request)
