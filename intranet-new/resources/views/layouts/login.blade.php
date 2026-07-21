@@ -45,10 +45,13 @@
                         </div>
                     </div>
 
-                    <main class="flex-1"></main>
+                    <main class="flex-1 py-8">
+                        {{ $preview ?? '' }}
+                    </main>
 
                     <x-modal name="login" :show="$errors->any() || session('status')" maxWidth="md">
                         <div class="px-6 py-8">
+                            <p class="text-center text-gray-700 font-medium mb-4">Entre para acessar as funcionalidades</p>
                             {{ $slot }}
                         </div>
                     </x-modal>

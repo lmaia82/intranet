@@ -2,6 +2,9 @@
 
 namespace Tests\Feature\Auth;
 
+use App\Models\Destaque;
+use App\Models\Informativo;
+use App\Models\Sector;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -16,7 +19,31 @@ class AuthenticationTest extends TestCase
 
         $response->assertStatus(200)
             ->assertSee("dispatch('open-modal', 'login')", false)
-            ->assertSee('style="display: none;"', false);
+            ->assertSee('style="display: none;"', false)
+            ->assertSee('Entre para acessar as funcionalidades')
+            ->assertSee('Mural de Avisos');
+    }
+
+    public function test_login_screen_mostra_previa_de_informativos_publicos_e_esconde_privados(): void
+    {
+        $sector = Sector::create(['sigla' => 'TI']);
+        Informativo::create(['title' => 'Aviso Público', 'content' => 'x', 'published_at' => now(), 'is_private' => false]);
+        Informativo::create(['title' => 'Aviso Restrito', 'content' => 'x', 'sector_id' => $sector->id, 'published_at' => now(), 'is_private' => true]);
+
+        $response = $this->get('/login');
+
+        $response->assertOk()
+            ->assertSee('Aviso Público')
+            ->assertDontSee('Aviso Restrito');
+    }
+
+    public function test_login_screen_mostra_destaques_ativos(): void
+    {
+        Destaque::create(['titulo' => 'Campanha', 'imagem' => 'destaques/campanha.jpg', 'ordem' => 0, 'ativo' => true]);
+
+        $response = $this->get('/login');
+
+        $response->assertOk()->assertSee('destaques/campanha.jpg', false);
     }
 
     public function test_login_com_credenciais_invalidas_abre_o_popup_com_o_erro(): void
