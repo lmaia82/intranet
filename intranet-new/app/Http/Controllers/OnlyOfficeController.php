@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Arquivo;
-use App\Models\Pasta;
 use Firebase\JWT\JWT;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
@@ -78,35 +77,7 @@ class OnlyOfficeController extends Controller
 
     public function aplicacoes()
     {
-        $documentos = $this->documentosDaPastaPessoal();
-
-        return view('repositorio.aplicacoes', compact('documentos'));
-    }
-
-    public function documentos()
-    {
-        $documentos = $this->documentosDaPastaPessoal()->map(fn (Arquivo $arquivo) => [
-            'id' => $arquivo->id,
-            'nome_original' => $arquivo->nome_original,
-            'extensao' => $arquivo->extensao,
-            'tamanho_formatado' => $arquivo->tamanhoFormatado(),
-            'editor_url' => route('onlyoffice.editor', $arquivo),
-        ]);
-
-        return response()->json($documentos);
-    }
-
-    private function documentosDaPastaPessoal()
-    {
-        $pastaPessoal = Pasta::firstOrCreate(
-            ['user_id' => auth()->id(), 'parent_id' => null],
-            ['nome' => 'Meus Arquivos']
-        );
-
-        return $pastaPessoal->arquivos()
-            ->whereIn('extensao', self::EXTENSOES_SUPORTADAS)
-            ->latest()
-            ->get();
+        return view('repositorio.aplicacoes');
     }
 
     public function criar(Request $request)
@@ -116,10 +87,10 @@ class OnlyOfficeController extends Controller
             'titulo' => 'nullable|string|max:100',
         ]);
 
-        $pastaPessoal = Pasta::firstOrCreate(
-            ['user_id' => auth()->id(), 'parent_id' => null],
-            ['nome' => 'Meus Arquivos']
-        );
+        $sector = auth()->user()->sector;
+        abort_unless($sector, 422, 'Você precisa estar vinculado a um setor (lotação) para criar documentos pelas Aplicações. Atualize seu perfil.');
+
+        $pastaTemporaria = $sector->pastaTemporaria();
 
         $titulo = $request->input('titulo') ?: 'Documento sem título';
         $nomeArquivo = $titulo . '.' . $request->tipo;
@@ -146,11 +117,13 @@ class OnlyOfficeController extends Controller
         unlink($caminhoTemp);
 
         $arquivo = Arquivo::create([
-            'pasta_id' => $pastaPessoal->id,
+            'pasta_id' => $pastaTemporaria->id,
             'nome_original' => $nomeArquivo,
             'caminho' => $caminhoStorage,
             'extensao' => $request->tipo,
             'tamanho' => Storage::disk('arquivos')->size($caminhoStorage),
+            'sector_id' => $sector->id,
+            'is_private' => true,
         ]);
 
         return redirect()->route('onlyoffice.editor', $arquivo);

@@ -23,6 +23,19 @@ class Sector extends Model
         return $this->hasMany(Arquivo::class);
     }
 
+    public function pastaTemporaria(): Pasta
+    {
+        $raiz = Pasta::firstOrCreate(
+            ['nome' => $this->sigla, 'parent_id' => null],
+            ['sector_id' => $this->id, 'is_private' => false]
+        );
+
+        return Pasta::firstOrCreate(
+            ['nome' => 'Temporário', 'parent_id' => $raiz->id],
+            ['sector_id' => $this->id, 'is_private' => true]
+        );
+    }
+
     public function usoBytes(): int
     {
         return (int) $this->arquivos()->sum('tamanho');

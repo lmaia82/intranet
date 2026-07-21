@@ -3,7 +3,7 @@
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">Aplicações Office</h2>
     </x-slot>
     <div class="py-6 max-w-4xl mx-auto sm:px-6 lg:px-8">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
             <form method="POST" action="{{ route('onlyoffice.criar') }}" target="_blank" class="bg-white shadow rounded p-6 text-center space-y-3">
                 @csrf
                 <input type="hidden" name="tipo" value="docx">
@@ -41,45 +41,9 @@
             </div>
         </div>
 
-        <h3 class="font-semibold text-lg mb-3">Meus documentos</h3>
-        @php
-            $documentosIniciais = $documentos->map(fn ($d) => [
-                'id' => $d->id,
-                'nome_original' => $d->nome_original,
-                'extensao' => $d->extensao,
-                'tamanho_formatado' => $d->tamanhoFormatado(),
-                'editor_url' => route('onlyoffice.editor', $d),
-            ]);
-        @endphp
-        <div class="bg-white shadow rounded overflow-hidden"
-            x-data="meusDocumentos(@js($documentosIniciais), @js(route('onlyoffice.aplicacoes.documentos')))"
-            x-init="iniciarPolling()"
-        >
-            <table class="w-full text-left">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th class="p-3">Nome</th>
-                        <th class="p-3">Tipo</th>
-                        <th class="p-3">Tamanho</th>
-                        <th class="p-3"></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <template x-if="documentos.length === 0">
-                        <tr><td colspan="4" class="p-3 text-gray-500">Nenhum documento ainda. Crie um acima!</td></tr>
-                    </template>
-                    <template x-for="doc in documentos" :key="doc.id">
-                        <tr class="border-t">
-                            <td class="p-3" x-text="doc.nome_original"></td>
-                            <td class="p-3 uppercase" x-text="doc.extensao"></td>
-                            <td class="p-3" x-text="doc.tamanho_formatado"></td>
-                            <td class="p-3 text-right">
-                                <a :href="doc.editor_url" target="_blank" rel="noopener" class="text-green-700">Abrir no editor</a>
-                            </td>
-                        </tr>
-                    </template>
-                </tbody>
-            </table>
-        </div>
+        <p class="text-sm text-gray-600">
+            Os documentos criados aqui ficam na pasta <strong>Temporário</strong> do seu setor, dentro do
+            <a href="{{ route('repositorio.index') }}" class="text-blue-600">Repositório</a>.
+        </p>
     </div>
 </x-app-layout>

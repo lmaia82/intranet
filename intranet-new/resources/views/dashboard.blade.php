@@ -185,27 +185,6 @@
                 </div>
             </div>
 
-            <div class="bg-white shadow rounded p-4">
-                <div class="flex justify-between items-center mb-3">
-                    <h3 class="font-semibold text-lg">📁 Meus últimos arquivos</h3>
-                    <a href="{{ route('repositorio.meus') }}" class="text-sm text-blue-600">Ver todos</a>
-                </div>
-                <div class="space-y-3">
-                    @forelse($meusArquivos as $arquivo)
-                        <div class="flex justify-between items-center border-b pb-2 last:border-0">
-                            <span>{{ $arquivo->nome_original }}</span>
-                            @if(in_array($arquivo->extensao, ['doc','docx','odt','xls','xlsx','ods','ppt','pptx','odp','pdf']))
-                                <a href="{{ route('onlyoffice.editor', $arquivo) }}" target="_blank" rel="noopener" class="text-sm text-green-700">abrir</a>
-                            @else
-                                <a href="{{ route('repositorio.download', $arquivo) }}" class="text-sm text-blue-700">baixar</a>
-                            @endif
-                        </div>
-                    @empty
-                        <p class="text-sm text-gray-500">Nenhum arquivo por aqui ainda.</p>
-                    @endforelse
-                </div>
-            </div>
-
             @if(auth()->user()->hasPermission('tutoriais.ver'))
             <div class="bg-white shadow rounded p-4">
                 <div class="flex justify-between items-center mb-3">

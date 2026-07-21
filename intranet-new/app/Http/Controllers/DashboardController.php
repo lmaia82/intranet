@@ -32,13 +32,6 @@ class DashboardController extends Controller
             ->take(5)
             ->get();
 
-        $meusArquivos = Arquivo::whereHas('pasta', function ($query) {
-                $query->where('user_id', auth()->id());
-            })
-            ->latest('updated_at')
-            ->take(5)
-            ->get();
-
         $tutoriais = $user->hasPermission('tutoriais.ver')
             ? Tutorial::latest('data')->take(5)->get()
             : collect();
@@ -48,12 +41,7 @@ class DashboardController extends Controller
             : collect();
 
         $documentosPublicos = $user->hasPermission('repositorio.ver')
-            ? Arquivo::where('is_private', false)
-                ->whereDoesntHave('pasta', fn ($query) => $query->whereNotNull('user_id'))
-                ->with('sector')
-                ->latest('data')
-                ->take(5)
-                ->get()
+            ? Arquivo::where('is_private', false)->with('sector')->latest('data')->take(5)->get()
             : collect();
 
         $mes = (int) $request->query('mes', now()->month);
@@ -86,7 +74,7 @@ class DashboardController extends Controller
             ->groupBy(fn ($evento) => $evento->dt_start->toDateString());
 
         return view('dashboard', compact(
-            'destaques', 'informativos', 'eventos', 'meusArquivos',
+            'destaques', 'informativos', 'eventos',
             'tutoriais', 'eventosGravados', 'documentosPublicos',
             'mesReferencia', 'nomeMesAno', 'mesAnterior', 'mesProximo',
             'diasCalendario', 'eventosPorDia'

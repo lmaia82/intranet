@@ -39,19 +39,4 @@ Alpine.data('ocrStatus', (status, erro, url) => ({
     },
 }));
 
-Alpine.data('meusDocumentos', (iniciais, url) => ({
-    documentos: iniciais,
-    carregar() {
-        fetch(url)
-            .then((r) => r.json())
-            .then((dados) => {
-                this.documentos = dados;
-            })
-            .catch(() => {});
-    },
-    iniciarPolling() {
-        setInterval(() => this.carregar(), 5000);
-    },
-}));
-
 Alpine.start();

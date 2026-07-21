@@ -163,18 +163,6 @@ class SectorQuotaTest extends TestCase
         $this->actingAs($user)->get(route('repositorio.download', $arquivo))->assertForbidden();
     }
 
-    public function test_pasta_meus_arquivos_e_criada_com_o_setor_do_usuario(): void
-    {
-        $sector = Sector::create(['sigla' => 'TI']);
-        $user = User::factory()->create(['sector_id' => $sector->id]);
-
-        $this->actingAs($user)->get(route('repositorio.meus'));
-
-        $pasta = \App\Models\Pasta::where('user_id', $user->id)->whereNull('parent_id')->first();
-        $this->assertNotNull($pasta);
-        $this->assertEquals($sector->id, $pasta->sector_id);
-    }
-
     public function test_dashboard_de_armazenamento_renderiza_para_admin(): void
     {
         $admin = User::factory()->create(['is_admin' => true]);

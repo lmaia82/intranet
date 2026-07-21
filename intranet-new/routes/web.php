@@ -103,7 +103,6 @@ Route::middleware('auth')->group(function () {
 use App\Http\Controllers\RepositorioController;
 
 Route::middleware(['auth', 'permission:repositorio.ver'])->group(function () {
-    Route::get('meus-arquivos', [RepositorioController::class, 'meusArquivos'])->name('repositorio.meus');
     Route::get('repositorio/{pasta?}', [RepositorioController::class, 'index'])->name('repositorio.index')->middleware('registrar.acesso:repositorio');
     Route::get('repositorio/arquivos/{arquivo}/download', [RepositorioController::class, 'download'])->name('repositorio.download');
     Route::get('repositorio/arquivos/{arquivo}/ocr-status', [RepositorioController::class, 'ocrStatus'])->name('repositorio.arquivos.ocr-status');
@@ -140,7 +139,6 @@ Route::post('webhooks/paperless', [PaperlessWebhookController::class, 'handle'])
 
 Route::middleware('auth')->group(function () {
     Route::get('aplicacoes', [OnlyOfficeController::class, 'aplicacoes'])->name('onlyoffice.aplicacoes');
-    Route::get('aplicacoes/documentos', [OnlyOfficeController::class, 'documentos'])->name('onlyoffice.aplicacoes.documentos');
     Route::post('aplicacoes/criar', [OnlyOfficeController::class, 'criar'])->name('onlyoffice.criar');
 });
 

@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Pasta extends Model
 {
-    protected $fillable = ['nome', 'parent_id', 'sector_id', 'is_private', 'user_id'];
+    protected $fillable = ['nome', 'parent_id', 'sector_id', 'is_private'];
 
     protected $casts = [
         'is_private' => 'boolean',
@@ -14,10 +14,6 @@ class Pasta extends Model
 
     public function visivelPara(User $user): bool
     {
-        if ($this->user_id !== null) {
-            return $this->user_id === $user->id;
-        }
-
         if (!$this->is_private) {
             return true;
         }

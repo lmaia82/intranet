@@ -17,18 +17,6 @@ class RepositorioController extends Controller
     {
     }
 
-    public function meusArquivos()
-    {
-        $user = auth()->user();
-
-        $pasta = Pasta::firstOrCreate(
-            ['user_id' => $user->id, 'parent_id' => null],
-            ['nome' => 'Meus Arquivos', 'sector_id' => $user->sector_id]
-        );
-
-        return redirect()->route('repositorio.index', ['pasta' => $pasta->id]);
-    }
-
     public function index(?Pasta $pasta = null)
     {
         $user = auth()->user();
@@ -62,13 +50,6 @@ class RepositorioController extends Controller
             'is_private' => 'boolean',
         ]);
         $validated['is_private'] = $request->boolean('is_private');
-
-        if ($validated['parent_id'] ?? null) {
-            $pastaPai = Pasta::find($validated['parent_id']);
-            if ($pastaPai && $pastaPai->user_id !== null) {
-                $validated['user_id'] = $pastaPai->user_id;
-            }
-        }
 
         Pasta::create($validated);
 
