@@ -61,7 +61,7 @@ class ActiveDirectoryAuthenticator
     /**
      * Garante o mínimo privilégio por padrão: importa o setor do AD para a
      * intranet automaticamente (quando a sigla corresponde a um setor já
-     * cadastrado) e entra no grupo "Leitor" (somente visualização) até um
+     * cadastrado) e entra no grupo "Leitores" (somente visualização) até um
      * admin decidir elevar o acesso.
      */
     private function provisionarPrimeiroLogin(User $usuario): void
@@ -70,7 +70,7 @@ class ActiveDirectoryAuthenticator
             $usuario->sector_id = Sector::where('sigla', $usuario->ad_setor)->value('id');
         }
 
-        $usuario->group_id = Group::where('name', 'Leitor')->value('id');
+        $usuario->group_id = Group::where('name', 'Leitores')->value('id');
     }
 
     /**

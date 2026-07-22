@@ -41,6 +41,7 @@ class ActiveDirectoryAuthenticationTest extends TestCase
     public function test_usuario_do_ad_autentica_via_bind_direto_com_o_proprio_email_e_sincroniza_dados(): void
     {
         $setor = Sector::create(['sigla' => 'TI']);
+        Group::create(['name' => 'Leitores']);
 
         $fake = DirectoryEmulator::setup();
 
@@ -71,13 +72,15 @@ class ActiveDirectoryAuthenticationTest extends TestCase
         $this->assertNotNull($usuario->ad_synced_at);
 
         // Primeiro login: setor importado automaticamente do AD e grupo
-        // "Leitor" (mínimo privilégio) atribuído por padrão.
+        // "Leitores" (mínimo privilégio) atribuído por padrão.
         $this->assertSame($setor->id, $usuario->sector_id);
-        $this->assertSame('Leitor', $usuario->group->name);
+        $this->assertSame('Leitores', $usuario->group->name);
     }
 
     public function test_primeiro_login_entra_no_grupo_leitor_mesmo_quando_setor_do_ad_nao_corresponde_a_nenhum_cadastrado(): void
     {
+        Group::create(['name' => 'Leitores']);
+
         $fake = DirectoryEmulator::setup();
 
         $this->criarUsuarioNoAd([
@@ -96,7 +99,30 @@ class ActiveDirectoryAuthenticationTest extends TestCase
         $usuario = User::where('email', 'fulano@cetem.gov.br')->first();
 
         $this->assertNull($usuario->sector_id);
-        $this->assertSame('Leitor', $usuario->group->name);
+        $this->assertSame('Leitores', $usuario->group->name);
+    }
+
+    public function test_primeiro_login_nao_falha_quando_grupo_leitores_ainda_nao_existe(): void
+    {
+        $fake = DirectoryEmulator::setup();
+
+        $this->criarUsuarioNoAd([
+            'cn' => 'Fulano da Silva',
+            'mail' => 'fulano@cetem.gov.br',
+            'objectguid' => Str::orderedUuid(),
+        ], setor: 'TI');
+
+        $fake->getLdapConnection()->shouldAllowBindWith('fulano@cetem.gov.br');
+
+        $this->post('/login', [
+            'email' => 'fulano@cetem.gov.br',
+            'password' => 'senha-do-ad',
+        ]);
+
+        $usuario = User::where('email', 'fulano@cetem.gov.br')->first();
+
+        $this->assertNotNull($usuario);
+        $this->assertNull($usuario->group_id);
     }
 
     public function test_autentica_com_formato_down_level_quando_o_email_nao_e_aceito_como_upn(): void
