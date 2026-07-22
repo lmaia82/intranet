@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Models\Group;
+use App\Models\Sector;
 use App\Models\User;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -41,10 +43,34 @@ class ActiveDirectoryAuthenticator
         }
 
         $usuario = $this->synchronizer->run($ldapUser);
+
+        // Só no primeiro login (usuário recém-criado pelo sync acima) — se
+        // já existia (ex.: vinculado ao AD por e-mail por já ter sido
+        // cadastrado manualmente), setor/grupo continuam como o admin
+        // definiu, não são sobrescritos.
+        if (! $usuario->exists) {
+            $this->provisionarPrimeiroLogin($usuario);
+        }
+
         $usuario->ad_synced_at = now();
         $usuario->save();
 
         return $usuario;
+    }
+
+    /**
+     * Garante o mínimo privilégio por padrão: importa o setor do AD para a
+     * intranet automaticamente (quando a sigla corresponde a um setor já
+     * cadastrado) e entra no grupo "Leitor" (somente visualização) até um
+     * admin decidir elevar o acesso.
+     */
+    private function provisionarPrimeiroLogin(User $usuario): void
+    {
+        if ($usuario->ad_setor) {
+            $usuario->sector_id = Sector::where('sigla', $usuario->ad_setor)->value('id');
+        }
+
+        $usuario->group_id = Group::where('name', 'Leitor')->value('id');
     }
 
     /**

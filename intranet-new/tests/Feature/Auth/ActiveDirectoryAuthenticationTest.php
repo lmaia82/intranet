@@ -2,6 +2,8 @@
 
 namespace Tests\Feature\Auth;
 
+use App\Models\Group;
+use App\Models\Sector;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
@@ -38,6 +40,8 @@ class ActiveDirectoryAuthenticationTest extends TestCase
 
     public function test_usuario_do_ad_autentica_via_bind_direto_com_o_proprio_email_e_sincroniza_dados(): void
     {
+        $setor = Sector::create(['sigla' => 'TI']);
+
         $fake = DirectoryEmulator::setup();
 
         $this->criarUsuarioNoAd([
@@ -65,6 +69,34 @@ class ActiveDirectoryAuthenticationTest extends TestCase
         $this->assertSame('TI', $usuario->ad_setor);
         $this->assertNotNull($usuario->ad_guid);
         $this->assertNotNull($usuario->ad_synced_at);
+
+        // Primeiro login: setor importado automaticamente do AD e grupo
+        // "Leitor" (mínimo privilégio) atribuído por padrão.
+        $this->assertSame($setor->id, $usuario->sector_id);
+        $this->assertSame('Leitor', $usuario->group->name);
+    }
+
+    public function test_primeiro_login_entra_no_grupo_leitor_mesmo_quando_setor_do_ad_nao_corresponde_a_nenhum_cadastrado(): void
+    {
+        $fake = DirectoryEmulator::setup();
+
+        $this->criarUsuarioNoAd([
+            'cn' => 'Fulano da Silva',
+            'mail' => 'fulano@cetem.gov.br',
+            'objectguid' => Str::orderedUuid(),
+        ], setor: 'SETOR-INEXISTENTE-NA-INTRANET');
+
+        $fake->getLdapConnection()->shouldAllowBindWith('fulano@cetem.gov.br');
+
+        $this->post('/login', [
+            'email' => 'fulano@cetem.gov.br',
+            'password' => 'senha-do-ad',
+        ]);
+
+        $usuario = User::where('email', 'fulano@cetem.gov.br')->first();
+
+        $this->assertNull($usuario->sector_id);
+        $this->assertSame('Leitor', $usuario->group->name);
     }
 
     public function test_autentica_com_formato_down_level_quando_o_email_nao_e_aceito_como_upn(): void
@@ -138,9 +170,14 @@ class ActiveDirectoryAuthenticationTest extends TestCase
 
     public function test_usuario_ja_cadastrado_na_intranet_e_vinculado_ao_ad_pelo_email_no_primeiro_login(): void
     {
+        $setorJaDefinido = Sector::create(['sigla' => 'RH']);
+        $grupoJaDefinido = Group::create(['name' => 'Administradores']);
+
         $usuario = User::factory()->create([
             'email' => 'existente@cetem.gov.br',
             'ad_guid' => null,
+            'sector_id' => $setorJaDefinido->id,
+            'group_id' => $grupoJaDefinido->id,
         ]);
 
         $fake = DirectoryEmulator::setup();
@@ -164,5 +201,10 @@ class ActiveDirectoryAuthenticationTest extends TestCase
         $usuario->refresh();
         $this->assertNotNull($usuario->ad_guid);
         $this->assertSame('ADM', $usuario->ad_setor);
+
+        // Usuário já existia (vínculo por e-mail, não é o primeiro login) —
+        // setor/grupo definidos manualmente pelo admin não são sobrescritos.
+        $this->assertSame($setorJaDefinido->id, $usuario->sector_id);
+        $this->assertSame($grupoJaDefinido->id, $usuario->group_id);
     }
 }
