@@ -24,9 +24,16 @@ class ConfirmablePasswordController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        // Mesma estrutura híbrida do login (App\Http\Requests\Auth\LoginRequest):
+        // senha verificada via bind no AD, com fallback local para usuários
+        // administrados só na intranet.
         if (! Auth::guard('web')->validate([
-            'email' => $request->user()->email,
+            'mail' => $request->user()->email,
             'password' => $request->password,
+            'fallback' => [
+                'email' => $request->user()->email,
+                'password' => $request->password,
+            ],
         ])) {
             throw ValidationException::withMessages([
                 'password' => __('auth.password'),

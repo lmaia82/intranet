@@ -177,6 +177,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::put('usuarios/{usuario}', [AdminController::class, 'updateUsuario'])->name('usuarios.update');
     Route::post('usuarios/{usuario}/toggle-admin', [AdminController::class, 'toggleAdmin'])->name('usuarios.toggle');
     Route::put('usuarios/{usuario}/setor', [AdminController::class, 'updateUsuarioSetor'])->name('usuarios.setor');
+    Route::post('usuarios/{usuario}/setor/trazer-do-ad', [AdminController::class, 'trazerSetorDoAd'])->name('usuarios.setor.trazer-do-ad');
     Route::put('usuarios/{usuario}/grupo', [AdminController::class, 'updateUsuarioGrupo'])->name('usuarios.grupo');
     Route::delete('usuarios/{usuario}', [AdminController::class, 'destroyUsuario'])->name('usuarios.destroy');
 

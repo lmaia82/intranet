@@ -26,6 +26,13 @@
         <env name="DB_CONNECTION" value="sqlite"/>
         <env name="DB_DATABASE" value=":memory:"/>
         <env name="DB_URL" value=""/>
+        <!-- Nunca apontar os testes para o AD real do CETEM (definido no
+             .env local) — os testes de autenticação/import via LDAP usam
+             LdapRecord\Testing\DirectoryFake, e este host inexistente
+             garante que nenhum teste acidentalmente tente uma conexão real. -->
+        <env name="LDAP_HOST" value="127.0.0.1"/>
+        <env name="LDAP_USERNAME" value=""/>
+        <env name="LDAP_PASSWORD" value=""/>
         <env name="MAIL_MAILER" value="array"/>
         <env name="QUEUE_CONNECTION" value="sync"/>
         <env name="SESSION_DRIVER" value="array"/>

@@ -18,7 +18,9 @@
                     <tr>
                         <th class="p-3">Nome</th>
                         <th class="p-3">E-mail</th>
-                        <th class="p-3">Setor</th>
+                        <th class="p-3">Setor (Intranet)</th>
+                        <th class="p-3">Setor (AD)</th>
+                        <th class="p-3" title="Compara o setor da intranet com o setor trazido do AD">Confere?</th>
                         <th class="p-3">Grupo</th>
                         <th class="p-3">Admin</th>
                         <th class="p-3"></th>
@@ -40,6 +42,23 @@
                                         @endforeach
                                     </select>
                                 </form>
+                                @if($usuario->ad_setor && !$usuario->sector_id)
+                                    <form action="{{ route('admin.usuarios.setor.trazer-do-ad', $usuario) }}" method="POST" class="mt-1">
+                                        @csrf
+                                        <button type="submit" class="text-xs text-blue-600 underline">Trazer do AD</button>
+                                    </form>
+                                @endif
+                            </td>
+                            <td class="p-3">{{ $usuario->ad_setor ?? '—' }}</td>
+                            <td class="p-3 text-center">
+                                @php($confere = $usuario->setorBateComAd())
+                                @if(is_null($confere))
+                                    <span class="text-gray-400" title="Usuário sem conta no AD">—</span>
+                                @elseif($confere)
+                                    <span class="text-green-600" title="Setor da intranet confere com o AD">✅</span>
+                                @else
+                                    <span class="text-amber-600" title="Setor da intranet diferente do AD">⚠️</span>
+                                @endif
                             </td>
                             <td class="p-3">
                                 <form action="{{ route('admin.usuarios.grupo', $usuario) }}" method="POST">

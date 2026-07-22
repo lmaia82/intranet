@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\User;
+use LdapRecord\Models\ActiveDirectory\User as LdapUser;
 
 return [
 
@@ -62,15 +63,39 @@ return [
     */
 
     'providers' => [
+        // Provider híbrido: a senha é verificada via bind direto no AD para
+        // usuários vinculados (ad_guid preenchido); usuários só-intranet
+        // (mantidos manualmente para administração, sem conta no AD) caem
+        // no fallback local por Eloquent — ver App\Http\Requests\Auth\LoginRequest.
         'users' => [
-            'driver' => 'eloquent',
-            'model' => env('AUTH_MODEL', User::class),
+            'driver' => 'ldap',
+            'model' => LdapUser::class,
+            'rules' => [],
+            'database' => [
+                'model' => User::class,
+                'sync_passwords' => false,
+                'sync_attributes' => [
+                    'name' => 'cn',
+                    'email' => 'mail',
+                    'ad_setor' => 'department',
+                ],
+                // Vincula por e-mail, na primeira importação, usuários já
+                // cadastrados manualmente na intranet antes da integração
+                // — evita duplicar em vez de criar um segundo registro.
+                'sync_existing' => [
+                    'email' => 'mail',
+                ],
+            ],
         ],
 
-        // 'users' => [
-        //     'driver' => 'database',
-        //     'table' => 'users',
-        // ],
+        // Provider Eloquent puro, usado apenas pelo broker de redefinição de
+        // senha (abaixo) — a senha de usuários vinculados ao AD é gerenciada
+        // lá, não faz sentido reenviar link de redefinição por e-mail para
+        // eles; isso continua servindo aos usuários só-intranet.
+        'users_local' => [
+            'driver' => 'eloquent',
+            'model' => User::class,
+        ],
     ],
 
     /*
@@ -94,7 +119,7 @@ return [
 
     'passwords' => [
         'users' => [
-            'provider' => 'users',
+            'provider' => 'users_local',
             'table' => env('AUTH_PASSWORD_RESET_TOKEN_TABLE', 'password_reset_tokens'),
             'expire' => 60,
             'throttle' => 60,

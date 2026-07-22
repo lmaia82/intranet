@@ -42,7 +42,19 @@ class LoginRequest extends FormRequest
     {
         $this->ensureIsNotRateLimited();
 
-        if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
+        // Tenta autenticar via bind direto no AD (usuário localizado pelo
+        // atributo "mail"); se não houver conta no AD com esse e-mail, cai
+        // no fallback local (usuários administrados só na intranet).
+        $credentials = [
+            'mail' => $this->string('email'),
+            'password' => $this->string('password'),
+            'fallback' => [
+                'email' => $this->string('email'),
+                'password' => $this->string('password'),
+            ],
+        ];
+
+        if (! Auth::attempt($credentials, $this->boolean('remember'))) {
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([

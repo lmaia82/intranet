@@ -392,6 +392,25 @@ class AdminController extends Controller
         return redirect()->route('admin.usuarios')->with('status', 'Setor do usuário atualizado.');
     }
 
+    public function trazerSetorDoAd(User $usuario)
+    {
+        abort_if(is_null($usuario->ad_setor), 404, 'Usuário sem setor importado do AD.');
+
+        if ($usuario->sector_id) {
+            return redirect()->route('admin.usuarios')->with('status', 'O usuário já possui um setor definido na intranet — remova-o antes de trazer do AD.');
+        }
+
+        $setor = Sector::where('sigla', $usuario->ad_setor)->first();
+
+        if (!$setor) {
+            return redirect()->route('admin.usuarios')->with('status', "Nenhum setor da intranet corresponde a \"{$usuario->ad_setor}\" (AD). Cadastre o setor ou ajuste manualmente.");
+        }
+
+        $usuario->update(['sector_id' => $setor->id]);
+
+        return redirect()->route('admin.usuarios')->with('status', 'Setor trazido do AD com sucesso.');
+    }
+
     public function updateUsuarioGrupo(Request $request, User $usuario)
     {
         $validated = $request->validate(['group_id' => 'nullable|exists:groups,id']);
