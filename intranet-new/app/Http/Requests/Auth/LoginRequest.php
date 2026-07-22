@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Auth;
 
+use App\Services\ActiveDirectoryAuthenticator;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -42,19 +43,18 @@ class LoginRequest extends FormRequest
     {
         $this->ensureIsNotRateLimited();
 
-        // Tenta autenticar via bind direto no AD (usuário localizado pelo
-        // atributo "mail"); se não houver conta no AD com esse e-mail, cai
-        // no fallback local (usuários administrados só na intranet).
-        $credentials = [
-            'mail' => $this->string('email'),
-            'password' => $this->string('password'),
-            'fallback' => [
-                'email' => $this->string('email'),
-                'password' => $this->string('password'),
-            ],
-        ];
+        $email = $this->string('email')->value();
+        $password = $this->string('password')->value();
 
-        if (! Auth::attempt($credentials, $this->boolean('remember'))) {
+        // Tenta autenticar via bind direto no AD (sem conta de serviço: o
+        // CETEM optou por autenticar cada usuário com a própria credencial).
+        // Se a senha não conferir no AD — inclusive para quem não tem conta
+        // lá — cai no fallback local (usuários administrados só na intranet).
+        $usuario = app(ActiveDirectoryAuthenticator::class)->autenticar($email, $password);
+
+        if ($usuario) {
+            Auth::login($usuario, $this->boolean('remember'));
+        } elseif (! Auth::attempt(['email' => $email, 'password' => $password], $this->boolean('remember'))) {
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([

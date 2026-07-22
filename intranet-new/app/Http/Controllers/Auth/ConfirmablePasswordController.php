@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Services\ActiveDirectoryAuthenticator;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -24,17 +25,19 @@ class ConfirmablePasswordController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        // Mesma estrutura híbrida do login (App\Http\Requests\Auth\LoginRequest):
-        // senha verificada via bind no AD, com fallback local para usuários
-        // administrados só na intranet.
-        if (! Auth::guard('web')->validate([
-            'mail' => $request->user()->email,
-            'password' => $request->password,
-            'fallback' => [
+        // Mesma verificação do login (App\Http\Requests\Auth\LoginRequest):
+        // tenta o bind direto no AD e, se não conferir, cai no fallback
+        // local (usuários administrados só na intranet).
+        $confirmadoNoAd = app(ActiveDirectoryAuthenticator::class)
+            ->autenticar($request->user()->email, $request->password);
+
+        $confirmado = $confirmadoNoAd
+            || Auth::guard('web')->validate([
                 'email' => $request->user()->email,
                 'password' => $request->password,
-            ],
-        ])) {
+            ]);
+
+        if (! $confirmado) {
             throw ValidationException::withMessages([
                 'password' => __('auth.password'),
             ]);

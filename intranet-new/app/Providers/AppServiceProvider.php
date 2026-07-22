@@ -2,9 +2,11 @@
 
 namespace App\Providers;
 
+use App\Models\User;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 use LdapRecord\Laravel\Events\Import\Saved;
+use LdapRecord\Laravel\Import\UserSynchronizer;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -13,7 +15,15 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // Usado por App\Services\ActiveDirectoryAuthenticator para
+        // sincronizar nome/e-mail/setor após um bind direto no AD.
+        $this->app->bind(UserSynchronizer::class, function () {
+            return new UserSynchronizer(User::class, [
+                'sync_passwords' => false,
+                'sync_attributes' => config('ldap.sync_attributes'),
+                'sync_existing' => config('ldap.sync_existing'),
+            ]);
+        });
     }
 
     /**

@@ -3,7 +3,6 @@
 use App\Http\Middleware\EnsureUserHasPermission;
 use App\Http\Middleware\EnsureUserIsAdmin;
 use App\Http\Middleware\RegistrarAcesso;
-use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -15,15 +14,10 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
-    ->withSchedule(function (Schedule $schedule): void {
-        // Mantém nome/e-mail/setor(AD) sincronizados com o Active Directory.
-        // Filtro conferido com a integração LDAP já em produção no GLPI do
-        // CETEM (exclui contas desabilitadas via userAccountControl).
-        $schedule->command('ldap:import users', [
-            '--no-interaction',
-            '--filter=(&(objectClass=user)(objectCategory=person)(!(userAccountControl:1.2.840.113556.1.4.803:=2)))',
-        ])->daily();
-    })
+    // Sem importação agendada: o CETEM optou por não configurar uma conta de
+    // serviço no AD, então não há como buscar todo o diretório em lote.
+    // Nome/e-mail/setor(AD) são sincronizados no momento do login de cada
+    // usuário — ver App\Services\ActiveDirectoryAuthenticator.
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->validateCsrfTokens(except: [
             'onlyoffice/callback/*',

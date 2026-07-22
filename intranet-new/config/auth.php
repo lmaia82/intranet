@@ -1,7 +1,6 @@
 <?php
 
 use App\Models\User;
-use LdapRecord\Models\ActiveDirectory\User as LdapUser;
 
 return [
 
@@ -63,38 +62,14 @@ return [
     */
 
     'providers' => [
-        // Provider híbrido: a senha é verificada via bind direto no AD para
-        // usuários vinculados (ad_guid preenchido); usuários só-intranet
-        // (mantidos manualmente para administração, sem conta no AD) caem
-        // no fallback local por Eloquent — ver App\Http\Requests\Auth\LoginRequest.
+        // Provider Eloquent puro. A verificação de senha no AD acontece à
+        // parte, via App\Services\ActiveDirectoryAuthenticator (bind direto,
+        // sem conta de serviço — ver config/ldap.php); este provider só
+        // entra em ação como fallback local, para usuários administrados
+        // só na intranet (sem conta no AD) — ver App\Http\Requests\Auth\LoginRequest.
         'users' => [
-            'driver' => 'ldap',
-            'model' => LdapUser::class,
-            'rules' => [],
-            'database' => [
-                'model' => User::class,
-                'sync_passwords' => false,
-                'sync_attributes' => [
-                    'name' => 'cn',
-                    'email' => 'mail',
-                    'ad_setor' => 'department',
-                ],
-                // Vincula por e-mail, na primeira importação, usuários já
-                // cadastrados manualmente na intranet antes da integração
-                // — evita duplicar em vez de criar um segundo registro.
-                'sync_existing' => [
-                    'email' => 'mail',
-                ],
-            ],
-        ],
-
-        // Provider Eloquent puro, usado apenas pelo broker de redefinição de
-        // senha (abaixo) — a senha de usuários vinculados ao AD é gerenciada
-        // lá, não faz sentido reenviar link de redefinição por e-mail para
-        // eles; isso continua servindo aos usuários só-intranet.
-        'users_local' => [
             'driver' => 'eloquent',
-            'model' => User::class,
+            'model' => env('AUTH_MODEL', User::class),
         ],
     ],
 
@@ -119,7 +94,7 @@ return [
 
     'passwords' => [
         'users' => [
-            'provider' => 'users_local',
+            'provider' => 'users',
             'table' => env('AUTH_PASSWORD_RESET_TOKEN_TABLE', 'password_reset_tokens'),
             'expire' => 60,
             'throttle' => 60,
