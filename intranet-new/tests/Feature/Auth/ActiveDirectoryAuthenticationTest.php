@@ -22,16 +22,29 @@ class ActiveDirectoryAuthenticationTest extends TestCase
         parent::tearDown();
     }
 
+    /**
+     * O AD do CETEM representa o setor como a OU do usuário (ex.:
+     * OU=TI,OU=CETEM,DC=mineral,DC=cetem), não como um atributo — ver
+     * App\Services\ActiveDirectorySetorHydrator.
+     */
+    private function criarUsuarioNoAd(array $atributos, string $setor): LdapUser
+    {
+        $usuario = new LdapUser($atributos);
+        $usuario->inside("OU={$setor},OU=CETEM,DC=mineral,DC=cetem");
+        $usuario->save();
+
+        return $usuario;
+    }
+
     public function test_usuario_do_ad_autentica_via_bind_direto_com_o_proprio_email_e_sincroniza_dados(): void
     {
         $fake = DirectoryEmulator::setup();
 
-        LdapUser::create([
+        $this->criarUsuarioNoAd([
             'cn' => 'Fulano da Silva',
             'mail' => 'fulano@cetem.gov.br',
-            'department' => 'TI',
             'objectguid' => Str::orderedUuid(),
-        ]);
+        ], setor: 'TI');
 
         // Sem conta de serviço: o bind é feito com o próprio e-mail/senha do
         // usuário (primeiro formato tentado por ActiveDirectoryAuthenticator).
@@ -58,12 +71,11 @@ class ActiveDirectoryAuthenticationTest extends TestCase
     {
         $fake = DirectoryEmulator::setup();
 
-        LdapUser::create([
+        $this->criarUsuarioNoAd([
             'cn' => 'Fulano da Silva',
             'mail' => 'fulano@cetem.gov.br',
-            'department' => 'TI',
             'objectguid' => Str::orderedUuid(),
-        ]);
+        ], setor: 'TI');
 
         $ldap = $fake->getLdapConnection();
         // O AD recusa o e-mail puro como identidade de bind (primeiro
@@ -133,12 +145,11 @@ class ActiveDirectoryAuthenticationTest extends TestCase
 
         $fake = DirectoryEmulator::setup();
 
-        LdapUser::create([
+        $this->criarUsuarioNoAd([
             'cn' => 'Nome Atualizado Pelo AD',
             'mail' => 'existente@cetem.gov.br',
-            'department' => 'ADM',
             'objectguid' => Str::orderedUuid(),
-        ]);
+        ], setor: 'ADM');
 
         $fake->getLdapConnection()->shouldAllowBindWith('existente@cetem.gov.br');
 

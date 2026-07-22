@@ -86,7 +86,7 @@ return [
     'sync_attributes' => [
         'name' => 'cn',
         'email' => 'mail',
-        'ad_setor' => 'department',
+        'ad_setor' => \App\Services\ActiveDirectorySetorHydrator::class,
     ],
 
     // Vincula pelo e-mail, no primeiro login, usuários já cadastrados
