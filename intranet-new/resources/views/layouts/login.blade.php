@@ -49,7 +49,7 @@
                         {{ $preview ?? '' }}
                     </main>
 
-                    <x-modal name="login" :show="$errors->any() || session('status')" maxWidth="md">
+                    <x-modal name="login" :show="$errors->any() || session('status')" maxWidth="md" sync-store="loginModal">
                         <div class="px-6 py-8">
                             <p class="text-center text-gray-700 font-medium mb-4">Entre para acessar as funcionalidades</p>
                             {{ $slot }}

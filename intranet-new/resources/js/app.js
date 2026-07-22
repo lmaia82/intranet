@@ -39,4 +39,6 @@ Alpine.data('ocrStatus', (status, erro, url) => ({
     },
 }));
 
+Alpine.store('loginModal', { aberto: false });
+
 Alpine.start();

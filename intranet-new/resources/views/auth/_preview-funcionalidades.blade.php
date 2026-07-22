@@ -1,4 +1,8 @@
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6" x-data>
+<div
+    class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 transition-opacity duration-500 ease-in-out"
+    x-data
+    :class="$store.loginModal.aberto ? 'opacity-0' : 'opacity-100'"
+>
     <div class="bg-white/80 backdrop-blur-sm shadow rounded p-4 text-center">
         <p class="text-gray-700 font-medium">Conheça o que a Intranet CETEM oferece</p>
         <p class="text-sm text-gray-500">Entre para acessar todas as funcionalidades abaixo.</p>
