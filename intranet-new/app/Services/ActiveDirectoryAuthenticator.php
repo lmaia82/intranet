@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\User;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use LdapRecord\Container;
 use LdapRecord\LdapRecordException;
@@ -59,7 +60,16 @@ class ActiveDirectoryAuthenticator
         foreach ($this->possiveisIdentidadesDeBind($email) as $identidade) {
             try {
                 $connection->connect($identidade, $password);
-            } catch (LdapRecordException) {
+            } catch (LdapRecordException $e) {
+                // Loga o motivo detalhado do AD (ex.: "data 52e" = senha
+                // incorreta, "data 525" = usuário não encontrado, "data 533"
+                // = conta desabilitada) — o log padrão do LdapRecord só
+                // mostra o erro genérico "Invalid credentials".
+                Log::warning('Bind direto no AD falhou', [
+                    'identidade' => $identidade,
+                    'diagnostico' => $e->getDetailedError()?->getDiagnosticMessage(),
+                ]);
+
                 continue;
             }
 
