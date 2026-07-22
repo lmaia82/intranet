@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Auth;
 
+use App\Models\Configuracao;
 use App\Models\Destaque;
 use App\Models\Informativo;
 use App\Models\Sector;
@@ -21,11 +22,24 @@ class AuthenticationTest extends TestCase
             ->assertSee("dispatch('open-modal', 'login')", false)
             ->assertSee('style="display: none;"', false)
             ->assertSee('Entre para acessar as funcionalidades')
-            ->assertSee('Mural de Avisos');
+            ->assertDontSee('Mural de Avisos');
+    }
+
+    public function test_login_screen_nao_mostra_previa_de_funcionalidades_por_padrao(): void
+    {
+        $this->assertFalse(Configuracao::atual()->previa_login_ativa);
+
+        Destaque::create(['titulo' => 'Campanha', 'imagem' => 'destaques/campanha.jpg', 'ordem' => 0, 'ativo' => true]);
+
+        $response = $this->get('/login');
+
+        $response->assertOk()->assertDontSee('destaques/campanha.jpg', false);
     }
 
     public function test_login_screen_mostra_previa_de_informativos_publicos_e_esconde_privados(): void
     {
+        Configuracao::atual()->update(['previa_login_ativa' => true]);
+
         $sector = Sector::create(['sigla' => 'TI']);
         Informativo::create(['title' => 'Aviso Público', 'content' => 'x', 'published_at' => now(), 'is_private' => false]);
         Informativo::create(['title' => 'Aviso Restrito', 'content' => 'x', 'sector_id' => $sector->id, 'published_at' => now(), 'is_private' => true]);
@@ -39,6 +53,8 @@ class AuthenticationTest extends TestCase
 
     public function test_login_screen_mostra_destaques_ativos(): void
     {
+        Configuracao::atual()->update(['previa_login_ativa' => true]);
+
         Destaque::create(['titulo' => 'Campanha', 'imagem' => 'destaques/campanha.jpg', 'ordem' => 0, 'ativo' => true]);
 
         $response = $this->get('/login');

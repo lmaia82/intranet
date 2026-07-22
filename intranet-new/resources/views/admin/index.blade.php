@@ -71,6 +71,10 @@
                 <p class="font-semibold text-lg">🩺 Saúde do Sistema</p>
                 <p class="text-sm text-gray-500">OCR, envio de e-mails de Informativos e cotas de armazenamento</p>
             </a>
+            <a href="{{ route('admin.configuracoes') }}" class="bg-white shadow rounded p-6 hover:bg-gray-50">
+                <p class="font-semibold text-lg">⚙️ Configurações</p>
+                <p class="text-sm text-gray-500">Ativar/desativar funcionalidades da intranet</p>
+            </a>
         </div>
     </div>
 </x-app-layout>

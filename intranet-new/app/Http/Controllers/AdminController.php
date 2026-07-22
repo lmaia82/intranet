@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Acesso;
 use App\Models\Arquivo;
+use App\Models\Configuracao;
 use App\Models\Destaque;
 use App\Models\Evento;
 use App\Models\Group;
@@ -197,6 +198,20 @@ class AdminController extends Controller
             'servicos', 'ocrPorStatus', 'arquivosComFalhaOcr',
             'enviosEmail', 'emailsComFalha', 'setoresProximosDaCota'
         ));
+    }
+
+    public function configuracoes()
+    {
+        $configuracao = Configuracao::atual();
+        return view('admin.configuracoes', compact('configuracao'));
+    }
+
+    public function togglePreviaLogin()
+    {
+        $configuracao = Configuracao::atual();
+        $configuracao->update(['previa_login_ativa' => !$configuracao->previa_login_ativa]);
+
+        return redirect()->route('admin.configuracoes')->with('status', 'Configuração atualizada.');
     }
 
     public function storeSetor(Request $request)

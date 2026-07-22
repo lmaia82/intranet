@@ -162,6 +162,9 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('conteudo', [AdminController::class, 'conteudo'])->name('conteudo');
     Route::get('saude', [AdminController::class, 'saude'])->name('saude');
 
+    Route::get('configuracoes', [AdminController::class, 'configuracoes'])->name('configuracoes');
+    Route::post('configuracoes/previa-login', [AdminController::class, 'togglePreviaLogin'])->name('configuracoes.previa-login');
+
     Route::get('grupos', [AdminController::class, 'grupos'])->name('grupos');
     Route::get('grupos/criar', [AdminController::class, 'criarGrupoForm'])->name('grupos.criar');
     Route::post('grupos', [AdminController::class, 'storeGrupo'])->name('grupos.store');

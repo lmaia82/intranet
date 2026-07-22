@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Models\Arquivo;
+use App\Models\Configuracao;
 use App\Models\Destaque;
 use App\Models\Evento;
 use App\Models\EventoGravado;
@@ -23,6 +24,12 @@ class AuthenticatedSessionController extends Controller
      */
     public function create(): View
     {
+        $mostrarPreviaLogin = Configuracao::atual()->previa_login_ativa;
+
+        if (!$mostrarPreviaLogin) {
+            return view('auth.login', compact('mostrarPreviaLogin'));
+        }
+
         $destaques = Destaque::ativos()->get();
         $informativos = Informativo::where('is_private', false)->with('sector')->latest('published_at')->take(3)->get();
         $eventos = Evento::where('dt_start', '>=', now()->toDateString())->orderBy('dt_start')->take(3)->get();
@@ -31,7 +38,7 @@ class AuthenticatedSessionController extends Controller
         $documentosPublicos = Arquivo::where('is_private', false)->with('sector')->latest('data')->take(3)->get();
 
         return view('auth.login', compact(
-            'destaques', 'informativos', 'eventos', 'tutoriais', 'eventosGravados', 'documentosPublicos'
+            'mostrarPreviaLogin', 'destaques', 'informativos', 'eventos', 'tutoriais', 'eventosGravados', 'documentosPublicos'
         ));
     }
 
