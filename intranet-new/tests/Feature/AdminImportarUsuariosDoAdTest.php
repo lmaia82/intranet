@@ -120,6 +120,49 @@ class AdminImportarUsuariosDoAdTest extends TestCase
         $this->assertNull(User::where('email', 'novo@cetem.gov.br')->first());
     }
 
+    public function test_ad_com_dois_objetos_para_o_mesmo_email_nao_interrompe_a_importacao(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true, 'email' => 'admin@cetem.gov.br']);
+        Sector::create(['sigla' => 'TI']);
+        Group::create(['name' => 'Leitores']);
+
+        $fake = DirectoryEmulator::setup();
+
+        // Dado real de diretório desatualizado: dois objetos do AD com o
+        // mesmo "mail" (o segundo é um resquício/duplicata) — não pode
+        // travar a importação inteira com um erro 500.
+        $this->criarUsuarioNoAd([
+            'cn' => 'Duplicado Um',
+            'mail' => 'duplicado@cetem.gov.br',
+            'objectguid' => Str::orderedUuid(),
+            'useraccountcontrol' => 512,
+        ], setor: 'TI');
+
+        $this->criarUsuarioNoAd([
+            'cn' => 'Duplicado Dois',
+            'mail' => 'duplicado@cetem.gov.br',
+            'objectguid' => Str::orderedUuid(),
+            'useraccountcontrol' => 512,
+        ], setor: 'TI');
+
+        $this->criarUsuarioNoAd([
+            'cn' => 'Depois Do Duplicado',
+            'mail' => 'depois@cetem.gov.br',
+            'objectguid' => Str::orderedUuid(),
+            'useraccountcontrol' => 512,
+        ], setor: 'TI');
+
+        $fake->getLdapConnection()->shouldAllowBindWith('admin@cetem.gov.br');
+
+        $response = $this->actingAs($admin)->post(route('admin.usuarios.importar-do-ad'), [
+            'password' => 'senha-do-admin',
+        ]);
+
+        $response->assertRedirect(route('admin.usuarios'));
+        $this->assertSame(1, User::where('email', 'duplicado@cetem.gov.br')->count());
+        $this->assertNotNull(User::where('email', 'depois@cetem.gov.br')->first());
+    }
+
     public function test_usuario_nao_admin_nao_importa_do_ad(): void
     {
         $user = User::factory()->create(['is_admin' => false]);

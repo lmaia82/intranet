@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Group;
 use App\Models\Sector;
 use App\Models\User;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use LdapRecord\Container;
@@ -148,22 +149,37 @@ class ActiveDirectoryAuthenticator
 
         $emailsExistentes = User::query()->pluck('email')
             ->map(fn ($email) => Str::lower($email))
-            ->flip();
+            ->flip()
+            ->all();
 
         $importados = 0;
 
         foreach ($this->buscarUsuariosAtivos() as $ldapUser) {
             $email = $ldapUser->getFirstAttribute('mail');
 
-            if (! $email || $emailsExistentes->has(Str::lower($email))) {
+            if (! $email || isset($emailsExistentes[Str::lower($email)])) {
                 continue;
             }
 
-            $usuario = $this->synchronizer->run($ldapUser);
-            $this->provisionarPrimeiroLogin($usuario);
-            $usuario->ad_synced_at = now();
-            $usuario->save();
+            try {
+                $usuario = $this->synchronizer->run($ldapUser);
+                $this->provisionarPrimeiroLogin($usuario);
+                $usuario->ad_synced_at = now();
+                $usuario->save();
+            } catch (UniqueConstraintViolationException $e) {
+                // O AD pode ter mais de um objeto com o mesmo "mail" (dado
+                // duplicado/desatualizado no diretório), ou dois cliques na
+                // importação podem correr em paralelo — nesses casos não
+                // travamos a importação inteira, só pulamos este usuário.
+                Log::warning('Pulando usuário duplicado na importação em lote do AD', [
+                    'email' => $email,
+                    'erro' => $e->getMessage(),
+                ]);
 
+                continue;
+            }
+
+            $emailsExistentes[Str::lower($email)] = true;
             $importados++;
         }
 
