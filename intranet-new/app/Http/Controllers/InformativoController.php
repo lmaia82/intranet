@@ -19,7 +19,24 @@ class InformativoController extends Controller
 {
     public function index(Request $request)
     {
+        $user = $request->user();
         $query = Informativo::with('sector')->latest('published_at');
+
+        if (! $user->is_admin) {
+            // Um informativo privado só entra na listagem se o setor do
+            // usuário estiver no alcance do setor do informativo (o próprio
+            // setor, ou um dos seus serviços subordinados quando o
+            // informativo é de uma coordenação).
+            $alcanceDoSetor = array_values(array_filter([$user->sector_id, $user->sector?->parent_id]));
+
+            $query->where(function ($q) use ($alcanceDoSetor) {
+                $q->where('is_private', false);
+
+                if ($alcanceDoSetor !== []) {
+                    $q->orWhereIn('sector_id', $alcanceDoSetor);
+                }
+            });
+        }
 
         if ($request->filled('sector_id')) {
             $query->where('sector_id', $request->sector_id);
@@ -34,6 +51,8 @@ class InformativoController extends Controller
     public function show(Informativo $informativo)
     {
         $informativo->load('sector', 'envios');
+
+        abort_unless($informativo->visivelPara(auth()->user()), 403, 'Você não tem acesso a este informativo.');
 
         if (auth()->check()) {
             Acesso::create([

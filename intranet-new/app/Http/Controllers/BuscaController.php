@@ -38,16 +38,7 @@ class BuscaController extends Controller
                         $query->where('title', 'like', $termo)->orWhere('content', 'like', $termo);
                     })
                     ->get()
-                    ->filter(function ($informativo) use ($user) {
-                        if (!$informativo->is_private || $user->is_admin) {
-                            return true;
-                        }
-
-                        // Informativo restrito a uma coordenação também é
-                        // visível para usuários dos serviços subordinados.
-                        return $informativo->sector && $user->sector_id
-                            && in_array($user->sector_id, $informativo->sector->idsComSubordinados());
-                    })
+                    ->filter(fn ($informativo) => $informativo->visivelPara($user))
                     ->take(20)
                     ->values();
             }

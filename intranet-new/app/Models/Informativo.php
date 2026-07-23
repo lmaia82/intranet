@@ -19,6 +19,25 @@ class Informativo extends Model
         return $this->belongsTo(Sector::class);
     }
 
+    /**
+     * Mesma regra usada por Pasta/Arquivo::visivelPara(), com a hierarquia:
+     * um informativo restrito a uma coordenação também é visível para
+     * usuários dos serviços subordinados a ela.
+     */
+    public function visivelPara(User $user): bool
+    {
+        if (! $this->is_private) {
+            return true;
+        }
+
+        if ($user->is_admin) {
+            return true;
+        }
+
+        return $this->sector_id !== null && $user->sector_id !== null
+            && in_array($user->sector_id, $this->sector->idsComSubordinados());
+    }
+
     public function arquivo()
     {
         return $this->belongsTo(Arquivo::class);
