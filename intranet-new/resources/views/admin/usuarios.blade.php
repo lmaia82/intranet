@@ -88,10 +88,27 @@
             </div>
         </form>
 
+        <form id="excluir-lote-form" action="{{ route('admin.usuarios.destroy-lote') }}" method="POST"
+              onsubmit="return confirm('Remover os usuários selecionados? Esta ação não pode ser desfeita.')">
+            @csrf
+            @foreach(request()->only(['nome', 'email', 'sector_id', 'ad_setor', 'confere', 'group_id', 'is_admin']) as $chave => $valor)
+                <input type="hidden" name="{{ $chave }}" value="{{ $valor }}">
+            @endforeach
+        </form>
+
+        <div class="flex justify-end mb-2">
+            <button type="submit" form="excluir-lote-form" class="px-4 py-2 bg-red-600 text-white rounded text-sm">
+                Excluir selecionados
+            </button>
+        </div>
+
         <div class="bg-white shadow rounded overflow-x-auto">
             <table class="w-full text-left whitespace-nowrap">
                 <thead class="bg-gray-50">
                     <tr>
+                        <th class="p-3">
+                            <input type="checkbox" onclick="document.querySelectorAll('.selecionar-usuario').forEach(cb => cb.checked = this.checked)">
+                        </th>
                         <th class="p-3">Nome</th>
                         <th class="p-3">E-mail</th>
                         <th class="p-3">Setor (Intranet)</th>
@@ -106,6 +123,11 @@
                 <tbody>
                     @foreach($usuarios as $usuario)
                         <tr class="border-t">
+                            <td class="p-3">
+                                @if($usuario->id !== auth()->id())
+                                    <input type="checkbox" class="selecionar-usuario" name="ids[]" value="{{ $usuario->id }}" form="excluir-lote-form">
+                                @endif
+                            </td>
                             <td class="p-3">{{ $usuario->name }}</td>
                             <td class="p-3">{{ $usuario->email }}</td>
                             <td class="p-3">

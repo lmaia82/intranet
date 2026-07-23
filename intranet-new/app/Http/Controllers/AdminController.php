@@ -489,6 +489,23 @@ class AdminController extends Controller
         return redirect()->route('admin.usuarios')->with('status', 'Usuário removido.');
     }
 
+    public function destroyUsuariosLote(Request $request)
+    {
+        $validated = $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'exists:users,id',
+        ]);
+
+        $ids = collect($validated['ids'])->reject(fn ($id) => (int) $id === auth()->id());
+
+        User::whereIn('id', $ids)->delete();
+
+        $filtros = $request->only(['nome', 'email', 'sector_id', 'ad_setor', 'confere', 'group_id', 'is_admin']);
+
+        return redirect()->route('admin.usuarios', $filtros)
+            ->with('status', $ids->count() . ' usuário(s) removido(s).');
+    }
+
     public function usuariosLoteForm()
     {
         return view('admin.usuarios-lote');
