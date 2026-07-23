@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\AplicarTempoInatividadeSessao;
+use App\Http\Middleware\EnsureTutoriaisAtivo;
 use App\Http\Middleware\EnsureUserHasPermission;
 use App\Http\Middleware\EnsureUserIsAdmin;
 use App\Http\Middleware\RegistrarAcesso;
@@ -33,6 +34,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin' => EnsureUserIsAdmin::class,
             'permission' => EnsureUserHasPermission::class,
             'registrar.acesso' => RegistrarAcesso::class,
+            'tutoriais.ativo' => EnsureTutoriaisAtivo::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

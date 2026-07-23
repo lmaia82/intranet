@@ -107,4 +107,38 @@ class AdminConfiguracoesTest extends TestCase
 
         $this->assertSame(45, config('session.lifetime'));
     }
+
+    public function test_pagina_mostra_aba_tutoriais_ativada_por_padrao(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true]);
+
+        $this->actingAs($admin)->get(route('admin.configuracoes'))
+            ->assertOk()
+            ->assertSee('Aba Tutoriais');
+
+        $this->assertTrue(Configuracao::atual()->tutoriais_ativo);
+    }
+
+    public function test_toggle_ativa_e_desativa_aba_tutoriais(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true]);
+
+        $this->actingAs($admin)->post(route('admin.configuracoes.tutoriais'))
+            ->assertRedirect(route('admin.configuracoes'));
+
+        $this->assertFalse(Configuracao::atual()->tutoriais_ativo);
+
+        $this->actingAs($admin)->post(route('admin.configuracoes.tutoriais'));
+
+        $this->assertTrue(Configuracao::atual()->tutoriais_ativo);
+    }
+
+    public function test_usuario_nao_admin_nao_altera_aba_tutoriais(): void
+    {
+        $user = User::factory()->create(['is_admin' => false]);
+
+        $this->actingAs($user)->post(route('admin.configuracoes.tutoriais'))->assertForbidden();
+
+        $this->assertTrue(Configuracao::atual()->tutoriais_ativo);
+    }
 }

@@ -48,5 +48,23 @@
                 <p class="text-sm text-red-600 mt-2">{{ $message }}</p>
             @enderror
         </div>
+
+        <div class="bg-white shadow rounded p-4 mt-4">
+            <div class="flex justify-between items-center gap-4">
+                <div>
+                    <p class="font-semibold">Aba Tutoriais</p>
+                    <p class="text-sm text-gray-500">
+                        Exibe a aba Tutoriais no menu e permite o acesso à página. Desative
+                        para tirá-la do ar enquanto se avalia se ela vai continuar existindo.
+                    </p>
+                </div>
+                <form method="POST" action="{{ route('admin.configuracoes.tutoriais') }}">
+                    @csrf
+                    <button type="submit" class="px-4 py-2 rounded text-white {{ $configuracao->tutoriais_ativo ? 'bg-green-600' : 'bg-gray-400' }}">
+                        {{ $configuracao->tutoriais_ativo ? 'Ativada' : 'Desativada' }}
+                    </button>
+                </form>
+            </div>
+        </div>
     </div>
 </x-app-layout>

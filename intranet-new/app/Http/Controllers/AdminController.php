@@ -218,6 +218,14 @@ class AdminController extends Controller
         return redirect()->route('admin.configuracoes')->with('status', 'Configuração atualizada.');
     }
 
+    public function toggleTutoriais()
+    {
+        $configuracao = Configuracao::atual();
+        $configuracao->update(['tutoriais_ativo' => !$configuracao->tutoriais_ativo]);
+
+        return redirect()->route('admin.configuracoes')->with('status', 'Configuração atualizada.');
+    }
+
     public function atualizarTempoInatividade(Request $request)
     {
         $validated = $request->validate([

@@ -185,7 +185,7 @@
                 </div>
             </div>
 
-            @if(auth()->user()->hasPermission('tutoriais.ver'))
+            @if(auth()->user()->hasPermission('tutoriais.ver') && \App\Models\Configuracao::atual()->tutoriais_ativo)
             <div class="bg-white shadow rounded p-4">
                 <div class="flex justify-between items-center mb-3">
                     <h3 class="font-semibold text-lg">🎬 Últimos Tutoriais</h3>

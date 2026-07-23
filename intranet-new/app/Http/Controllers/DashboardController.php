@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Arquivo;
+use App\Models\Configuracao;
 use App\Models\Destaque;
 use App\Models\Evento;
 use App\Models\EventoGravado;
@@ -32,7 +33,7 @@ class DashboardController extends Controller
             ->take(5)
             ->get();
 
-        $tutoriais = $user->hasPermission('tutoriais.ver')
+        $tutoriais = ($user->hasPermission('tutoriais.ver') && Configuracao::atual()->tutoriais_ativo)
             ? Tutorial::latest('data')->take(5)->get()
             : collect();
 

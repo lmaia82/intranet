@@ -1,3 +1,4 @@
+@php($tutoriaisAtivo = \App\Models\Configuracao::atual()->tutoriais_ativo)
 <nav x-data="{ open: false }" class="bg-gradient-to-b from-[#B9DBF7] to-white border-b border-gray-100">
     <!-- Primary Navigation Menu -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -30,7 +31,7 @@
                             {{ __('Agenda') }}
                         </x-nav-link>
                     @endif
-                    @if(auth()->user()->hasPermission('tutoriais.ver'))
+                    @if($tutoriaisAtivo && auth()->user()->hasPermission('tutoriais.ver'))
                         <x-nav-link :href="route('tutoriais.index')" :active="request()->routeIs('tutoriais.*')">
                             {{ __('Tutoriais') }}
                         </x-nav-link>
@@ -126,7 +127,7 @@
                     {{ __('Agenda') }}
                 </x-responsive-nav-link>
             @endif
-            @if(auth()->user()->hasPermission('tutoriais.ver'))
+            @if($tutoriaisAtivo && auth()->user()->hasPermission('tutoriais.ver'))
                 <x-responsive-nav-link :href="route('tutoriais.index')" :active="request()->routeIs('tutoriais.*')">
                     {{ __('Tutoriais') }}
                 </x-responsive-nav-link>

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Acesso;
 use App\Models\Arquivo;
+use App\Models\Configuracao;
 use App\Models\Evento;
 use App\Models\EventoGravado;
 use App\Models\Informativo;
@@ -48,7 +49,7 @@ class BuscaController extends Controller
                 $resultados['eventos_gravados'] = EventoGravado::where('titulo', 'like', $termo)->take(20)->get();
             }
 
-            if ($user->hasPermission('tutoriais.ver')) {
+            if ($user->hasPermission('tutoriais.ver') && Configuracao::atual()->tutoriais_ativo) {
                 $resultados['tutoriais'] = Tutorial::where('titulo', 'like', $termo)->take(20)->get();
             }
 

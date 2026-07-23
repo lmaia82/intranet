@@ -70,7 +70,7 @@ Route::middleware('auth')->group(function () {
 
 use App\Http\Controllers\TutorialController;
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'tutoriais.ativo'])->group(function () {
     Route::resource('tutoriais', TutorialController::class)
         ->parameters(['tutoriais' => 'tutorial'])
         ->middlewareFor(['index'], ['permission:tutoriais.ver', 'registrar.acesso:tutoriais'])
@@ -165,6 +165,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('configuracoes', [AdminController::class, 'configuracoes'])->name('configuracoes');
     Route::post('configuracoes/previa-login', [AdminController::class, 'togglePreviaLogin'])->name('configuracoes.previa-login');
     Route::post('configuracoes/tempo-inatividade', [AdminController::class, 'atualizarTempoInatividade'])->name('configuracoes.tempo-inatividade');
+    Route::post('configuracoes/tutoriais', [AdminController::class, 'toggleTutoriais'])->name('configuracoes.tutoriais');
 
     Route::get('grupos', [AdminController::class, 'grupos'])->name('grupos');
     Route::get('grupos/criar', [AdminController::class, 'criarGrupoForm'])->name('grupos.criar');
