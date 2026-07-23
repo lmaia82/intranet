@@ -186,12 +186,6 @@
                                         @endforeach
                                     </select>
                                 </form>
-                                @if($usuario->ad_setor && !$usuario->sector_id)
-                                    <form action="{{ route('admin.usuarios.setor.trazer-do-ad', $usuario) }}" method="POST" class="mt-1">
-                                        @csrf
-                                        <button type="submit" class="text-xs text-blue-600 underline">Trazer do AD</button>
-                                    </form>
-                                @endif
                             </td>
                             <td class="p-3">{{ $usuario->ad_setor ?? '—' }}</td>
                             <td class="p-3 text-center">
