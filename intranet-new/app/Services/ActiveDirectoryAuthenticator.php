@@ -147,6 +147,11 @@ class ActiveDirectoryAuthenticator
             return null;
         }
 
+        // A importação de um diretório com muitos usuários pode levar mais
+        // que os 30s padrão de execução — é uma ação pontual de admin, não
+        // uma requisição comum, então vale esperar.
+        set_time_limit(300);
+
         $emailsExistentes = User::query()->pluck('email')
             ->map(fn ($email) => Str::lower($email))
             ->flip()
@@ -154,33 +159,46 @@ class ActiveDirectoryAuthenticator
 
         $importados = 0;
 
-        foreach ($this->buscarUsuariosAtivos() as $ldapUser) {
-            $email = $ldapUser->getFirstAttribute('mail');
+        // A senha aleatória gravada para cada usuário importado nunca é
+        // usada de fato (a senha real é sempre verificada no AD) — hasheá-la
+        // no custo padrão do bcrypt (pensado para uma senha real, não para
+        // centenas delas em lote) foi o que estourou os 30s no primeiro
+        // teste em produção. Reduz o custo só durante este laço.
+        $custoOriginal = config('hashing.bcrypt.rounds');
+        config(['hashing.bcrypt.rounds' => 4]);
 
-            if (! $email || isset($emailsExistentes[Str::lower($email)])) {
-                continue;
+        try {
+            foreach ($this->buscarUsuariosAtivos() as $ldapUser) {
+                $email = $ldapUser->getFirstAttribute('mail');
+
+                if (! $email || isset($emailsExistentes[Str::lower($email)])) {
+                    continue;
+                }
+
+                try {
+                    $usuario = $this->synchronizer->run($ldapUser);
+                    $this->provisionarPrimeiroLogin($usuario);
+                    $usuario->ad_synced_at = now();
+                    $usuario->save();
+                } catch (UniqueConstraintViolationException $e) {
+                    // O AD pode ter mais de um objeto com o mesmo "mail"
+                    // (dado duplicado/desatualizado no diretório), ou dois
+                    // cliques na importação podem correr em paralelo —
+                    // nesses casos não travamos a importação inteira, só
+                    // pulamos este usuário.
+                    Log::warning('Pulando usuário duplicado na importação em lote do AD', [
+                        'email' => $email,
+                        'erro' => $e->getMessage(),
+                    ]);
+
+                    continue;
+                }
+
+                $emailsExistentes[Str::lower($email)] = true;
+                $importados++;
             }
-
-            try {
-                $usuario = $this->synchronizer->run($ldapUser);
-                $this->provisionarPrimeiroLogin($usuario);
-                $usuario->ad_synced_at = now();
-                $usuario->save();
-            } catch (UniqueConstraintViolationException $e) {
-                // O AD pode ter mais de um objeto com o mesmo "mail" (dado
-                // duplicado/desatualizado no diretório), ou dois cliques na
-                // importação podem correr em paralelo — nesses casos não
-                // travamos a importação inteira, só pulamos este usuário.
-                Log::warning('Pulando usuário duplicado na importação em lote do AD', [
-                    'email' => $email,
-                    'erro' => $e->getMessage(),
-                ]);
-
-                continue;
-            }
-
-            $emailsExistentes[Str::lower($email)] = true;
-            $importados++;
+        } finally {
+            config(['hashing.bcrypt.rounds' => $custoOriginal]);
         }
 
         return $importados;
