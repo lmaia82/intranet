@@ -2,7 +2,7 @@
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">Usuários</h2>
     </x-slot>
-    <div class="py-6 max-w-screen-2xl mx-auto sm:px-6 lg:px-8">
+    <div class="py-6 w-full mx-auto px-4 sm:px-6 lg:px-8">
         @if(session('status'))
             <div class="mb-4 p-4 bg-green-100 text-green-800 rounded">{{ session('status') }}</div>
         @endif
