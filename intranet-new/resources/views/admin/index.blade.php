@@ -8,38 +8,38 @@
         @endif
 
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            <div class="bg-white shadow rounded p-4 text-center">
+            <a href="{{ route('admin.usuarios') }}" class="bg-white shadow rounded p-4 text-center hover:bg-gray-50">
                 <p class="text-3xl font-bold text-blue-600">{{ $stats['usuarios'] }}</p>
                 <p class="text-sm text-gray-500">Usuários ativos</p>
-            </div>
-            <div class="bg-white shadow rounded p-4 text-center">
+            </a>
+            <a href="{{ route('admin.setores') }}" class="bg-white shadow rounded p-4 text-center hover:bg-gray-50">
                 <p class="text-3xl font-bold text-blue-600">{{ $stats['setores'] }}</p>
                 <p class="text-sm text-gray-500">Setores</p>
-            </div>
-            <div class="bg-white shadow rounded p-4 text-center">
+            </a>
+            <a href="{{ route('admin.grupos') }}" class="bg-white shadow rounded p-4 text-center hover:bg-gray-50">
                 <p class="text-3xl font-bold text-blue-600">{{ $stats['grupos'] }}</p>
                 <p class="text-sm text-gray-500">Grupos</p>
-            </div>
-            <div class="bg-white shadow rounded p-4 text-center">
+            </a>
+            <a href="{{ route('telefones.index') }}" class="bg-white shadow rounded p-4 text-center hover:bg-gray-50">
                 <p class="text-3xl font-bold text-blue-600">{{ $stats['ramais'] }}</p>
                 <p class="text-sm text-gray-500">Ramais</p>
-            </div>
-            <div class="bg-white shadow rounded p-4 text-center">
+            </a>
+            <a href="{{ route('informativos.index') }}" class="bg-white shadow rounded p-4 text-center hover:bg-gray-50">
                 <p class="text-3xl font-bold text-blue-600">{{ $stats['informativos'] }}</p>
                 <p class="text-sm text-gray-500">Informativos</p>
-            </div>
-            <div class="bg-white shadow rounded p-4 text-center">
+            </a>
+            <a href="{{ route('eventos.index') }}" class="bg-white shadow rounded p-4 text-center hover:bg-gray-50">
                 <p class="text-3xl font-bold text-blue-600">{{ $stats['eventos'] }}</p>
                 <p class="text-sm text-gray-500">Eventos</p>
-            </div>
-            <div class="bg-white shadow rounded p-4 text-center">
+            </a>
+            <a href="{{ route('destaques.index') }}" class="bg-white shadow rounded p-4 text-center hover:bg-gray-50">
                 <p class="text-3xl font-bold text-blue-600">{{ $stats['destaques'] }}</p>
                 <p class="text-sm text-gray-500">Destaques</p>
-            </div>
-            <div class="bg-white shadow rounded p-4 text-center">
+            </a>
+            <a href="{{ route('repositorio.index') }}" class="bg-white shadow rounded p-4 text-center hover:bg-gray-50">
                 <p class="text-3xl font-bold text-blue-600">{{ $stats['arquivos'] }}</p>
                 <p class="text-sm text-gray-500">Arquivos</p>
-            </div>
+            </a>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
