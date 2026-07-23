@@ -14,9 +14,11 @@ use App\Models\Permission;
 use App\Models\Sector;
 use App\Models\Telefone;
 use App\Models\User;
+use App\Services\ActiveDirectoryAuthenticator;
 use App\Services\HealthCheckService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class AdminController extends Controller
 {
@@ -321,12 +323,67 @@ class AdminController extends Controller
         });
     }
 
-    public function usuarios()
+    public function usuarios(Request $request)
     {
-        $usuarios = User::orderBy('name')->get();
+        $usuarios = User::with(['sector', 'group'])->orderBy('name')->get();
+
+        if ($nome = trim((string) $request->input('nome'))) {
+            $usuarios = $usuarios->filter(fn ($u) => str_contains(Str::lower($u->name), Str::lower($nome)));
+        }
+
+        if ($email = trim((string) $request->input('email'))) {
+            $usuarios = $usuarios->filter(fn ($u) => str_contains(Str::lower($u->email), Str::lower($email)));
+        }
+
+        if ($request->filled('sector_id')) {
+            $usuarios = $usuarios->where('sector_id', $request->input('sector_id'));
+        }
+
+        if ($request->filled('ad_setor')) {
+            $usuarios = $usuarios->where('ad_setor', $request->input('ad_setor'));
+        }
+
+        if ($request->filled('confere')) {
+            $confere = $request->input('confere');
+            $usuarios = $usuarios->filter(function ($u) use ($confere) {
+                $bate = $u->setorBateComAd();
+
+                return match ($confere) {
+                    'sim' => $bate === true,
+                    'nao' => $bate === false,
+                    'sem_ad' => is_null($bate),
+                    default => true,
+                };
+            });
+        }
+
+        if ($request->filled('group_id')) {
+            $usuarios = $usuarios->where('group_id', $request->input('group_id'));
+        }
+
+        if ($request->filled('is_admin')) {
+            $usuarios = $usuarios->where('is_admin', (bool) (int) $request->input('is_admin'));
+        }
+
         $setores = Sector::orderBy('sigla')->get();
         $grupos = Group::orderBy('name')->get();
-        return view('admin.usuarios', compact('usuarios', 'setores', 'grupos'));
+        $adSetores = User::whereNotNull('ad_setor')->distinct()->orderBy('ad_setor')->pluck('ad_setor');
+
+        return view('admin.usuarios', compact('usuarios', 'setores', 'grupos', 'adSetores'));
+    }
+
+    public function importarUsuariosDoAd(Request $request)
+    {
+        $validated = $request->validate(['password' => 'required|string']);
+
+        $importados = app(ActiveDirectoryAuthenticator::class)
+            ->importarUsuariosAtivos($request->user()->email, $validated['password']);
+
+        if (is_null($importados)) {
+            return redirect()->route('admin.usuarios')->with('status', 'Senha do AD incorreta — importação cancelada.');
+        }
+
+        return redirect()->route('admin.usuarios')->with('status', "Importação concluída: {$importados} usuário(s) novo(s) trazido(s) do AD.");
     }
 
     public function criarUsuarioForm()

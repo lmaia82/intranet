@@ -14,14 +14,10 @@ use LdapRecord\Models\ActiveDirectory\User as LdapUser;
 
 /**
  * Autentica diretamente no AD (bind), sem depender de uma conta de serviço
- * fixa para busca — o CETEM optou por não configurar uma conta de serviço,
- * então cada login se autentica com a própria credencial do usuário, e essa
- * mesma conexão (já autenticada) é reaproveitada para buscar seus dados.
- *
- * Isso significa que não há como importar o diretório inteiro em lote (o
- * comando `ldap:import` agendado precisa de uma conta com acesso a todos os
- * usuários); nome/e-mail/setor só são sincronizados no momento em que o
- * próprio usuário loga.
+ * fixa — o CETEM optou por não cadastrar uma conta de serviço no .env.
+ * Login: cada usuário se autentica com a própria credencial. Importação em
+ * lote (`importarUsuariosAtivos`): usa a senha do admin que clicou no
+ * botão, digitada na hora e nunca armazenada — só autoriza aquela busca.
  */
 class ActiveDirectoryAuthenticator
 {
@@ -81,6 +77,22 @@ class ActiveDirectoryAuthenticator
      */
     protected function bindarEBuscarUsuario(string $email, string $password): ?LdapUser
     {
+        if (! $this->autenticarConexao($email, $password)) {
+            return null;
+        }
+
+        // O bind confirmou a senha; a mesma conexão (agora autenticada como
+        // o próprio usuário) é usada para buscar seus atributos.
+        return LdapUser::where('mail', $email)->first();
+    }
+
+    /**
+     * Autentica a conexão LDAP compartilhada com o e-mail/senha informados,
+     * sem buscar nenhum usuário — usado tanto para o login quanto para
+     * autorizar uma busca em lote no diretório (ver `buscarUsuariosAtivos`).
+     */
+    public function autenticarConexao(string $email, string $password): bool
+    {
         $connection = Container::getConnection('default');
 
         foreach ($this->possiveisIdentidadesDeBind($email) as $identidade) {
@@ -99,12 +111,63 @@ class ActiveDirectoryAuthenticator
                 continue;
             }
 
-            // O bind confirmou a senha; a mesma conexão (agora autenticada
-            // como o próprio usuário) é usada para buscar seus atributos.
-            return LdapUser::where('mail', $email)->first();
+            return true;
         }
 
-        return null;
+        return false;
+    }
+
+    /**
+     * Busca todos os usuários ativos do AD (mesmo filtro já usado em
+     * produção pelo GLPI: exclui contas desabilitadas). Só funciona com a
+     * conexão já autenticada por `autenticarConexao` — sem conta de
+     * serviço, uma busca anônima não tem permissão (AD retorna
+     * "Operations error").
+     *
+     * @return \Illuminate\Support\Collection<int, LdapUser>
+     */
+    public function buscarUsuariosAtivos()
+    {
+        return LdapUser::rawFilter('(!(userAccountControl:1.2.840.113556.1.4.803:=2))')->get();
+    }
+
+    /**
+     * Importa para a intranet todos os usuários ativos do AD que ainda não
+     * existem localmente (por e-mail), já com setor importado e no grupo
+     * "Leitores" (mínimo privilégio) — igual ao provisionamento automático
+     * do primeiro login, mas em lote.
+     *
+     * @return int|null Quantidade de usuários importados, ou null se a
+     *                   senha do admin não confere no AD.
+     */
+    public function importarUsuariosAtivos(string $emailAdmin, string $senhaAdmin): ?int
+    {
+        if (! $this->autenticarConexao($emailAdmin, $senhaAdmin)) {
+            return null;
+        }
+
+        $emailsExistentes = User::query()->pluck('email')
+            ->map(fn ($email) => Str::lower($email))
+            ->flip();
+
+        $importados = 0;
+
+        foreach ($this->buscarUsuariosAtivos() as $ldapUser) {
+            $email = $ldapUser->getFirstAttribute('mail');
+
+            if (! $email || $emailsExistentes->has(Str::lower($email))) {
+                continue;
+            }
+
+            $usuario = $this->synchronizer->run($ldapUser);
+            $this->provisionarPrimeiroLogin($usuario);
+            $usuario->ad_synced_at = now();
+            $usuario->save();
+
+            $importados++;
+        }
+
+        return $importados;
     }
 
     /**

@@ -180,6 +180,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('usuarios/{usuario}/setor/trazer-do-ad', [AdminController::class, 'trazerSetorDoAd'])->name('usuarios.setor.trazer-do-ad');
     Route::put('usuarios/{usuario}/grupo', [AdminController::class, 'updateUsuarioGrupo'])->name('usuarios.grupo');
     Route::delete('usuarios/{usuario}', [AdminController::class, 'destroyUsuario'])->name('usuarios.destroy');
+    Route::post('usuarios/importar-do-ad', [AdminController::class, 'importarUsuariosDoAd'])->name('usuarios.importar-do-ad');
 
     Route::get('usuarios-lote', [AdminController::class, 'usuariosLoteForm'])->name('usuarios.lote.form');
     Route::post('usuarios-lote', [AdminController::class, 'usuariosLoteImport'])->name('usuarios.lote.import');
