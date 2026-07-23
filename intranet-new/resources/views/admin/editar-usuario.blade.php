@@ -16,15 +16,21 @@
                 <input type="email" name="email" value="{{ old('email', $usuario->email) }}" class="mt-1 block w-full border-gray-300 rounded">
                 @error('email') <p class="text-red-600 text-sm">{{ $message }}</p> @enderror
             </div>
-            <div>
-                <label class="block text-sm font-medium">Nova senha</label>
-                <input type="password" name="password" class="mt-1 block w-full border-gray-300 rounded" placeholder="Deixe em branco para manter a senha atual">
-                @error('password') <p class="text-red-600 text-sm">{{ $message }}</p> @enderror
-            </div>
-            <div>
-                <label class="block text-sm font-medium">Confirmar nova senha</label>
-                <input type="password" name="password_confirmation" class="mt-1 block w-full border-gray-300 rounded">
-            </div>
+            @if($usuario->autenticadoViaAd())
+                <p class="text-sm text-gray-500">
+                    A senha deste usuário é validada no Active Directory e não pode ser alterada pela intranet.
+                </p>
+            @else
+                <div>
+                    <label class="block text-sm font-medium">Nova senha</label>
+                    <input type="password" name="password" class="mt-1 block w-full border-gray-300 rounded" placeholder="Deixe em branco para manter a senha atual">
+                    @error('password') <p class="text-red-600 text-sm">{{ $message }}</p> @enderror
+                </div>
+                <div>
+                    <label class="block text-sm font-medium">Confirmar nova senha</label>
+                    <input type="password" name="password_confirmation" class="mt-1 block w-full border-gray-300 rounded">
+                </div>
+            @endif
             <div class="flex items-center gap-3">
                 <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded">Salvar</button>
                 <a href="{{ route('admin.usuarios') }}" class="text-gray-600">Cancelar</a>

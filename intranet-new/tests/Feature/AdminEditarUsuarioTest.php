@@ -97,6 +97,43 @@ class AdminEditarUsuarioTest extends TestCase
         $this->assertEquals('Admin Renomeado', $admin->fresh()->name);
     }
 
+    public function test_campo_de_senha_nao_aparece_para_usuario_vinculado_ao_ad(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true]);
+        $usuario = User::factory()->create(['ad_guid' => 'guid-123']);
+
+        $this->actingAs($admin)->get(route('admin.usuarios.editar', $usuario))
+            ->assertOk()
+            ->assertDontSee('Nova senha')
+            ->assertSee('validada no Active Directory');
+    }
+
+    public function test_campo_de_senha_aparece_para_usuario_local(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true]);
+        $usuario = User::factory()->create(['ad_guid' => null]);
+
+        $this->actingAs($admin)->get(route('admin.usuarios.editar', $usuario))
+            ->assertOk()
+            ->assertSee('Nova senha');
+    }
+
+    public function test_admin_nao_consegue_trocar_senha_de_usuario_vinculado_ao_ad(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true]);
+        $usuario = User::factory()->create(['ad_guid' => 'guid-456', 'password' => Hash::make('senha-antiga')]);
+        $senhaAntigaHash = $usuario->password;
+
+        $this->actingAs($admin)->put(route('admin.usuarios.update', $usuario), [
+            'name' => $usuario->name,
+            'email' => $usuario->email,
+            'password' => 'senha-nova-123',
+            'password_confirmation' => 'senha-nova-123',
+        ]);
+
+        $this->assertEquals($senhaAntigaHash, $usuario->fresh()->password);
+    }
+
     public function test_usuario_nao_admin_nao_acessa_edicao(): void
     {
         $user = User::factory()->create(['is_admin' => false]);

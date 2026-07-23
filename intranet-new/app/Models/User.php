@@ -54,6 +54,15 @@ class User extends Authenticatable implements LdapAuthenticatable
     }
 
     /**
+     * A senha desses usuários é validada diretamente no Active Directory,
+     * então a intranet não deve oferecer (nem aceitar) troca de senha local.
+     */
+    public function autenticadoViaAd(): bool
+    {
+        return !is_null($this->ad_guid);
+    }
+
+    /**
      * Compara o setor cadastrado na intranet com o setor bruto trazido do
      * AD. `null` quando o usuário não está vinculado a uma conta do AD.
      */

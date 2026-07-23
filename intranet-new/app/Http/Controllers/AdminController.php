@@ -505,7 +505,7 @@ class AdminController extends Controller
         $usuario->name = $validated['name'];
         $usuario->email = $validated['email'];
 
-        if (!empty($validated['password'])) {
+        if (!empty($validated['password']) && !$usuario->autenticadoViaAd()) {
             $usuario->password = Hash::make($validated['password']);
         }
 
