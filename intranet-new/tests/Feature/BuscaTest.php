@@ -79,6 +79,29 @@ class BuscaTest extends TestCase
             ->assertDontSee('Restrito Buscatermo');
     }
 
+    public function test_informativo_restrito_a_coordenacao_aparece_para_usuario_do_servico_subordinado(): void
+    {
+        $coordenacao = Sector::create(['sigla' => 'COADM']);
+        $servico = Sector::create(['sigla' => 'SECOF', 'parent_id' => $coordenacao->id]);
+
+        $permissao = Permission::where('key', 'informativos.ver')->first();
+        $grupo = Group::create(['name' => 'Leitores Informativos Hierarquia']);
+        $grupo->permissions()->attach($permissao);
+        $user = User::factory()->create(['group_id' => $grupo->id, 'sector_id' => $servico->id]);
+
+        Informativo::create([
+            'title' => 'Restrito Da Coordenacao Buscatermo',
+            'content' => 'x',
+            'sector_id' => $coordenacao->id,
+            'is_private' => true,
+            'published_at' => now(),
+        ]);
+
+        $this->actingAs($user)->get(route('busca.index', ['q' => 'Buscatermo']))
+            ->assertOk()
+            ->assertSee('Restrito Da Coordenacao Buscatermo');
+    }
+
     public function test_encontra_arquivo_pelo_conteudo_ocr(): void
     {
         $admin = User::factory()->create(['is_admin' => true, 'group_id' => null]);

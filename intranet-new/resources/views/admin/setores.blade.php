@@ -48,18 +48,23 @@
                 </thead>
                 <tbody>
                     @foreach($setores as $setor)
+                        {{-- Um <form> não pode abranger vários <td> de uma <tr> (HTML
+                             inválido, navegadores não garantem o envio dos campos) — o
+                             form fica fora da linha, e cada campo se associa a ele via
+                             o atributo form="", igual ao usado na tela de Usuários. --}}
+                        <form id="setor-{{ $setor->id }}-form" method="POST" action="{{ route('admin.setores.update', $setor) }}">
+                            @csrf
+                            @method('PUT')
+                        </form>
                         <tr class="border-t">
-                            <form method="POST" action="{{ route('admin.setores.update', $setor) }}">
-                                @csrf
-                                @method('PUT')
                                 <td class="p-3">
-                                    <input type="text" name="sigla" value="{{ $setor->sigla }}" class="border-gray-300 rounded w-full">
+                                    <input type="text" name="sigla" value="{{ $setor->sigla }}" form="setor-{{ $setor->id }}-form" class="border-gray-300 rounded w-full">
                                 </td>
                                 <td class="p-3">
-                                    <input type="text" name="nome" value="{{ $setor->nome }}" placeholder="Nome por extenso" class="border-gray-300 rounded w-full">
+                                    <input type="text" name="nome" value="{{ $setor->nome }}" placeholder="Nome por extenso" form="setor-{{ $setor->id }}-form" class="border-gray-300 rounded w-full">
                                 </td>
                                 <td class="p-3">
-                                    <select name="parent_id" class="border-gray-300 rounded">
+                                    <select name="parent_id" form="setor-{{ $setor->id }}-form" class="border-gray-300 rounded">
                                         <option value="">(nenhuma)</option>
                                         @foreach($coordenacoes as $coordenacao)
                                             <option value="{{ $coordenacao->id }}" @selected($setor->parent_id === $coordenacao->id)>{{ $coordenacao->sigla }}</option>
@@ -67,7 +72,7 @@
                                     </select>
                                 </td>
                                 <td class="p-3">
-                                    <input type="number" name="quota_mb" min="0" step="1" placeholder="Sem limite"
+                                    <input type="number" name="quota_mb" min="0" step="1" placeholder="Sem limite" form="setor-{{ $setor->id }}-form"
                                            value="{{ $setor->quota_bytes ? round($setor->quota_bytes / 1048576) : '' }}"
                                            class="border-gray-300 rounded w-32">
                                 </td>
@@ -78,8 +83,7 @@
                                     @endif
                                 </td>
                                 <td class="p-3 text-right whitespace-nowrap">
-                                    <button type="submit" class="text-blue-600">Salvar</button>
-                            </form>
+                                    <button type="submit" form="setor-{{ $setor->id }}-form" class="text-blue-600">Salvar</button>
                                     <form action="{{ route('admin.setores.destroy', $setor) }}" method="POST" class="inline" onsubmit="return confirm('Remover este setor?')">
                                         @csrf
                                         @method('DELETE')

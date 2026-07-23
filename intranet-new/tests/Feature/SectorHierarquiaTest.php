@@ -110,4 +110,66 @@ class SectorHierarquiaTest extends TestCase
 
         $this->assertNull($setor->fresh()->parent_id);
     }
+
+    public function test_definir_coordenacao_pela_tela_de_setores_move_a_pasta_raiz_ja_existente(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true]);
+        $coordenacao = Sector::create(['sigla' => 'COADM']);
+        $servico = Sector::create(['sigla' => 'SECOF']);
+
+        // A pasta raiz do serviço já existe (solta no topo) antes de a
+        // coordenação ser definida — simula um setor de uso antigo.
+        $pastaServico = $servico->pastaTemporaria();
+        $raizServico = Pasta::find($pastaServico->parent_id);
+        $this->assertNull($raizServico->parent_id);
+
+        $this->actingAs($admin)->put(route('admin.setores.update', $servico), [
+            'sigla' => 'SECOF',
+            'parent_id' => $coordenacao->id,
+        ]);
+
+        $raizServico->refresh();
+        $this->assertNotNull($raizServico->parent_id);
+
+        $raizCoordenacao = Pasta::find($raizServico->parent_id);
+        $this->assertSame('COADM', $raizCoordenacao->nome);
+    }
+
+    public function test_remover_coordenacao_pela_tela_de_setores_move_a_pasta_raiz_de_volta_ao_topo(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true]);
+        $coordenacao = Sector::create(['sigla' => 'COADM']);
+        $servico = Sector::create(['sigla' => 'SECOF', 'parent_id' => $coordenacao->id]);
+
+        $pastaServico = $servico->pastaTemporaria();
+        $raizServico = Pasta::find($pastaServico->parent_id);
+        $this->assertNotNull($raizServico->parent_id);
+
+        $this->actingAs($admin)->put(route('admin.setores.update', $servico), [
+            'sigla' => 'SECOF',
+            'parent_id' => '',
+        ]);
+
+        $raizServico->refresh();
+        $this->assertNull($raizServico->parent_id);
+    }
+
+    public function test_pastas_destaques_imagens_e_temporario_aparecem_antes_dos_servicos(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true]);
+        $coordenacao = Sector::create(['sigla' => 'COADM']);
+        $servico = Sector::create(['sigla' => 'SECOF', 'parent_id' => $coordenacao->id]);
+
+        // Cria as pastas especiais da coordenação e a pasta raiz do serviço.
+        $coordenacao->pastaDestaques();
+        $coordenacao->pastaImagensInformativos();
+        $coordenacao->pastaTemporaria();
+        $servico->pastaTemporaria();
+
+        $raizCoordenacao = Pasta::whereNull('parent_id')->where('nome', 'COADM')->firstOrFail();
+
+        $response = $this->actingAs($admin)->get(route('repositorio.index', $raizCoordenacao));
+
+        $response->assertOk()->assertSeeInOrder(['Destaques', 'Imagens Informativos', 'Temporário', 'SECOF']);
+    }
 }

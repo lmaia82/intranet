@@ -23,8 +23,13 @@ class RepositorioController extends Controller
         abort_if($pasta && !$pasta->visivelPara($user), 403, 'Você não tem acesso a esta pasta.');
 
         $pastaAtual = $pasta;
+        // Destaques, Imagens Informativos e Temporário sempre aparecem
+        // primeiro (nessa ordem) — em ordem alfabética pura, "Temporário"
+        // cairia depois das pastas de serviço (que começam com S).
+        $ordemFixa = ['Destaques' => 0, 'Imagens Informativos' => 1, 'Temporário' => 2];
         $subpastas = ($pastaAtual ? $pastaAtual->children : Pasta::whereNull('parent_id')->orderBy('nome')->get())
             ->filter(fn (Pasta $p) => $p->visivelPara($user))
+            ->sortBy(fn (Pasta $p) => [$ordemFixa[$p->nome] ?? 3, $p->nome])
             ->values()
             ->load('sector');
         $arquivos = ($pastaAtual ? $pastaAtual->arquivos : Arquivo::whereNull('pasta_id')->orderBy('nome_original')->get())

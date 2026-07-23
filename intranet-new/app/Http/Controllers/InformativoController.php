@@ -49,7 +49,7 @@ class InformativoController extends Controller
 
     public function create()
     {
-        $sectors = Sector::orderBy('sigla')->get();
+        $sectors = Sector::with('children')->orderBy('sigla')->get();
         return view('informativos.create', compact('sectors'));
     }
 
@@ -85,7 +85,7 @@ class InformativoController extends Controller
 
     public function edit(Informativo $informativo)
     {
-        $sectors = Sector::orderBy('sigla')->get();
+        $sectors = Sector::with('children')->orderBy('sigla')->get();
         return view('informativos.edit', compact('informativo', 'sectors'));
     }
 
@@ -290,12 +290,12 @@ class InformativoController extends Controller
 
     public function reenviarForm(Informativo $informativo)
     {
-        $sectors = Sector::orderBy('sigla')->get();
+        $sectors = Sector::with('children')->orderBy('sigla')->get();
         $sectorId = request()->filled('sector_id') ? request('sector_id') : $informativo->sector_id;
 
         $query = User::query();
         if ($sectorId) {
-            $query->where('sector_id', $sectorId);
+            $query->whereIn('sector_id', Sector::find($sectorId)?->idsComSubordinados() ?? [$sectorId]);
         }
         $emails = $query->orderBy('name')->pluck('email');
 
@@ -386,12 +386,16 @@ class InformativoController extends Controller
         }
     }
 
+    /**
+     * Quando o informativo é direcionado a uma coordenação, os destinatários
+     * incluem também os usuários dos serviços subordinados a ela.
+     */
     private function destinatarios(Informativo $informativo)
     {
         $query = User::query();
 
         if ($informativo->sector_id) {
-            $query->where('sector_id', $informativo->sector_id);
+            $query->whereIn('sector_id', $informativo->sector->idsComSubordinados());
         }
 
         return $query->get();

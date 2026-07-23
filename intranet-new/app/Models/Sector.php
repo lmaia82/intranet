@@ -9,6 +9,35 @@ class Sector extends Model
     protected $fillable = ['sigla', 'nome', 'quota_bytes', 'parent_id'];
 
     /**
+     * Quando a coordenação de um setor muda (Admin > Setores), a pasta raiz
+     * já existente desse setor no repositório precisa se mover junto — sem
+     * isso, ela ficaria presa sob a coordenação antiga (ou solta no topo).
+     */
+    protected static function booted(): void
+    {
+        static::updated(function (Sector $sector) {
+            if ($sector->wasChanged('parent_id')) {
+                $sector->reparentarPastaRaiz();
+            }
+        });
+    }
+
+    private function reparentarPastaRaiz(): void
+    {
+        $pasta = Pasta::where('sector_id', $this->id)->where('nome', $this->sigla)->first();
+
+        if (! $pasta) {
+            return;
+        }
+
+        $novoParentId = $this->parent ? $this->parent->pastaRaiz()->id : null;
+
+        if ($pasta->parent_id !== $novoParentId) {
+            $pasta->update(['parent_id' => $novoParentId]);
+        }
+    }
+
+    /**
      * A coordenação à qual este setor (serviço) pertence — null quando o
      * próprio setor já é uma coordenação (ou a diretoria).
      */
@@ -23,6 +52,18 @@ class Sector extends Model
     public function children()
     {
         return $this->hasMany(Sector::class, 'parent_id');
+    }
+
+    /**
+     * O próprio id mais os dos serviços subordinados — usado para incluir a
+     * hierarquia inteira ao restringir e-mail/visibilidade de um informativo
+     * por setor: selecionar uma coordenação também alcança seus serviços.
+     *
+     * @return array<int, int>
+     */
+    public function idsComSubordinados(): array
+    {
+        return [$this->id, ...$this->children->pluck('id')->all()];
     }
 
     /**

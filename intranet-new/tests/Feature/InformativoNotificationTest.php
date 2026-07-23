@@ -80,6 +80,35 @@ class InformativoNotificationTest extends TestCase
         $this->assertNotContains($foraDoSetor->email, $envios);
     }
 
+    public function test_publicar_para_coordenacao_notifica_tambem_os_servicos_subordinados(): void
+    {
+        Mail::fake();
+
+        $admin = User::factory()->create();
+        $coordenacao = Sector::create(['sigla' => 'COADM']);
+        $servico = Sector::create(['sigla' => 'SECOF', 'parent_id' => $coordenacao->id]);
+        $outraCoordenacao = Sector::create(['sigla' => 'COAMI']);
+
+        $daCoordenacao = User::factory()->create(['sector_id' => $coordenacao->id]);
+        $doServico = User::factory()->create(['sector_id' => $servico->id]);
+        $deFora = User::factory()->create(['sector_id' => $outraCoordenacao->id]);
+
+        $this->actingAs($admin)->post(route('informativos.store'), [
+            'title' => 'Aviso da coordenação',
+            'content' => 'Conteudo',
+            'sector_id' => $coordenacao->id,
+            'is_private' => '1',
+            'notificar_email' => '1',
+        ]);
+
+        $informativo = Informativo::firstOrFail();
+        $envios = InformativoEnvio::where('informativo_id', $informativo->id)->pluck('email')->all();
+
+        $this->assertContains($daCoordenacao->email, $envios);
+        $this->assertContains($doServico->email, $envios);
+        $this->assertNotContains($deFora->email, $envios);
+    }
+
     public function test_reenviar_formulario_sugere_emails_do_setor_do_informativo(): void
     {
         $admin = User::factory()->create();
@@ -98,6 +127,26 @@ class InformativoNotificationTest extends TestCase
         $this->actingAs($admin)->get(route('informativos.reenviar.form', $informativo))
             ->assertOk()
             ->assertSee($doSetor->email);
+    }
+
+    public function test_reenviar_formulario_sugere_tambem_emails_dos_servicos_subordinados(): void
+    {
+        $admin = User::factory()->create();
+        $coordenacao = Sector::create(['sigla' => 'COADM']);
+        $servico = Sector::create(['sigla' => 'SECOF', 'parent_id' => $coordenacao->id]);
+        $doServico = User::factory()->create(['sector_id' => $servico->id]);
+
+        $informativo = Informativo::create([
+            'title' => 'Aviso da coordenação',
+            'content' => 'Conteudo',
+            'sector_id' => $coordenacao->id,
+            'is_private' => true,
+            'published_at' => now(),
+        ]);
+
+        $this->actingAs($admin)->get(route('informativos.reenviar.form', $informativo))
+            ->assertOk()
+            ->assertSee($doServico->email);
     }
 
     public function test_reenviar_permite_editar_lista_de_destinatarios(): void
