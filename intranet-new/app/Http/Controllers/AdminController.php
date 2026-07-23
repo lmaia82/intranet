@@ -427,8 +427,14 @@ class AdminController extends Controller
             $usuarios = $usuarios->where('is_admin', (bool) (int) $request->input('is_admin'));
         }
 
-        if ($request->filled('is_active')) {
-            $usuarios = $usuarios->where('is_active', (bool) (int) $request->input('is_active'));
+        if ($request->has('is_active')) {
+            if ($request->filled('is_active')) {
+                $usuarios = $usuarios->where('is_active', (bool) (int) $request->input('is_active'));
+            }
+        } else {
+            // Ao carregar a tela sem nenhum filtro na URL, o padrão é mostrar
+            // somente usuários ativos — facilita a leitura da lista.
+            $usuarios = $usuarios->where('is_active', true);
         }
 
         if ($request->filled('dominio_email')) {

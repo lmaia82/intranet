@@ -85,8 +85,8 @@
                 <div>
                     <label class="block text-xs font-medium text-gray-600 mb-1">Status</label>
                     <select name="is_active" class="w-full border-gray-300 rounded text-sm">
-                        <option value="">(todos)</option>
-                        <option value="1" @selected(request('is_active') === '1')>Ativos</option>
+                        <option value="" @selected(request()->has('is_active') && request('is_active') === '')>(todos)</option>
+                        <option value="1" @selected(!request()->has('is_active') || request('is_active') === '1')>Ativos</option>
                         <option value="0" @selected(request('is_active') === '0')>Inativos</option>
                     </select>
                 </div>

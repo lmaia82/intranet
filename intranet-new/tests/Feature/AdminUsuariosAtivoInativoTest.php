@@ -36,6 +36,26 @@ class AdminUsuariosAtivoInativoTest extends TestCase
             ->assertOk()->assertSee('Usuario Inativo')->assertDontSee('Usuario Ativo');
     }
 
+    public function test_pagina_sem_filtro_na_url_mostra_somente_ativos_por_padrao(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true]);
+        User::factory()->create(['name' => 'Usuario Ativo', 'is_active' => true]);
+        User::factory()->create(['name' => 'Usuario Inativo', 'is_active' => false]);
+
+        $this->actingAs($admin)->get(route('admin.usuarios'))
+            ->assertOk()->assertSee('Usuario Ativo')->assertDontSee('Usuario Inativo');
+    }
+
+    public function test_filtro_todos_explicito_mostra_ativos_e_inativos(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true]);
+        User::factory()->create(['name' => 'Usuario Ativo', 'is_active' => true]);
+        User::factory()->create(['name' => 'Usuario Inativo', 'is_active' => false]);
+
+        $this->actingAs($admin)->get(route('admin.usuarios', ['is_active' => '']))
+            ->assertOk()->assertSee('Usuario Ativo')->assertSee('Usuario Inativo');
+    }
+
     public function test_admin_desativa_e_reativa_usuario_individualmente(): void
     {
         $admin = User::factory()->create(['is_admin' => true]);
