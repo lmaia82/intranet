@@ -23,15 +23,10 @@ class RepositorioController extends Controller
         abort_if($pasta && !$pasta->visivelPara($user), 403, 'Você não tem acesso a esta pasta.');
 
         $pastaAtual = $pasta;
-        // Destaques, Imagens Informativos e Temporário sempre aparecem
-        // primeiro (nessa ordem) — em ordem alfabética pura, "Temporário"
-        // cairia depois das pastas de serviço (que começam com S).
-        $ordemFixa = ['Destaques' => 0, 'Imagens Informativos' => 1, 'Temporário' => 2];
-        $subpastas = ($pastaAtual ? $pastaAtual->children : Pasta::whereNull('parent_id')->orderBy('nome')->get())
-            ->filter(fn (Pasta $p) => $p->visivelPara($user))
-            ->sortBy(fn (Pasta $p) => [$ordemFixa[$p->nome] ?? 3, $p->nome])
-            ->values()
-            ->load('sector');
+        $subpastas = $this->ordenarPastas(
+            ($pastaAtual ? $pastaAtual->children : Pasta::whereNull('parent_id')->orderBy('nome')->get())
+                ->filter(fn (Pasta $p) => $p->visivelPara($user))
+        )->load('sector');
         $arquivos = ($pastaAtual ? $pastaAtual->arquivos : Arquivo::whereNull('pasta_id')->orderBy('nome_original')->get())
             ->each(fn (Arquivo $a) => $pastaAtual ? $a->setRelation('pasta', $pastaAtual) : null)
             ->filter(fn (Arquivo $a) => $a->visivelPara($user))
@@ -66,12 +61,27 @@ class RepositorioController extends Controller
 
     private function construirArvore($pastas, ?int $parentId)
     {
-        return $pastas->where('parent_id', $parentId)
+        return $this->ordenarPastas($pastas->where('parent_id', $parentId))
             ->map(fn (Pasta $p) => [
                 'id' => $p->id,
                 'nome' => $p->nome,
                 'filhas' => $this->construirArvore($pastas, $p->id),
             ])
+            ->values();
+    }
+
+    /**
+     * Destaques, Imagens Informativos e Temporário sempre aparecem primeiro
+     * (nessa ordem) em qualquer listagem de pastas — em ordem alfabética
+     * pura, "Temporário" cairia depois das pastas de serviço (que começam
+     * com S). Usado tanto na navegação principal quanto na árvore lateral.
+     */
+    private function ordenarPastas($pastas)
+    {
+        $ordemFixa = ['Destaques' => 0, 'Imagens Informativos' => 1, 'Temporário' => 2];
+
+        return $pastas
+            ->sortBy(fn (Pasta $p) => [$ordemFixa[$p->nome] ?? 3, $p->nome])
             ->values();
     }
 

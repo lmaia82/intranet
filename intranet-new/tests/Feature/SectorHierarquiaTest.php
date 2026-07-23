@@ -172,4 +172,23 @@ class SectorHierarquiaTest extends TestCase
 
         $response->assertOk()->assertSeeInOrder(['Destaques', 'Imagens Informativos', 'Temporário', 'SECOF']);
     }
+
+    public function test_arvore_lateral_de_pastas_tambem_respeita_a_ordem_fixa(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true]);
+        $coordenacao = Sector::create(['sigla' => 'COADM']);
+        $servico = Sector::create(['sigla' => 'SECOF', 'parent_id' => $coordenacao->id]);
+
+        // A árvore lateral é uma listagem separada da área de conteúdo
+        // principal (RepositorioController::construirArvore) — tinha sua
+        // própria ordenação alfabética não corrigida.
+        $coordenacao->pastaDestaques();
+        $coordenacao->pastaImagensInformativos();
+        $coordenacao->pastaTemporaria();
+        $servico->pastaTemporaria();
+
+        $response = $this->actingAs($admin)->get(route('repositorio.index'));
+
+        $response->assertOk()->assertSeeInOrder(['Destaques', 'Imagens Informativos', 'Temporário', 'SECOF']);
+    }
 }
