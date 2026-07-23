@@ -55,6 +55,10 @@
                 <p class="font-semibold text-lg">🔐 Gerenciar Grupos</p>
                 <p class="text-sm text-gray-500">Definir grupos com permissões de ver/criar por tela</p>
             </a>
+            <a href="{{ route('admin.depara-setores') }}" class="bg-white shadow rounded p-6 hover:bg-gray-50">
+                <p class="font-semibold text-lg">🔀 De/Para de Setores (AD)</p>
+                <p class="text-sm text-gray-500">Padronizar os setores antigos do AD para os setores da intranet</p>
+            </a>
             <a href="{{ route('admin.armazenamento') }}" class="bg-white shadow rounded p-6 hover:bg-gray-50">
                 <p class="font-semibold text-lg">💾 Armazenamento por Setor</p>
                 <p class="text-sm text-gray-500">Acompanhar consumo e cotas de espaço do Repositório</p>

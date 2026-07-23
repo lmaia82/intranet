@@ -10,6 +10,7 @@ use App\Models\Evento;
 use App\Models\Group;
 use App\Models\Informativo;
 use App\Models\InformativoEnvio;
+use App\Models\MapeamentoSetorAd;
 use App\Models\Permission;
 use App\Models\Sector;
 use App\Models\Telefone;
@@ -540,6 +541,56 @@ class AdminController extends Controller
         $usuario->update(['sector_id' => $setor->id]);
 
         return redirect()->route('admin.usuarios')->with('status', 'Setor trazido do AD com sucesso.');
+    }
+
+    /**
+     * De/Para: tela para padronizar os setores brutos trazidos do AD (que
+     * não podem ser renomeados no próprio AD por limitação) para os setores
+     * já cadastrados na intranet.
+     */
+    public function deParaSetores()
+    {
+        $adSetores = User::whereNotNull('ad_setor')->distinct()->orderBy('ad_setor')->pluck('ad_setor');
+        $mapeamentos = MapeamentoSetorAd::pluck('sector_id', 'ad_setor');
+        $setores = Sector::orderBy('sigla')->get();
+
+        return view('admin.depara-setores', compact('adSetores', 'mapeamentos', 'setores'));
+    }
+
+    public function atualizarDeParaSetores(Request $request)
+    {
+        $mapeamentos = $request->input('mapeamentos', []);
+
+        foreach ($mapeamentos as $adSetor => $sectorId) {
+            if (empty($sectorId)) {
+                MapeamentoSetorAd::where('ad_setor', $adSetor)->delete();
+                continue;
+            }
+
+            MapeamentoSetorAd::updateOrCreate(
+                ['ad_setor' => $adSetor],
+                ['sector_id' => $sectorId]
+            );
+        }
+
+        return redirect()->route('admin.depara-setores')->with('status', 'Mapeamento de setores atualizado.');
+    }
+
+    /**
+     * Aplica o de/para nos usuários que ainda estão sem setor (intranet)
+     * definido, sem sobrescrever atribuições manuais já existentes.
+     */
+    public function aplicarDeParaSetores()
+    {
+        $total = 0;
+
+        foreach (MapeamentoSetorAd::all() as $mapeamento) {
+            $total += User::where('ad_setor', $mapeamento->ad_setor)
+                ->whereNull('sector_id')
+                ->update(['sector_id' => $mapeamento->sector_id]);
+        }
+
+        return redirect()->route('admin.depara-setores')->with('status', "Setor atualizado para {$total} usuário(s) que estavam sem setor definido.");
     }
 
     public function updateUsuarioGrupo(Request $request, User $usuario)
