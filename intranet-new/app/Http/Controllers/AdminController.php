@@ -394,7 +394,9 @@ class AdminController extends Controller
             $usuarios = $usuarios->filter(fn ($u) => str_contains(Str::lower($u->email), Str::lower($email)));
         }
 
-        if ($request->filled('sector_id')) {
+        if ($request->input('sector_id') === 'none') {
+            $usuarios = $usuarios->whereNull('sector_id');
+        } elseif ($request->filled('sector_id')) {
             $usuarios = $usuarios->where('sector_id', $request->input('sector_id'));
         }
 

@@ -62,6 +62,19 @@ class AdminUsuariosFiltroTest extends TestCase
         $response->assertOk()->assertSee('Usuario TI')->assertDontSee('Usuario RH');
     }
 
+    public function test_filtra_usuarios_sem_setor_intranet(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true]);
+        $ti = Sector::create(['sigla' => 'TI']);
+
+        User::factory()->create(['name' => 'Usuario TI', 'sector_id' => $ti->id]);
+        User::factory()->create(['name' => 'Usuario Sem Setor', 'sector_id' => null]);
+
+        $response = $this->actingAs($admin)->get(route('admin.usuarios', ['sector_id' => 'none']));
+
+        $response->assertOk()->assertSee('Usuario Sem Setor')->assertDontSee('Usuario TI');
+    }
+
     public function test_filtra_por_setor_do_ad(): void
     {
         $admin = User::factory()->create(['is_admin' => true]);

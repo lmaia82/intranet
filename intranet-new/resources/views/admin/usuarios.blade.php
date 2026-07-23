@@ -41,6 +41,7 @@
                     <label class="block text-xs font-medium text-gray-600 mb-1">Setor (Intranet)</label>
                     <select name="sector_id" class="w-full border-gray-300 rounded text-sm">
                         <option value="">(todos)</option>
+                        <option value="none" @selected(request('sector_id') === 'none')>Sem setor</option>
                         @foreach($setores as $setor)
                             <option value="{{ $setor->id }}" @selected(request('sector_id') == $setor->id)>{{ $setor->sigla }}</option>
                         @endforeach
