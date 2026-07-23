@@ -74,4 +74,14 @@ class OrganogramaTest extends TestCase
 
         $this->actingAs($user)->get(route('organograma.index'))->assertOk()->assertSee('COADM');
     }
+
+    public function test_ctc_aparece_como_elemento_fixo_ao_lado_da_diretoria(): void
+    {
+        Sector::create(['sigla' => 'DIRETORIA', 'nome' => 'Diretoria']);
+        $user = $this->usuarioComPermissao();
+
+        $this->actingAs($user)->get(route('organograma.index'))
+            ->assertOk()
+            ->assertSee('CTC - Conselho Técnico Científico');
+    }
 }
