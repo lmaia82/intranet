@@ -25,6 +25,12 @@
             <input type="text" name="sigla" placeholder="Sigla do novo setor" required class="w-40 border-gray-300 rounded">
             <input type="text" name="nome" placeholder="Nome por extenso (opcional)" class="flex-1 border-gray-300 rounded">
             <input type="number" name="quota_mb" placeholder="Cota (MB, opcional)" min="0" step="1" class="w-48 border-gray-300 rounded">
+            <select name="parent_id" class="border-gray-300 rounded">
+                <option value="">Coordenação (opcional)</option>
+                @foreach($coordenacoes as $coordenacao)
+                    <option value="{{ $coordenacao->id }}">{{ $coordenacao->sigla }}</option>
+                @endforeach
+            </select>
             <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded">Adicionar</button>
         </form>
 
@@ -34,6 +40,7 @@
                     <tr>
                         <th class="p-3">Sigla</th>
                         <th class="p-3">Nome</th>
+                        <th class="p-3">Coordenação</th>
                         <th class="p-3">Cota (MB)</th>
                         <th class="p-3">Uso atual</th>
                         <th class="p-3"></th>
@@ -50,6 +57,14 @@
                                 </td>
                                 <td class="p-3">
                                     <input type="text" name="nome" value="{{ $setor->nome }}" placeholder="Nome por extenso" class="border-gray-300 rounded w-full">
+                                </td>
+                                <td class="p-3">
+                                    <select name="parent_id" class="border-gray-300 rounded">
+                                        <option value="">(nenhuma)</option>
+                                        @foreach($coordenacoes as $coordenacao)
+                                            <option value="{{ $coordenacao->id }}" @selected($setor->parent_id === $coordenacao->id)>{{ $coordenacao->sigla }}</option>
+                                        @endforeach
+                                    </select>
                                 </td>
                                 <td class="p-3">
                                     <input type="number" name="quota_mb" min="0" step="1" placeholder="Sem limite"

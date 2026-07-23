@@ -17,7 +17,7 @@
                     <tr>
                         <td style="padding:32px;">
                             <p style="margin:0 0 8px; font-family: Arial, Helvetica, sans-serif; font-size:12px; letter-spacing:0.05em; text-transform:uppercase; color:#F4A000; font-weight:bold;">
-                                {{ $informativo->sector->sigla ?? 'Comunicado geral' }}
+                                {{ $informativo->sector?->caminhoHierarquico() ?? 'Comunicado geral' }}
                             </p>
                             <h1 style="margin:0 0 16px; font-family: Arial, Helvetica, sans-serif; font-size:22px; color:#333333;">
                                 {{ $informativo->title }}

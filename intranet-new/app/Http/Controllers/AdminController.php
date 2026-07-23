@@ -19,6 +19,7 @@ use App\Services\HealthCheckService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class AdminController extends Controller
 {
@@ -40,8 +41,9 @@ class AdminController extends Controller
 
     public function setores()
     {
-        $setores = Sector::orderBy('sigla')->get();
-        return view('admin.setores', compact('setores'));
+        $setores = Sector::with('parent')->orderBy('sigla')->get();
+        $coordenacoes = $setores->whereNull('parent_id');
+        return view('admin.setores', compact('setores', 'coordenacoes'));
     }
 
     public function engajamento()
@@ -233,11 +235,13 @@ class AdminController extends Controller
             'sigla' => 'required|string|max:100|unique:sectors,sigla',
             'nome' => 'nullable|string|max:150',
             'quota_mb' => 'nullable|numeric|min:0',
+            'parent_id' => 'nullable|exists:sectors,id',
         ]);
         Sector::create([
             'sigla' => $validated['sigla'],
             'nome' => $validated['nome'] ?? null,
             'quota_bytes' => $this->mbParaBytes($validated['quota_mb'] ?? null),
+            'parent_id' => $validated['parent_id'] ?? null,
         ]);
         return redirect()->route('admin.setores')->with('status', 'Setor criado com sucesso.');
     }
@@ -248,11 +252,13 @@ class AdminController extends Controller
             'sigla' => 'required|string|max:100|unique:sectors,sigla,' . $setor->id,
             'nome' => 'nullable|string|max:150',
             'quota_mb' => 'nullable|numeric|min:0',
+            'parent_id' => ['nullable', 'exists:sectors,id', Rule::notIn([$setor->id])],
         ]);
         $setor->update([
             'sigla' => $validated['sigla'],
             'nome' => $validated['nome'] ?? null,
             'quota_bytes' => $this->mbParaBytes($validated['quota_mb'] ?? null),
+            'parent_id' => $validated['parent_id'] ?? null,
         ]);
         return redirect()->route('admin.setores')->with('status', 'Setor atualizado com sucesso.');
     }

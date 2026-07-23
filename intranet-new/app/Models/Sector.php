@@ -6,7 +6,33 @@ use Illuminate\Database\Eloquent\Model;
 
 class Sector extends Model
 {
-    protected $fillable = ['sigla', 'nome', 'quota_bytes'];
+    protected $fillable = ['sigla', 'nome', 'quota_bytes', 'parent_id'];
+
+    /**
+     * A coordenação à qual este setor (serviço) pertence — null quando o
+     * próprio setor já é uma coordenação (ou a diretoria).
+     */
+    public function parent()
+    {
+        return $this->belongsTo(Sector::class, 'parent_id');
+    }
+
+    /**
+     * Os serviços subordinados a esta coordenação.
+     */
+    public function children()
+    {
+        return $this->hasMany(Sector::class, 'parent_id');
+    }
+
+    /**
+     * "Coordenação / Serviço" quando o setor tem uma coordenação pai, ou só
+     * a sigla da própria coordenação quando não tem.
+     */
+    public function caminhoHierarquico(): string
+    {
+        return $this->parent ? "{$this->parent->sigla} / {$this->sigla}" : $this->sigla;
+    }
 
     public function telefones()
     {
@@ -49,8 +75,12 @@ class Sector extends Model
 
     private function pastaRaiz(): Pasta
     {
+        // Setor "serviço" (tem coordenação pai): sua pasta raiz fica dentro
+        // da pasta raiz da coordenação, não solta na raiz do repositório.
+        $pastaPaiId = $this->parent ? $this->parent->pastaRaiz()->id : null;
+
         return Pasta::firstOrCreate(
-            ['nome' => $this->sigla, 'parent_id' => null],
+            ['nome' => $this->sigla, 'parent_id' => $pastaPaiId],
             ['sector_id' => $this->id, 'is_private' => false]
         );
     }

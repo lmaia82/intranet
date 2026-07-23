@@ -5,7 +5,7 @@
             <div class="flex items-center gap-3 text-sm text-white">
                 <span>
                     @if(auth()->user()->sector)
-                        {{ auth()->user()->sector->nome ?: auth()->user()->sector->sigla }} ({{ auth()->user()->sector->sigla }})
+                        {{ auth()->user()->sector->nome ?: auth()->user()->sector->sigla }} ({{ auth()->user()->sector->caminhoHierarquico() }})
                     @else
                         Sem lotação definida
                     @endif
@@ -83,7 +83,7 @@
                     @forelse($informativos as $informativo)
                         <a href="{{ route('informativos.show', $informativo) }}" class="block border-b pb-2 last:border-0">
                             <p class="font-medium text-blue-700">{{ $informativo->title }}</p>
-                            <p class="text-xs text-gray-500">{{ $informativo->sector->sigla ?? 'Geral' }} — {{ $informativo->published_at?->format('d/m/Y') }}</p>
+                            <p class="text-xs text-gray-500">{{ $informativo->sector?->caminhoHierarquico() ?? 'Geral' }} — {{ $informativo->published_at?->format('d/m/Y') }}</p>
                         </a>
                     @empty
                         <p class="text-sm text-gray-500">Nenhum informativo publicado ainda.</p>

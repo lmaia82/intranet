@@ -32,7 +32,7 @@
                     @endif
                     <div class="flex-1">
                         <a href="{{ route('informativos.show', $informativo) }}" class="text-lg font-semibold text-blue-700">{{ $informativo->title }}</a>
-                        <p class="text-sm text-gray-500">{{ $informativo->sector->sigla ?? 'Geral' }} — {{ $informativo->published_at?->format('d/m/Y H:i') }}</p>
+                        <p class="text-sm text-gray-500">{{ $informativo->sector?->caminhoHierarquico() ?? 'Geral' }} — {{ $informativo->published_at?->format('d/m/Y H:i') }}</p>
                         @if(auth()->user()->hasPermission('informativos.criar'))
                             <div class="mt-2 flex gap-2">
                                 <a href="{{ route('informativos.edit', $informativo) }}" class="text-blue-600 text-sm">Editar</a>
