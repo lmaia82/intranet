@@ -81,6 +81,14 @@ Route::middleware(['auth', 'tutoriais.ativo'])->group(function () {
     Route::get('tutoriais-lote/template', [TutorialController::class, 'loteTemplate'])->name('tutoriais.lote.template')->middleware('permission:tutoriais.criar');
 });
 
+use App\Http\Controllers\OrganogramaController;
+
+Route::middleware('auth')->group(function () {
+    Route::get('organograma', [OrganogramaController::class, 'index'])
+        ->name('organograma.index')
+        ->middleware(['permission:organograma.ver', 'registrar.acesso:organograma']);
+});
+
 use App\Http\Controllers\DestaqueController;
 
 Route::middleware('auth')->group(function () {

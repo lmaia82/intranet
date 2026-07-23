@@ -36,6 +36,11 @@
                             {{ __('Tutoriais') }}
                         </x-nav-link>
                     @endif
+                    @if(auth()->user()->hasPermission('organograma.ver'))
+                        <x-nav-link :href="route('organograma.index')" :active="request()->routeIs('organograma.*')">
+                            {{ __('Organograma') }}
+                        </x-nav-link>
+                    @endif
                     @if(auth()->user()->hasPermission('destaques.ver'))
                         <x-nav-link :href="route('destaques.index')" :active="request()->routeIs('destaques.*')">
                             {{ __('Destaques') }}
@@ -130,6 +135,11 @@
             @if($tutoriaisAtivo && auth()->user()->hasPermission('tutoriais.ver'))
                 <x-responsive-nav-link :href="route('tutoriais.index')" :active="request()->routeIs('tutoriais.*')">
                     {{ __('Tutoriais') }}
+                </x-responsive-nav-link>
+            @endif
+            @if(auth()->user()->hasPermission('organograma.ver'))
+                <x-responsive-nav-link :href="route('organograma.index')" :active="request()->routeIs('organograma.*')">
+                    {{ __('Organograma') }}
                 </x-responsive-nav-link>
             @endif
             @if(auth()->user()->hasPermission('destaques.ver'))

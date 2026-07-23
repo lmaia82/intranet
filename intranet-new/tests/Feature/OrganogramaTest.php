@@ -1,0 +1,77 @@
+<?php
+
+namespace Tests\Feature;
+
+use App\Models\Group;
+use App\Models\Permission;
+use App\Models\Sector;
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
+
+class OrganogramaTest extends TestCase
+{
+    use RefreshDatabase;
+
+    private function usuarioComPermissao(): User
+    {
+        $permissao = Permission::where('key', 'organograma.ver')->first();
+        $grupo = Group::create(['name' => 'Ve Organograma ' . uniqid()]);
+        $grupo->permissions()->attach($permissao);
+
+        return User::factory()->create(['group_id' => $grupo->id]);
+    }
+
+    public function test_pagina_mostra_diretoria_coordenacoes_e_servicos(): void
+    {
+        $diretoria = Sector::create(['sigla' => 'DIRETORIA', 'nome' => 'Diretoria']);
+        $coordenacao = Sector::create(['sigla' => 'COADM', 'nome' => 'Coordenação de Administração']);
+        Sector::create(['sigla' => 'SECOF', 'nome' => 'Serviço de Contabilidade', 'parent_id' => $coordenacao->id]);
+
+        $user = $this->usuarioComPermissao();
+
+        $this->actingAs($user)->get(route('organograma.index'))
+            ->assertOk()
+            ->assertSeeInOrder(['Diretoria', 'COADM', 'Coordenação de Administração', 'SECOF']);
+    }
+
+    public function test_setores_sem_coordenacao_e_diferentes_de_diretoria_aparecem_como_coordenacao(): void
+    {
+        Sector::create(['sigla' => 'SEIN', 'nome' => 'Serviço de Informática']);
+
+        $user = $this->usuarioComPermissao();
+
+        $this->actingAs($user)->get(route('organograma.index'))
+            ->assertOk()
+            ->assertSee('SEIN');
+    }
+
+    public function test_usuario_sem_permissao_nao_acessa_organograma(): void
+    {
+        $user = User::factory()->create(['group_id' => null]);
+
+        $this->actingAs($user)->get(route('organograma.index'))->assertForbidden();
+    }
+
+    public function test_link_do_organograma_aparece_no_menu_para_quem_tem_permissao(): void
+    {
+        $user = $this->usuarioComPermissao();
+
+        $this->actingAs($user)->get(route('dashboard'))->assertOk()->assertSee('Organograma');
+    }
+
+    public function test_link_do_organograma_nao_aparece_para_quem_nao_tem_permissao(): void
+    {
+        $user = User::factory()->create(['group_id' => null]);
+
+        $this->actingAs($user)->get(route('dashboard'))->assertOk()->assertDontSee('Organograma');
+    }
+
+    public function test_pagina_carrega_mesmo_sem_setor_diretoria_cadastrado(): void
+    {
+        Sector::create(['sigla' => 'COADM']);
+        $user = $this->usuarioComPermissao();
+
+        $this->actingAs($user)->get(route('organograma.index'))->assertOk()->assertSee('COADM');
+    }
+}
