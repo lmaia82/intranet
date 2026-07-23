@@ -6,23 +6,32 @@
     </x-slot>
 
     <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
-            <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
-                <div class="max-w-xl">
-                    @include('profile.partials.update-profile-information-form')
+        <div class="max-w-xl mx-auto sm:px-6 lg:px-8">
+            <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg space-y-6">
+                <div>
+                    <p class="text-sm font-medium text-gray-500">Nome</p>
+                    <p class="mt-1 text-gray-900">{{ $user->name }}</p>
                 </div>
-            </div>
 
-            <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
-                <div class="max-w-xl">
-                    @include('profile.partials.update-password-form')
+                <div>
+                    <p class="text-sm font-medium text-gray-500">E-mail</p>
+                    <p class="mt-1 text-gray-900">{{ $user->email }}</p>
                 </div>
-            </div>
 
-            <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
-                <div class="max-w-xl">
-                    @include('profile.partials.delete-user-form')
+                <div>
+                    <p class="text-sm font-medium text-gray-500">Lotação</p>
+                    <p class="mt-1 text-gray-900">
+                        @if($user->sector)
+                            {{ $user->sector->nome ?: $user->sector->sigla }} ({{ $user->sector->caminhoHierarquico() }})
+                        @else
+                            Sem lotação definida
+                        @endif
+                    </p>
                 </div>
+
+                <p class="text-sm text-gray-500">
+                    Para alterar essas informações, entre em contato com um administrador da intranet.
+                </p>
             </div>
         </div>
     </div>

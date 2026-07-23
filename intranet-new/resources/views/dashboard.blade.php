@@ -10,7 +10,7 @@
                         Sem lotação definida
                     @endif
                 </span>
-                <a href="{{ route('profile.edit') }}" class="px-3 py-1 bg-white/20 hover:bg-white/30 rounded text-white">Alterar lotação</a>
+                <a href="{{ route('profile.edit') }}" class="px-3 py-1 bg-white/20 hover:bg-white/30 rounded text-white">Ver perfil</a>
             </div>
         </div>
     </x-slot>
