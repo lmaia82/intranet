@@ -16,9 +16,19 @@
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         {{ __('Início') }}
                     </x-nav-link>
+                    @if(auth()->user()->hasPermission('organograma.ver'))
+                        <x-nav-link :href="route('organograma.index')" :active="request()->routeIs('organograma.*')">
+                            {{ __('Organograma') }}
+                        </x-nav-link>
+                    @endif
                     @if(auth()->user()->hasPermission('ramais.ver'))
                         <x-nav-link :href="route('telefones.index')" :active="request()->routeIs('telefones.*')">
                             {{ __('Ramais') }}
+                        </x-nav-link>
+                    @endif
+                    @if(auth()->user()->hasPermission('destaques.ver'))
+                        <x-nav-link :href="route('destaques.index')" :active="request()->routeIs('destaques.*')">
+                            {{ __('Destaques') }}
                         </x-nav-link>
                     @endif
                     @if(auth()->user()->hasPermission('informativos.ver'))
@@ -36,27 +46,17 @@
                             {{ __('Tutoriais') }}
                         </x-nav-link>
                     @endif
-                    @if(auth()->user()->hasPermission('organograma.ver'))
-                        <x-nav-link :href="route('organograma.index')" :active="request()->routeIs('organograma.*')">
-                            {{ __('Organograma') }}
-                        </x-nav-link>
-                    @endif
-                    @if(auth()->user()->hasPermission('destaques.ver'))
-                        <x-nav-link :href="route('destaques.index')" :active="request()->routeIs('destaques.*')">
-                            {{ __('Destaques') }}
-                        </x-nav-link>
-                    @endif
                     <x-nav-link :href="route('artigos.index')" :active="request()->routeIs('artigos.*')">
                         {{ __('Publicações') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('onlyoffice.aplicacoes')" :active="request()->routeIs('onlyoffice.aplicacoes')">
+                        {{ __('Aplicações') }}
                     </x-nav-link>
                     @if(auth()->user()->hasPermission('repositorio.ver'))
                         <x-nav-link :href="route('repositorio.index')" :active="request()->routeIs('repositorio.*')">
                             {{ __('Repositório') }}
                         </x-nav-link>
                     @endif
-                    <x-nav-link :href="route('onlyoffice.aplicacoes')" :active="request()->routeIs('onlyoffice.aplicacoes')">
-                        {{ __('Aplicações') }}
-                    </x-nav-link>
                     @if(auth()->user()->is_admin)
                         <x-nav-link :href="route('admin.index')" :active="request()->routeIs('admin.*')">
                             {{ __('Administração') }}
@@ -117,9 +117,19 @@
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 {{ __('Início') }}
             </x-responsive-nav-link>
+            @if(auth()->user()->hasPermission('organograma.ver'))
+                <x-responsive-nav-link :href="route('organograma.index')" :active="request()->routeIs('organograma.*')">
+                    {{ __('Organograma') }}
+                </x-responsive-nav-link>
+            @endif
             @if(auth()->user()->hasPermission('ramais.ver'))
                 <x-responsive-nav-link :href="route('telefones.index')" :active="request()->routeIs('telefones.*')">
                     {{ __('Ramais') }}
+                </x-responsive-nav-link>
+            @endif
+            @if(auth()->user()->hasPermission('destaques.ver'))
+                <x-responsive-nav-link :href="route('destaques.index')" :active="request()->routeIs('destaques.*')">
+                    {{ __('Destaques') }}
                 </x-responsive-nav-link>
             @endif
             @if(auth()->user()->hasPermission('informativos.ver'))
@@ -137,27 +147,17 @@
                     {{ __('Tutoriais') }}
                 </x-responsive-nav-link>
             @endif
-            @if(auth()->user()->hasPermission('organograma.ver'))
-                <x-responsive-nav-link :href="route('organograma.index')" :active="request()->routeIs('organograma.*')">
-                    {{ __('Organograma') }}
-                </x-responsive-nav-link>
-            @endif
-            @if(auth()->user()->hasPermission('destaques.ver'))
-                <x-responsive-nav-link :href="route('destaques.index')" :active="request()->routeIs('destaques.*')">
-                    {{ __('Destaques') }}
-                </x-responsive-nav-link>
-            @endif
             <x-responsive-nav-link :href="route('artigos.index')" :active="request()->routeIs('artigos.*')">
                 {{ __('Publicações') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('onlyoffice.aplicacoes')" :active="request()->routeIs('onlyoffice.aplicacoes')">
+                {{ __('Aplicações') }}
             </x-responsive-nav-link>
             @if(auth()->user()->hasPermission('repositorio.ver'))
                 <x-responsive-nav-link :href="route('repositorio.index')" :active="request()->routeIs('repositorio.*')">
                     {{ __('Repositório') }}
                 </x-responsive-nav-link>
             @endif
-            <x-responsive-nav-link :href="route('onlyoffice.aplicacoes')" :active="request()->routeIs('onlyoffice.aplicacoes')">
-                {{ __('Aplicações') }}
-            </x-responsive-nav-link>
             @if(auth()->user()->is_admin)
                 <x-responsive-nav-link :href="route('admin.index')" :active="request()->routeIs('admin.*')">
                     {{ __('Administração') }}
