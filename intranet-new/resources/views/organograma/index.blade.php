@@ -14,9 +14,14 @@
                     <div class="bg-[#166F9E] text-white font-bold rounded px-8 py-3 shadow text-center">
                         {{ $diretoria->nome ?: $diretoria->sigla }}
                     </div>
-                    <div class="w-px h-10 bg-gray-300"></div>
-                    <div class="bg-yellow-100 border border-yellow-400 rounded-full px-4 py-2 text-center text-xs text-gray-700 whitespace-nowrap">
-                        CTC - Conselho Técnico Científico
+                    <div class="relative">
+                        <div class="w-px h-16 bg-gray-300"></div>
+                        <div class="absolute top-8 left-1/2 -translate-y-1/2 flex items-center">
+                            <div class="w-6 h-px bg-gray-300"></div>
+                            <div class="bg-yellow-100 border border-yellow-400 rounded-full px-4 py-2 text-center text-xs text-gray-700 whitespace-nowrap">
+                                CTC - Conselho Técnico Científico
+                            </div>
+                        </div>
                     </div>
                     @if($coordenacoes->isNotEmpty())
                         <div class="w-px h-6 bg-gray-300"></div>
