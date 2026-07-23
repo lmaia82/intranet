@@ -554,6 +554,20 @@ class AdminController extends Controller
             ->with('status', count($validated['ids']) . ' usuário(s) ativado(s).');
     }
 
+    public function atualizarSetorUsuariosLote(Request $request)
+    {
+        $validated = $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'exists:users,id',
+            'novo_sector_id' => 'nullable|exists:sectors,id',
+        ]);
+
+        User::whereIn('id', $validated['ids'])->update(['sector_id' => $validated['novo_sector_id'] ?? null]);
+
+        return redirect()->route('admin.usuarios', $this->filtrosAtuais($request))
+            ->with('status', count($validated['ids']) . ' usuário(s) com setor atualizado.');
+    }
+
     private function filtrosAtuais(Request $request): array
     {
         return $request->only(['nome', 'email', 'sector_id', 'ad_setor', 'confere', 'group_id', 'is_admin', 'is_active', 'dominio_email']);

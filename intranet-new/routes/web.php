@@ -185,6 +185,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('usuarios/excluir-em-lote', [AdminController::class, 'destroyUsuariosLote'])->name('usuarios.destroy-lote');
     Route::post('usuarios/desativar-em-lote', [AdminController::class, 'desativarUsuariosLote'])->name('usuarios.desativar-lote');
     Route::post('usuarios/ativar-em-lote', [AdminController::class, 'ativarUsuariosLote'])->name('usuarios.ativar-lote');
+    Route::post('usuarios/setor-em-lote', [AdminController::class, 'atualizarSetorUsuariosLote'])->name('usuarios.setor-lote');
 
     Route::get('usuarios-lote', [AdminController::class, 'usuariosLoteForm'])->name('usuarios.lote.form');
     Route::post('usuarios-lote', [AdminController::class, 'usuariosLoteImport'])->name('usuarios.lote.import');

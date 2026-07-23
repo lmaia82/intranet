@@ -115,7 +115,18 @@
             <p class="text-sm text-gray-600">
                 Exibindo <strong>{{ $usuarios->count() }}</strong> de <strong>{{ $totalGeral }}</strong> usuário(s)
             </p>
-            <div class="flex gap-3">
+            <div class="flex gap-3 items-center">
+            <select name="novo_sector_id" form="acao-lote-form" class="border-gray-300 rounded text-sm">
+                <option value="">Setor (Intranet)...</option>
+                @foreach($setores as $setor)
+                    <option value="{{ $setor->id }}">{{ $setor->sigla }}</option>
+                @endforeach
+            </select>
+            <button type="submit" form="acao-lote-form" formaction="{{ route('admin.usuarios.setor-lote') }}"
+                    class="px-4 py-2 bg-blue-600 text-white rounded text-sm"
+                    onclick="return confirm('Atualizar o setor dos usuários selecionados?')">
+                Atualizar setor dos selecionados
+            </button>
             <button type="submit" form="acao-lote-form" formaction="{{ route('admin.usuarios.desativar-lote') }}"
                     class="px-4 py-2 bg-amber-600 text-white rounded text-sm"
                     onclick="return confirm('Desativar os usuários selecionados?')">
