@@ -325,6 +325,8 @@ class AdminController extends Controller
 
     public function usuarios(Request $request)
     {
+        $totalGeral = User::count();
+
         $usuarios = User::with(['sector', 'group'])->orderBy('name')->get();
 
         if ($nome = trim((string) $request->input('nome'))) {
@@ -382,7 +384,7 @@ class AdminController extends Controller
         $grupos = Group::orderBy('name')->get();
         $adSetores = User::whereNotNull('ad_setor')->distinct()->orderBy('ad_setor')->pluck('ad_setor');
 
-        return view('admin.usuarios', compact('usuarios', 'setores', 'grupos', 'adSetores'));
+        return view('admin.usuarios', compact('usuarios', 'setores', 'grupos', 'adSetores', 'totalGeral'));
     }
 
     public function importarUsuariosDoAd(Request $request)

@@ -111,7 +111,11 @@
             @endforeach
         </form>
 
-        <div class="flex justify-end mb-2 gap-3">
+        <div class="flex justify-between items-center mb-2 gap-3">
+            <p class="text-sm text-gray-600">
+                Exibindo <strong>{{ $usuarios->count() }}</strong> de <strong>{{ $totalGeral }}</strong> usuário(s)
+            </p>
+            <div class="flex gap-3">
             <button type="submit" form="acao-lote-form" formaction="{{ route('admin.usuarios.desativar-lote') }}"
                     class="px-4 py-2 bg-amber-600 text-white rounded text-sm"
                     onclick="return confirm('Desativar os usuários selecionados?')">
@@ -127,6 +131,7 @@
                     onclick="return confirm('Remover os usuários selecionados? Esta ação não pode ser desfeita.')">
                 Excluir selecionados
             </button>
+            </div>
         </div>
 
         <div class="bg-white shadow rounded overflow-x-auto">

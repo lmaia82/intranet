@@ -12,6 +12,20 @@ class AdminUsuariosFiltroTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_mostra_total_geral_e_total_apos_filtro(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true, 'name' => 'Fulano de Tal']);
+        User::factory()->create(['name' => 'Beltrano da Silva']);
+        User::factory()->create(['name' => 'Ciclano Pereira']);
+
+        // 3 usuários no total (admin + 2), filtrando por nome sobra só 1.
+        $response = $this->actingAs($admin)->get(route('admin.usuarios', ['nome' => 'Fulano']));
+
+        $response->assertOk()
+            ->assertSee('Exibindo')
+            ->assertSeeInOrder(['1', 'de', '3']);
+    }
+
     public function test_filtra_por_nome(): void
     {
         $admin = User::factory()->create(['is_admin' => true]);
