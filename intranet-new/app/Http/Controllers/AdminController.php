@@ -329,8 +329,21 @@ class AdminController extends Controller
             'permissions.*' => 'exists:permissions,id',
         ]);
 
+        $permissoes = $validated['permissions'] ?? [];
+
+        // A aba Tutoriais some do formulário quando desativada em
+        // Configurações — sem isso, salvar o grupo removeria silenciosamente
+        // a permissão de tutoriais que ele já tinha, mesmo sem o admin ter
+        // mexido nela.
+        if (! Configuracao::atual()->tutoriais_ativo) {
+            $permissoes = array_unique(array_merge(
+                $permissoes,
+                $grupo->permissions()->where('key', 'like', 'tutoriais.%')->pluck('id')->all()
+            ));
+        }
+
         $grupo->update(['name' => $validated['name']]);
-        $grupo->permissions()->sync($validated['permissions'] ?? []);
+        $grupo->permissions()->sync($permissoes);
 
         return redirect()->route('admin.grupos')->with('status', 'Grupo atualizado com sucesso.');
     }
@@ -343,9 +356,13 @@ class AdminController extends Controller
 
     private function permissoesPorTela()
     {
-        return Permission::orderBy('key')->get()->groupBy(function ($permission) {
-            return explode('.', $permission->key)[0];
-        });
+        return Permission::orderBy('key')->get()
+            ->when(! Configuracao::atual()->tutoriais_ativo, fn ($permissoes) => $permissoes->reject(
+                fn ($permissao) => str_starts_with($permissao->key, 'tutoriais.')
+            ))
+            ->groupBy(function ($permission) {
+                return explode('.', $permission->key)[0];
+            });
     }
 
     public function usuarios(Request $request)
