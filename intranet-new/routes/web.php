@@ -156,6 +156,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('setores', [AdminController::class, 'storeSetor'])->name('setores.store');
     Route::put('setores/{setor}', [AdminController::class, 'updateSetor'])->name('setores.update');
     Route::delete('setores/{setor}', [AdminController::class, 'destroySetor'])->name('setores.destroy');
+    Route::post('setores/cota-em-lote', [AdminController::class, 'atualizarCotaSetoresLote'])->name('setores.cota-lote');
 
     Route::get('armazenamento', [AdminController::class, 'armazenamento'])->name('armazenamento');
     Route::get('engajamento', [AdminController::class, 'engajamento'])->name('engajamento');

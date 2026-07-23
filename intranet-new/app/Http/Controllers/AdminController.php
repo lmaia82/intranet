@@ -271,6 +271,21 @@ class AdminController extends Controller
         return redirect()->route('admin.setores')->with('status', 'Setor atualizado com sucesso.');
     }
 
+    public function atualizarCotaSetoresLote(Request $request)
+    {
+        $validated = $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'exists:sectors,id',
+            'nova_cota_mb' => 'nullable|numeric|min:0',
+        ]);
+
+        Sector::whereIn('id', $validated['ids'])
+            ->update(['quota_bytes' => $this->mbParaBytes($validated['nova_cota_mb'] ?? null)]);
+
+        return redirect()->route('admin.setores')
+            ->with('status', count($validated['ids']) . ' setor(es) com cota atualizada.');
+    }
+
     public function destroySetor(Sector $setor)
     {
         $setor->delete();

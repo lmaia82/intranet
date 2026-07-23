@@ -34,10 +34,29 @@
             <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded">Adicionar</button>
         </form>
 
+        {{-- Form da edição de cota em lote — fica fora da tabela e recebe os
+             checkboxes/campos via atributo form="", mesma técnica usada nos
+             forms individuais de cada linha logo abaixo. --}}
+        <form id="cota-lote-form" method="POST" action="{{ route('admin.setores.cota-lote') }}">
+            @csrf
+        </form>
+
+        <div class="flex justify-end items-center gap-2 mb-2">
+            <input type="number" name="nova_cota_mb" min="0" step="1" placeholder="Nova cota (MB, vazio = sem limite)"
+                   form="cota-lote-form" class="w-64 border-gray-300 rounded text-sm">
+            <button type="submit" form="cota-lote-form" class="px-4 py-2 bg-blue-600 text-white rounded text-sm"
+                    onclick="return confirm('Atualizar a cota dos setores selecionados?')">
+                Atualizar cota dos selecionados
+            </button>
+        </div>
+
         <div class="bg-white shadow rounded overflow-hidden">
             <table class="w-full text-left">
                 <thead class="bg-gray-50">
                     <tr>
+                        <th class="p-3">
+                            <input type="checkbox" onclick="document.querySelectorAll('.selecionar-setor').forEach(cb => cb.checked = this.checked)">
+                        </th>
                         <th class="p-3">Sigla</th>
                         <th class="p-3">Nome</th>
                         <th class="p-3">Coordenação</th>
@@ -57,39 +76,42 @@
                             @method('PUT')
                         </form>
                         <tr class="border-t">
-                                <td class="p-3">
-                                    <input type="text" name="sigla" value="{{ $setor->sigla }}" form="setor-{{ $setor->id }}-form" class="border-gray-300 rounded w-full">
-                                </td>
-                                <td class="p-3">
-                                    <input type="text" name="nome" value="{{ $setor->nome }}" placeholder="Nome por extenso" form="setor-{{ $setor->id }}-form" class="border-gray-300 rounded w-full">
-                                </td>
-                                <td class="p-3">
-                                    <select name="parent_id" form="setor-{{ $setor->id }}-form" class="border-gray-300 rounded">
-                                        <option value="">(nenhuma)</option>
-                                        @foreach($coordenacoes as $coordenacao)
-                                            <option value="{{ $coordenacao->id }}" @selected($setor->parent_id === $coordenacao->id)>{{ $coordenacao->sigla }}</option>
-                                        @endforeach
-                                    </select>
-                                </td>
-                                <td class="p-3">
-                                    <input type="number" name="quota_mb" min="0" step="1" placeholder="Sem limite" form="setor-{{ $setor->id }}-form"
-                                           value="{{ $setor->quota_bytes ? round($setor->quota_bytes / 1048576) : '' }}"
-                                           class="border-gray-300 rounded w-32">
-                                </td>
-                                <td class="p-3 text-sm text-gray-600">
-                                    {{ $setor->usoFormatado() }}
-                                    @if($setor->percentualUso() !== null)
-                                        <span class="text-xs {{ $setor->percentualUso() >= 90 ? 'text-red-600' : 'text-gray-400' }}">({{ $setor->percentualUso() }}%)</span>
-                                    @endif
-                                </td>
-                                <td class="p-3 text-right whitespace-nowrap">
-                                    <button type="submit" form="setor-{{ $setor->id }}-form" class="text-blue-600">Salvar</button>
-                                    <form action="{{ route('admin.setores.destroy', $setor) }}" method="POST" class="inline" onsubmit="return confirm('Remover este setor?')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="text-red-600 ml-2">Remover</button>
-                                    </form>
-                                </td>
+                            <td class="p-3">
+                                <input type="checkbox" class="selecionar-setor" name="ids[]" value="{{ $setor->id }}" form="cota-lote-form">
+                            </td>
+                            <td class="p-3">
+                                <input type="text" name="sigla" value="{{ $setor->sigla }}" form="setor-{{ $setor->id }}-form" class="border-gray-300 rounded w-full">
+                            </td>
+                            <td class="p-3">
+                                <input type="text" name="nome" value="{{ $setor->nome }}" placeholder="Nome por extenso" form="setor-{{ $setor->id }}-form" class="border-gray-300 rounded w-full">
+                            </td>
+                            <td class="p-3">
+                                <select name="parent_id" form="setor-{{ $setor->id }}-form" class="border-gray-300 rounded">
+                                    <option value="">(nenhuma)</option>
+                                    @foreach($coordenacoes as $coordenacao)
+                                        <option value="{{ $coordenacao->id }}" @selected($setor->parent_id === $coordenacao->id)>{{ $coordenacao->sigla }}</option>
+                                    @endforeach
+                                </select>
+                            </td>
+                            <td class="p-3">
+                                <input type="number" name="quota_mb" min="0" step="1" placeholder="Sem limite" form="setor-{{ $setor->id }}-form"
+                                       value="{{ $setor->quota_bytes ? round($setor->quota_bytes / 1048576) : '' }}"
+                                       class="border-gray-300 rounded w-32">
+                            </td>
+                            <td class="p-3 text-sm text-gray-600">
+                                {{ $setor->usoFormatado() }}
+                                @if($setor->percentualUso() !== null)
+                                    <span class="text-xs {{ $setor->percentualUso() >= 90 ? 'text-red-600' : 'text-gray-400' }}">({{ $setor->percentualUso() }}%)</span>
+                                @endif
+                            </td>
+                            <td class="p-3 text-right whitespace-nowrap">
+                                <button type="submit" form="setor-{{ $setor->id }}-form" class="text-blue-600">Salvar</button>
+                                <form action="{{ route('admin.setores.destroy', $setor) }}" method="POST" class="inline" onsubmit="return confirm('Remover este setor?')">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="text-red-600 ml-2">Remover</button>
+                                </form>
+                            </td>
                         </tr>
                     @endforeach
                 </tbody>
