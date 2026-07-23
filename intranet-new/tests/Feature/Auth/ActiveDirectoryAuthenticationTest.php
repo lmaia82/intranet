@@ -233,4 +233,30 @@ class ActiveDirectoryAuthenticationTest extends TestCase
         $this->assertSame($setorJaDefinido->id, $usuario->sector_id);
         $this->assertSame($grupoJaDefinido->id, $usuario->group_id);
     }
+
+    public function test_usuario_desativado_nao_autentica_mesmo_com_senha_correta_no_ad(): void
+    {
+        $usuario = User::factory()->create([
+            'email' => 'desativado@cetem.gov.br',
+            'is_active' => false,
+        ]);
+
+        $fake = DirectoryEmulator::setup();
+
+        $this->criarUsuarioNoAd([
+            'cn' => 'Fulano Desativado',
+            'mail' => 'desativado@cetem.gov.br',
+            'objectguid' => Str::orderedUuid(),
+        ], setor: 'TI');
+
+        $fake->getLdapConnection()->shouldAllowBindWith('desativado@cetem.gov.br');
+
+        $response = $this->post('/login', [
+            'email' => 'desativado@cetem.gov.br',
+            'password' => 'senha-do-ad',
+        ]);
+
+        $response->assertSessionHasErrors('email');
+        $this->assertGuest();
+    }
 }

@@ -365,6 +365,19 @@ class AdminController extends Controller
             $usuarios = $usuarios->where('is_admin', (bool) (int) $request->input('is_admin'));
         }
 
+        if ($request->filled('is_active')) {
+            $usuarios = $usuarios->where('is_active', (bool) (int) $request->input('is_active'));
+        }
+
+        if ($request->filled('dominio_email')) {
+            $dominioEmail = $request->input('dominio_email');
+            $usuarios = $usuarios->filter(function ($u) use ($dominioEmail) {
+                $interno = str_ends_with(Str::lower($u->email), '@cetem.gov.br');
+
+                return $dominioEmail === 'cetem' ? $interno : ! $interno;
+            });
+        }
+
         $setores = Sector::orderBy('sigla')->get();
         $grupos = Group::orderBy('name')->get();
         $adSetores = User::whereNotNull('ad_setor')->distinct()->orderBy('ad_setor')->pluck('ad_setor');
@@ -482,6 +495,13 @@ class AdminController extends Controller
         return redirect()->route('admin.usuarios')->with('status', 'Permissão atualizada.');
     }
 
+    public function toggleAtivo(User $usuario)
+    {
+        abort_if($usuario->id === auth()->id(), 403, 'Você não pode desativar a si mesmo.');
+        $usuario->update(['is_active' => !$usuario->is_active]);
+        return redirect()->route('admin.usuarios')->with('status', $usuario->is_active ? 'Usuário ativado.' : 'Usuário desativado.');
+    }
+
     public function destroyUsuario(User $usuario)
     {
         abort_if($usuario->id === auth()->id(), 403, 'Você não pode remover a si mesmo.');
@@ -500,10 +520,41 @@ class AdminController extends Controller
 
         User::whereIn('id', $ids)->delete();
 
-        $filtros = $request->only(['nome', 'email', 'sector_id', 'ad_setor', 'confere', 'group_id', 'is_admin']);
-
-        return redirect()->route('admin.usuarios', $filtros)
+        return redirect()->route('admin.usuarios', $this->filtrosAtuais($request))
             ->with('status', $ids->count() . ' usuário(s) removido(s).');
+    }
+
+    public function desativarUsuariosLote(Request $request)
+    {
+        $validated = $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'exists:users,id',
+        ]);
+
+        $ids = collect($validated['ids'])->reject(fn ($id) => (int) $id === auth()->id());
+
+        User::whereIn('id', $ids)->update(['is_active' => false]);
+
+        return redirect()->route('admin.usuarios', $this->filtrosAtuais($request))
+            ->with('status', $ids->count() . ' usuário(s) desativado(s).');
+    }
+
+    public function ativarUsuariosLote(Request $request)
+    {
+        $validated = $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'exists:users,id',
+        ]);
+
+        User::whereIn('id', $validated['ids'])->update(['is_active' => true]);
+
+        return redirect()->route('admin.usuarios', $this->filtrosAtuais($request))
+            ->with('status', count($validated['ids']) . ' usuário(s) ativado(s).');
+    }
+
+    private function filtrosAtuais(Request $request): array
+    {
+        return $request->only(['nome', 'email', 'sector_id', 'ad_setor', 'confere', 'group_id', 'is_admin', 'is_active', 'dominio_email']);
     }
 
     public function usuariosLoteForm()

@@ -29,7 +29,8 @@ class ActiveDirectoryAuthenticator
     /**
      * Tenta autenticar e sincronizar o usuário a partir do e-mail e senha
      * informados na tela de login. Retorna o usuário local (já salvo) em
-     * caso de sucesso, ou null se a senha não confere no AD.
+     * caso de sucesso, ou null se a senha não confere no AD ou a conta
+     * estiver desativada na intranet.
      */
     public function autenticar(string $email, string $password): ?User
     {
@@ -52,6 +53,13 @@ class ActiveDirectoryAuthenticator
         $usuario->ad_synced_at = now();
         $usuario->save();
 
+        // Mesmo com a senha correta no AD, uma conta desativada na intranet
+        // (ver Admin > Usuários) não deve conseguir logar — os dados ainda
+        // são sincronizados acima, só o acesso é negado.
+        if (! $usuario->is_active) {
+            return null;
+        }
+
         return $usuario;
     }
 
@@ -68,6 +76,11 @@ class ActiveDirectoryAuthenticator
         }
 
         $usuario->group_id = Group::where('name', 'Leitores')->value('id');
+
+        // O default do banco (true) só é aplicado na linha em si — o modelo
+        // em memória fica com is_active = null até ser recarregado, e
+        // "! null" seria tratado como desativado. Define explicitamente.
+        $usuario->is_active = true;
     }
 
     /**

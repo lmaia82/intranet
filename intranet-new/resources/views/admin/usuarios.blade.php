@@ -81,6 +81,22 @@
                         <option value="0" @selected(request('is_admin') === '0')>Não</option>
                     </select>
                 </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-600 mb-1">Status</label>
+                    <select name="is_active" class="w-full border-gray-300 rounded text-sm">
+                        <option value="">(todos)</option>
+                        <option value="1" @selected(request('is_active') === '1')>Ativos</option>
+                        <option value="0" @selected(request('is_active') === '0')>Inativos</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-600 mb-1">Domínio do e-mail</label>
+                    <select name="dominio_email" class="w-full border-gray-300 rounded text-sm">
+                        <option value="">(todos)</option>
+                        <option value="cetem" @selected(request('dominio_email') === 'cetem')>@cetem.gov.br</option>
+                        <option value="externo" @selected(request('dominio_email') === 'externo')>Externo</option>
+                    </select>
+                </div>
             </div>
             <div class="flex gap-3 mt-3">
                 <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded text-sm">Filtrar</button>
@@ -88,16 +104,27 @@
             </div>
         </form>
 
-        <form id="excluir-lote-form" action="{{ route('admin.usuarios.destroy-lote') }}" method="POST"
-              onsubmit="return confirm('Remover os usuários selecionados? Esta ação não pode ser desfeita.')">
+        <form id="acao-lote-form" action="{{ route('admin.usuarios.destroy-lote') }}" method="POST">
             @csrf
-            @foreach(request()->only(['nome', 'email', 'sector_id', 'ad_setor', 'confere', 'group_id', 'is_admin']) as $chave => $valor)
+            @foreach(request()->only(['nome', 'email', 'sector_id', 'ad_setor', 'confere', 'group_id', 'is_admin', 'is_active', 'dominio_email']) as $chave => $valor)
                 <input type="hidden" name="{{ $chave }}" value="{{ $valor }}">
             @endforeach
         </form>
 
-        <div class="flex justify-end mb-2">
-            <button type="submit" form="excluir-lote-form" class="px-4 py-2 bg-red-600 text-white rounded text-sm">
+        <div class="flex justify-end mb-2 gap-3">
+            <button type="submit" form="acao-lote-form" formaction="{{ route('admin.usuarios.desativar-lote') }}"
+                    class="px-4 py-2 bg-amber-600 text-white rounded text-sm"
+                    onclick="return confirm('Desativar os usuários selecionados?')">
+                Desativar selecionados
+            </button>
+            <button type="submit" form="acao-lote-form" formaction="{{ route('admin.usuarios.ativar-lote') }}"
+                    class="px-4 py-2 bg-green-600 text-white rounded text-sm"
+                    onclick="return confirm('Ativar os usuários selecionados?')">
+                Ativar selecionados
+            </button>
+            <button type="submit" form="acao-lote-form" formaction="{{ route('admin.usuarios.destroy-lote') }}"
+                    class="px-4 py-2 bg-red-600 text-white rounded text-sm"
+                    onclick="return confirm('Remover os usuários selecionados? Esta ação não pode ser desfeita.')">
                 Excluir selecionados
             </button>
         </div>
@@ -116,6 +143,7 @@
                         <th class="p-3" title="Compara o setor da intranet com o setor trazido do AD">Confere?</th>
                         <th class="p-3">Grupo</th>
                         <th class="p-3">Admin</th>
+                        <th class="p-3">Status</th>
                         <th class="p-3">Criado em</th>
                         <th class="p-3"></th>
                     </tr>
@@ -125,7 +153,7 @@
                         <tr class="border-t">
                             <td class="p-3">
                                 @if($usuario->id !== auth()->id())
-                                    <input type="checkbox" class="selecionar-usuario" name="ids[]" value="{{ $usuario->id }}" form="excluir-lote-form">
+                                    <input type="checkbox" class="selecionar-usuario" name="ids[]" value="{{ $usuario->id }}" form="acao-lote-form">
                                 @endif
                             </td>
                             <td class="p-3">{{ $usuario->name }}</td>
@@ -172,6 +200,11 @@
                                 </form>
                             </td>
                             <td class="p-3">{{ $usuario->is_admin ? 'Sim' : 'Não' }}</td>
+                            <td class="p-3">
+                                <span class="{{ $usuario->is_active ? 'text-green-600' : 'text-gray-400' }}">
+                                    {{ $usuario->is_active ? 'Ativo' : 'Inativo' }}
+                                </span>
+                            </td>
                             <td class="p-3">{{ $usuario->created_at->format('d/m/Y') }}</td>
                             <td class="p-3 text-right whitespace-nowrap">
                                 <a href="{{ route('admin.usuarios.editar', $usuario) }}" class="text-blue-600">Editar</a>
@@ -179,6 +212,10 @@
                                     <form action="{{ route('admin.usuarios.toggle', $usuario) }}" method="POST" class="inline">
                                         @csrf
                                         <button type="submit" class="text-blue-600 ml-2">{{ $usuario->is_admin ? 'Remover admin' : 'Tornar admin' }}</button>
+                                    </form>
+                                    <form action="{{ route('admin.usuarios.toggle-ativo', $usuario) }}" method="POST" class="inline">
+                                        @csrf
+                                        <button type="submit" class="{{ $usuario->is_active ? 'text-amber-600' : 'text-green-600' }} ml-2">{{ $usuario->is_active ? 'Desativar' : 'Ativar' }}</button>
                                     </form>
                                     <form action="{{ route('admin.usuarios.destroy', $usuario) }}" method="POST" class="inline" onsubmit="return confirm('Remover este usuário?')">
                                         @csrf
