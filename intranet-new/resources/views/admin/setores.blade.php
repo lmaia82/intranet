@@ -2,7 +2,7 @@
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">Setores</h2>
     </x-slot>
-    <div class="py-6 max-w-4xl mx-auto sm:px-6 lg:px-8">
+    <div class="py-6 max-w-6xl mx-auto sm:px-6 lg:px-8">
         @if(session('status'))
             <div class="mb-4 p-4 bg-green-100 text-green-800 rounded">{{ session('status') }}</div>
         @endif
@@ -20,7 +20,7 @@
             <a href="{{ route('admin.armazenamento') }}" class="text-blue-600 text-sm">Ver dashboard de armazenamento &rarr;</a>
         </div>
 
-        <form method="POST" action="{{ route('admin.setores.store') }}" class="bg-white shadow rounded p-4 mb-6 flex gap-2">
+        <form method="POST" action="{{ route('admin.setores.store') }}" class="bg-white shadow rounded p-4 mb-6 flex flex-wrap gap-2">
             @csrf
             <input type="text" name="sigla" placeholder="Sigla do novo setor" required class="w-40 border-gray-300 rounded">
             <input type="text" name="nome" placeholder="Nome por extenso (opcional)" class="flex-1 border-gray-300 rounded">
