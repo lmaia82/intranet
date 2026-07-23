@@ -51,4 +51,60 @@ class AdminConfiguracoesTest extends TestCase
 
         $this->assertFalse(Configuracao::atual()->previa_login_ativa);
     }
+
+    public function test_pagina_mostra_tempo_de_inatividade_padrao(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true]);
+
+        $this->actingAs($admin)->get(route('admin.configuracoes'))
+            ->assertOk()
+            ->assertSee('value="120"', false);
+    }
+
+    public function test_admin_atualiza_o_tempo_de_inatividade(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true]);
+
+        $this->actingAs($admin)->post(route('admin.configuracoes.tempo-inatividade'), [
+            'tempo_inatividade_minutos' => 30,
+        ])->assertRedirect(route('admin.configuracoes'));
+
+        $this->assertSame(30, Configuracao::atual()->tempo_inatividade_minutos);
+    }
+
+    public function test_tempo_de_inatividade_invalido_falha_validacao(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true]);
+
+        $this->actingAs($admin)->post(route('admin.configuracoes.tempo-inatividade'), [
+            'tempo_inatividade_minutos' => 0,
+        ])->assertSessionHasErrors('tempo_inatividade_minutos');
+
+        $this->actingAs($admin)->post(route('admin.configuracoes.tempo-inatividade'), [
+            'tempo_inatividade_minutos' => 'abc',
+        ])->assertSessionHasErrors('tempo_inatividade_minutos');
+
+        $this->assertSame(120, Configuracao::atual()->tempo_inatividade_minutos);
+    }
+
+    public function test_usuario_nao_admin_nao_altera_tempo_de_inatividade(): void
+    {
+        $user = User::factory()->create(['is_admin' => false]);
+
+        $this->actingAs($user)->post(route('admin.configuracoes.tempo-inatividade'), [
+            'tempo_inatividade_minutos' => 30,
+        ])->assertForbidden();
+
+        $this->assertSame(120, Configuracao::atual()->tempo_inatividade_minutos);
+    }
+
+    public function test_valor_configurado_e_aplicado_ao_tempo_de_vida_da_sessao(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true]);
+        Configuracao::atual()->update(['tempo_inatividade_minutos' => 45]);
+
+        $this->actingAs($admin)->get(route('admin.configuracoes'));
+
+        $this->assertSame(45, config('session.lifetime'));
+    }
 }

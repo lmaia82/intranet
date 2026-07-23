@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\AplicarTempoInatividadeSessao;
 use App\Http\Middleware\EnsureUserHasPermission;
 use App\Http\Middleware\EnsureUserIsAdmin;
 use App\Http\Middleware\RegistrarAcesso;
@@ -19,6 +20,10 @@ return Application::configure(basePath: dirname(__DIR__))
     // Nome/e-mail/setor(AD) são sincronizados no momento do login de cada
     // usuário — ver App\Services\ActiveDirectoryAuthenticator.
     ->withMiddleware(function (Middleware $middleware): void {
+        // Precisa rodar antes do StartSession, para o session.lifetime
+        // configurável valer já nesta mesma requisição.
+        $middleware->web(prepend: [AplicarTempoInatividadeSessao::class]);
+
         $middleware->validateCsrfTokens(except: [
             'onlyoffice/callback/*',
             'webhooks/paperless',

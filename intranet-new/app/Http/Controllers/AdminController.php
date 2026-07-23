@@ -216,6 +216,17 @@ class AdminController extends Controller
         return redirect()->route('admin.configuracoes')->with('status', 'Configuração atualizada.');
     }
 
+    public function atualizarTempoInatividade(Request $request)
+    {
+        $validated = $request->validate([
+            'tempo_inatividade_minutos' => 'required|integer|min:1|max:43200',
+        ]);
+
+        Configuracao::atual()->update($validated);
+
+        return redirect()->route('admin.configuracoes')->with('status', 'Tempo de inatividade atualizado.');
+    }
+
     public function storeSetor(Request $request)
     {
         $validated = $request->validate([

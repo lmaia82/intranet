@@ -164,6 +164,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 
     Route::get('configuracoes', [AdminController::class, 'configuracoes'])->name('configuracoes');
     Route::post('configuracoes/previa-login', [AdminController::class, 'togglePreviaLogin'])->name('configuracoes.previa-login');
+    Route::post('configuracoes/tempo-inatividade', [AdminController::class, 'atualizarTempoInatividade'])->name('configuracoes.tempo-inatividade');
 
     Route::get('grupos', [AdminController::class, 'grupos'])->name('grupos');
     Route::get('grupos/criar', [AdminController::class, 'criarGrupoForm'])->name('grupos.criar');

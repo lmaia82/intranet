@@ -26,5 +26,27 @@
                 </form>
             </div>
         </div>
+
+        <div class="bg-white shadow rounded p-4 mt-4">
+            <div class="flex justify-between items-center gap-4">
+                <div>
+                    <p class="font-semibold">Tempo de inatividade da sessão</p>
+                    <p class="text-sm text-gray-500">
+                        Depois de quantos minutos sem uso o usuário precisa fazer login novamente.
+                    </p>
+                </div>
+                <form method="POST" action="{{ route('admin.configuracoes.tempo-inatividade') }}" class="flex items-center gap-2">
+                    @csrf
+                    <input type="number" name="tempo_inatividade_minutos" min="1" max="43200"
+                           value="{{ old('tempo_inatividade_minutos', $configuracao->tempo_inatividade_minutos) }}"
+                           class="w-24 border-gray-300 rounded text-sm">
+                    <span class="text-sm text-gray-500">minutos</span>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded">Salvar</button>
+                </form>
+            </div>
+            @error('tempo_inatividade_minutos')
+                <p class="text-sm text-red-600 mt-2">{{ $message }}</p>
+            @enderror
+        </div>
     </div>
 </x-app-layout>
