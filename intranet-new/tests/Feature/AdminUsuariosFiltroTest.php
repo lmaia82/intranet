@@ -86,6 +86,44 @@ class AdminUsuariosFiltroTest extends TestCase
         $response->assertOk()->assertSee('Usuario Sein')->assertDontSee('Usuario Adm');
     }
 
+    public function test_filtra_por_multiplos_setores_intranet(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true]);
+        $ti = Sector::create(['sigla' => 'TI']);
+        $rh = Sector::create(['sigla' => 'RH']);
+        $adm = Sector::create(['sigla' => 'ADM']);
+
+        User::factory()->create(['name' => 'Usuario TI', 'sector_id' => $ti->id]);
+        User::factory()->create(['name' => 'Usuario RH', 'sector_id' => $rh->id]);
+        User::factory()->create(['name' => 'Usuario ADM', 'sector_id' => $adm->id]);
+        User::factory()->create(['name' => 'Usuario Sem Setor', 'sector_id' => null]);
+
+        $response = $this->actingAs($admin)->get(route('admin.usuarios', [
+            'sector_id' => [$ti->id, $rh->id, 'none'],
+        ]));
+
+        $response->assertOk()
+            ->assertSee('Usuario TI')
+            ->assertSee('Usuario RH')
+            ->assertSee('Usuario Sem Setor')
+            ->assertDontSee('Usuario ADM');
+    }
+
+    public function test_filtra_por_multiplos_setores_do_ad(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true]);
+        User::factory()->create(['name' => 'Usuario Sein', 'ad_setor' => 'SEIN']);
+        User::factory()->create(['name' => 'Usuario Adm', 'ad_setor' => 'ADM']);
+        User::factory()->create(['name' => 'Usuario Rh', 'ad_setor' => 'RH']);
+
+        $response = $this->actingAs($admin)->get(route('admin.usuarios', ['ad_setor' => ['SEIN', 'ADM']]));
+
+        $response->assertOk()
+            ->assertSee('Usuario Sein')
+            ->assertSee('Usuario Adm')
+            ->assertDontSee('Usuario Rh');
+    }
+
     public function test_filtra_por_confere(): void
     {
         $admin = User::factory()->create(['is_admin' => true]);

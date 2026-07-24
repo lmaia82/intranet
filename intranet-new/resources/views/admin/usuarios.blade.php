@@ -40,20 +40,18 @@
                 </div>
                 <div>
                     <label class="block text-xs font-medium text-gray-600 mb-1">Setor (Intranet)</label>
-                    <select name="sector_id" class="w-full border-gray-300 rounded text-sm">
-                        <option value="">(todos)</option>
-                        <option value="none" @selected(request('sector_id') === 'none')>Sem setor</option>
+                    <select name="sector_id[]" multiple size="4" class="w-full border-gray-300 rounded text-sm">
+                        <option value="none" @selected(in_array('none', (array) request('sector_id', [])))>Sem setor</option>
                         @foreach($setores as $setor)
-                            <option value="{{ $setor->id }}" @selected(request('sector_id') == $setor->id)>{{ $setor->sigla }}</option>
+                            <option value="{{ $setor->id }}" @selected(in_array((string) $setor->id, (array) request('sector_id', [])))>{{ $setor->sigla }}</option>
                         @endforeach
                     </select>
                 </div>
                 <div>
                     <label class="block text-xs font-medium text-gray-600 mb-1">Setor (AD)</label>
-                    <select name="ad_setor" class="w-full border-gray-300 rounded text-sm">
-                        <option value="">(todos)</option>
+                    <select name="ad_setor[]" multiple size="4" class="w-full border-gray-300 rounded text-sm">
                         @foreach($adSetores as $adSetor)
-                            <option value="{{ $adSetor }}" @selected(request('ad_setor') === $adSetor)>{{ $adSetor }}</option>
+                            <option value="{{ $adSetor }}" @selected(in_array($adSetor, (array) request('ad_setor', [])))>{{ $adSetor }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -116,8 +114,14 @@
 
         <form id="acao-lote-form" action="{{ route('admin.usuarios.destroy-lote') }}" method="POST">
             @csrf
-            @foreach(request()->only(['nome', 'email', 'sector_id', 'ad_setor', 'confere', 'group_id', 'is_admin', 'is_active', 'cedido', 'dominio_email']) as $chave => $valor)
+            @foreach(request()->only(['nome', 'email', 'confere', 'group_id', 'is_admin', 'is_active', 'cedido', 'dominio_email']) as $chave => $valor)
                 <input type="hidden" name="{{ $chave }}" value="{{ $valor }}">
+            @endforeach
+            @foreach((array) request('sector_id', []) as $valor)
+                <input type="hidden" name="sector_id[]" value="{{ $valor }}">
+            @endforeach
+            @foreach((array) request('ad_setor', []) as $valor)
+                <input type="hidden" name="ad_setor[]" value="{{ $valor }}">
             @endforeach
         </form>
 

@@ -395,14 +395,16 @@ class AdminController extends Controller
             $usuarios = $usuarios->filter(fn ($u) => str_contains(Str::lower($u->email), Str::lower($email)));
         }
 
-        if ($request->input('sector_id') === 'none') {
-            $usuarios = $usuarios->whereNull('sector_id');
-        } elseif ($request->filled('sector_id')) {
-            $usuarios = $usuarios->where('sector_id', $request->input('sector_id'));
+        if ($request->filled('sector_id')) {
+            $sectorIds = (array) $request->input('sector_id');
+            $semSetor = in_array('none', $sectorIds, true);
+            $idsReais = array_values(array_diff($sectorIds, ['none']));
+
+            $usuarios = $usuarios->filter(fn ($u) => ($semSetor && is_null($u->sector_id)) || in_array($u->sector_id, $idsReais));
         }
 
         if ($request->filled('ad_setor')) {
-            $usuarios = $usuarios->where('ad_setor', $request->input('ad_setor'));
+            $usuarios = $usuarios->whereIn('ad_setor', (array) $request->input('ad_setor'));
         }
 
         if ($request->filled('confere')) {
