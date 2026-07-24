@@ -467,18 +467,18 @@ class AdminController extends Controller
         return redirect()->route('admin.usuarios')->with('status', "Importação concluída: {$importados} usuário(s) novo(s) trazido(s) do AD.");
     }
 
-    public function atualizarDatasCriacaoDoAd(Request $request)
+    public function atualizarDatasDoAd(Request $request)
     {
         $validated = $request->validate(['password' => 'required|string']);
 
         $atualizados = app(ActiveDirectoryAuthenticator::class)
-            ->atualizarDatasCriacaoDoAd($request->user()->email, $validated['password']);
+            ->atualizarDatasDoAd($request->user()->email, $validated['password']);
 
         if (is_null($atualizados)) {
             return redirect()->route('admin.usuarios')->with('status', 'Senha do AD incorreta — atualização cancelada.');
         }
 
-        return redirect()->route('admin.usuarios')->with('status', "Data de criação atualizada a partir do AD para {$atualizados} usuário(s).");
+        return redirect()->route('admin.usuarios')->with('status', "Data de criação e expiração atualizadas a partir do AD para {$atualizados} usuário(s).");
     }
 
     public function criarUsuarioForm()

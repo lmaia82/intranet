@@ -23,14 +23,14 @@
                 </form>
             </details>
             <details class="relative">
-                <summary class="px-4 py-2 bg-gray-200 rounded cursor-pointer select-none list-none">Atualizar data de criação (AD)</summary>
-                <form action="{{ route('admin.usuarios.atualizar-datas-criacao-do-ad') }}" method="POST"
+                <summary class="px-4 py-2 bg-gray-200 rounded cursor-pointer select-none list-none">Atualizar datas do AD</summary>
+                <form action="{{ route('admin.usuarios.atualizar-datas-do-ad') }}" method="POST"
                       class="absolute right-0 mt-2 z-10 w-80 bg-white shadow-lg rounded p-4 border">
                     @csrf
                     <p class="text-sm text-gray-600 mb-2">
-                        Atualiza o "Criado em" dos usuários já vinculados ao AD para a data de criação
-                        real da conta no AD, em vez da data em que foram importados na intranet.
-                        Confirme com sua própria senha do AD.
+                        Atualiza, para os usuários já vinculados ao AD, o "Criado em" e a data de
+                        expiração da conta (quando existir — nem todo usuário tem) com os valores reais
+                        do AD. Confirme com sua própria senha do AD.
                     </p>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Sua senha do AD</label>
                     <input type="password" name="password" required class="w-full border-gray-300 rounded text-sm mb-3">
@@ -177,6 +177,7 @@
                         <th class="p-3">Admin</th>
                         <th class="p-3">Status</th>
                         <th class="p-3">Criado em</th>
+                        <th class="p-3">Expira em (AD)</th>
                         <th class="p-3"></th>
                     </tr>
                 </thead>
@@ -232,6 +233,7 @@
                                 </span>
                             </td>
                             <td class="p-3">{{ $usuario->created_at->format('d/m/Y') }}</td>
+                            <td class="p-3">{{ $usuario->ad_expira_em?->format('d/m/Y') ?? '—' }}</td>
                             <td class="p-3 text-right whitespace-nowrap">
                                 <a href="{{ route('admin.usuarios.editar', $usuario) }}" class="text-blue-600">Editar</a>
                                 @if($usuario->id !== auth()->id())

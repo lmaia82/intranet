@@ -11,7 +11,7 @@ use LdapRecord\Laravel\Testing\DirectoryEmulator;
 use LdapRecord\Models\ActiveDirectory\User as LdapUser;
 use Tests\TestCase;
 
-class AdminAtualizarDatasCriacaoDoAdTest extends TestCase
+class AdminAtualizarDatasDoAdTest extends TestCase
 {
     use RefreshDatabase;
 
@@ -31,7 +31,12 @@ class AdminAtualizarDatasCriacaoDoAdTest extends TestCase
         return $usuario;
     }
 
-    public function test_admin_atualiza_created_at_dos_usuarios_vinculados_ao_ad(): void
+    private function windowsInt(Carbon $data): string
+    {
+        return (string) (($data->timestamp + 11644473600) * 10000000);
+    }
+
+    public function test_admin_atualiza_created_at_e_expira_em_dos_usuarios_vinculados_ao_ad(): void
     {
         $admin = User::factory()->create(['is_admin' => true, 'email' => 'admin@cetem.gov.br']);
         Sector::create(['sigla' => 'TI']);
@@ -40,11 +45,13 @@ class AdminAtualizarDatasCriacaoDoAdTest extends TestCase
             'email' => 'fulano@cetem.gov.br',
             'ad_guid' => (string) Str::orderedUuid(),
             'created_at' => now(),
+            'ad_expira_em' => null,
         ]);
 
         $fake = DirectoryEmulator::setup();
 
-        $criadoNoAd = Carbon::parse('2018-03-10 09:00:00');
+        $criadoNoAd = Carbon::parse('2018-03-10 12:00:00', 'UTC');
+        $expiraNoAd = Carbon::parse('2027-06-15 12:00:00', 'UTC');
 
         $this->criarUsuarioNoAd([
             'cn' => 'Fulano da Silva',
@@ -52,17 +59,51 @@ class AdminAtualizarDatasCriacaoDoAdTest extends TestCase
             'objectguid' => Str::orderedUuid(),
             'useraccountcontrol' => 512,
             'whencreated' => $criadoNoAd->format('YmdHis\Z'),
+            'accountexpires' => $this->windowsInt($expiraNoAd),
         ], setor: 'TI');
 
         $fake->getLdapConnection()->shouldAllowBindWith('admin@cetem.gov.br');
 
-        $response = $this->actingAs($admin)->post(route('admin.usuarios.atualizar-datas-criacao-do-ad'), [
+        $response = $this->actingAs($admin)->post(route('admin.usuarios.atualizar-datas-do-ad'), [
             'password' => 'senha-do-admin',
         ]);
 
         $response->assertRedirect(route('admin.usuarios'));
 
-        $this->assertEquals($criadoNoAd->toDateString(), $usuario->fresh()->created_at->toDateString());
+        $usuario->refresh();
+        $this->assertEquals($criadoNoAd->toDateString(), $usuario->created_at->toDateString());
+        $this->assertEquals($expiraNoAd->toDateString(), $usuario->ad_expira_em->toDateString());
+    }
+
+    public function test_conta_sem_expiracao_no_ad_fica_com_ad_expira_em_nulo(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true, 'email' => 'admin@cetem.gov.br']);
+        Sector::create(['sigla' => 'TI']);
+
+        $usuario = User::factory()->create([
+            'email' => 'fulano@cetem.gov.br',
+            'ad_guid' => (string) Str::orderedUuid(),
+            'ad_expira_em' => now(),
+        ]);
+
+        $fake = DirectoryEmulator::setup();
+
+        $this->criarUsuarioNoAd([
+            'cn' => 'Fulano da Silva',
+            'mail' => 'fulano@cetem.gov.br',
+            'objectguid' => Str::orderedUuid(),
+            'useraccountcontrol' => 512,
+            'whencreated' => now()->format('YmdHis\Z'),
+            'accountexpires' => '0',
+        ], setor: 'TI');
+
+        $fake->getLdapConnection()->shouldAllowBindWith('admin@cetem.gov.br');
+
+        $this->actingAs($admin)->post(route('admin.usuarios.atualizar-datas-do-ad'), [
+            'password' => 'senha-do-admin',
+        ]);
+
+        $this->assertNull($usuario->fresh()->ad_expira_em);
     }
 
     public function test_nao_atualiza_usuario_sem_vinculo_com_o_ad(): void
@@ -89,11 +130,12 @@ class AdminAtualizarDatasCriacaoDoAdTest extends TestCase
 
         $fake->getLdapConnection()->shouldAllowBindWith('admin@cetem.gov.br');
 
-        $this->actingAs($admin)->post(route('admin.usuarios.atualizar-datas-criacao-do-ad'), [
+        $this->actingAs($admin)->post(route('admin.usuarios.atualizar-datas-do-ad'), [
             'password' => 'senha-do-admin',
         ]);
 
         $this->assertEquals($dataOriginal->toDateString(), $usuarioLocal->fresh()->created_at->toDateString());
+        $this->assertNull($usuarioLocal->fresh()->ad_expira_em);
     }
 
     public function test_senha_incorreta_do_admin_cancela_a_atualizacao(): void
@@ -104,7 +146,7 @@ class AdminAtualizarDatasCriacaoDoAdTest extends TestCase
 
         // Sem shouldAllowBindWith: nenhum bind é aceito.
 
-        $response = $this->actingAs($admin)->post(route('admin.usuarios.atualizar-datas-criacao-do-ad'), [
+        $response = $this->actingAs($admin)->post(route('admin.usuarios.atualizar-datas-do-ad'), [
             'password' => 'senha-errada',
         ]);
 
@@ -115,7 +157,7 @@ class AdminAtualizarDatasCriacaoDoAdTest extends TestCase
     {
         $user = User::factory()->create(['is_admin' => false]);
 
-        $this->actingAs($user)->post(route('admin.usuarios.atualizar-datas-criacao-do-ad'), [
+        $this->actingAs($user)->post(route('admin.usuarios.atualizar-datas-do-ad'), [
             'password' => 'qualquer',
         ])->assertForbidden();
     }
