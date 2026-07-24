@@ -56,6 +56,26 @@ class InformativoNotificationTest extends TestCase
         Mail::assertSent(\App\Mail\NovoInformativoMail::class, 3);
     }
 
+    public function test_email_do_informativo_usa_reply_to_de_nao_responda(): void
+    {
+        Mail::fake();
+
+        $admin = User::factory()->create();
+        User::factory()->create();
+
+        $this->actingAs($admin)->post(route('informativos.store'), [
+            'title' => 'Aviso geral',
+            'content' => 'Conteudo',
+            'sector_id' => '',
+            'is_private' => '0',
+            'notificar_email' => '1',
+        ]);
+
+        Mail::assertSent(\App\Mail\NovoInformativoMail::class, function ($mail) {
+            return $mail->envelope()->replyTo[0]->address === config('mail.no_reply_address');
+        });
+    }
+
     public function test_publicar_com_notificacao_e_setor_notifica_apenas_o_setor(): void
     {
         Mail::fake();

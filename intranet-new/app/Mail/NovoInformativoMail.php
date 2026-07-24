@@ -21,6 +21,7 @@ class NovoInformativoMail extends Mailable
     {
         return new Envelope(
             subject: 'Novo informativo: ' . $this->informativo->title,
+            replyTo: [config('mail.no_reply_address')],
         );
     }
 

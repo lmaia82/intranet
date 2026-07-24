@@ -45,7 +45,8 @@
                     </tr>
                     <tr>
                         <td style="background-color:#f5f5f5; padding:16px 32px; font-size:12px; color:#999999;" align="center">
-                            Intranet CETEM — Centro de Tecnologia Mineral
+                            Intranet CETEM — Centro de Tecnologia Mineral<br>
+                            Este é um e-mail informativo automático — não responda nem encaminhe.
                         </td>
                     </tr>
                 </table>

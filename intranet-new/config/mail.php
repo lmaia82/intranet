@@ -118,4 +118,18 @@ return [
         'name' => env('MAIL_FROM_NAME', env('APP_NAME', 'Laravel')),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Endereço de "não responda"
+    |--------------------------------------------------------------------------
+    |
+    | Usado como Reply-To em e-mails informativos: como não dá para remover
+    | os botões Responder/Encaminhar de um cliente de e-mail, respostas
+    | acidentais são direcionadas para cá em vez de caírem na caixa de quem
+    | disparou o envio.
+    |
+    */
+
+    'no_reply_address' => env('MAIL_NO_REPLY_ADDRESS', 'nao-responda@cetem.gov.br'),
+
 ];
