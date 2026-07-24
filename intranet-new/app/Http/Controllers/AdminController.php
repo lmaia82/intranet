@@ -452,11 +452,16 @@ class AdminController extends Controller
             });
         }
 
+        if ($request->filled('cargo')) {
+            $usuarios = $usuarios->whereIn('cargo', (array) $request->input('cargo'));
+        }
+
         $setores = Sector::orderBy('sigla')->get();
         $grupos = Group::orderBy('name')->get();
         $adSetores = User::whereNotNull('ad_setor')->distinct()->orderBy('ad_setor')->pluck('ad_setor');
+        $cargos = User::whereNotNull('cargo')->distinct()->orderBy('cargo')->pluck('cargo');
 
-        return view('admin.usuarios', compact('usuarios', 'setores', 'grupos', 'adSetores', 'totalGeral'));
+        return view('admin.usuarios', compact('usuarios', 'setores', 'grupos', 'adSetores', 'cargos', 'totalGeral'));
     }
 
     public function importarUsuariosDoAd(Request $request)
@@ -717,7 +722,7 @@ class AdminController extends Controller
 
     private function filtrosAtuais(Request $request): array
     {
-        return $request->only(['nome', 'email', 'sector_id', 'ad_setor', 'confere', 'group_id', 'is_admin', 'is_active', 'cedido', 'dominio_email']);
+        return $request->only(['nome', 'email', 'sector_id', 'ad_setor', 'cargo', 'confere', 'group_id', 'is_admin', 'is_active', 'cedido', 'dominio_email']);
     }
 
     public function usuariosLoteForm()

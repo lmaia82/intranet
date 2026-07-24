@@ -124,6 +124,21 @@ class AdminUsuariosFiltroTest extends TestCase
             ->assertDontSee('Usuario Rh');
     }
 
+    public function test_filtra_por_multiplos_cargos(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true]);
+        User::factory()->create(['name' => 'Usuario Diretor', 'cargo' => 'Diretor']);
+        User::factory()->create(['name' => 'Usuario Coordenador', 'cargo' => 'Coordenador']);
+        User::factory()->create(['name' => 'Usuario Analista', 'cargo' => 'Analista']);
+
+        $response = $this->actingAs($admin)->get(route('admin.usuarios', ['cargo' => ['Diretor', 'Coordenador']]));
+
+        $response->assertOk()
+            ->assertSee('Usuario Diretor')
+            ->assertSee('Usuario Coordenador')
+            ->assertDontSee('Usuario Analista');
+    }
+
     public function test_filtra_por_confere(): void
     {
         $admin = User::factory()->create(['is_admin' => true]);

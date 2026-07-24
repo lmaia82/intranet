@@ -76,6 +76,23 @@
                         @endforeach
                     </div>
                 </div>
+                @php($cargosSelecionados = (array) request('cargo', []))
+                <div x-data="{ open: false }" class="relative">
+                    <label class="block text-xs font-medium text-gray-600 mb-1">Cargo</label>
+                    <button type="button" @click="open = !open" @click.outside="open = false"
+                            class="w-full border-gray-300 rounded text-sm text-left px-2 py-1.5 bg-white border truncate">
+                        {{ count($cargosSelecionados) ? count($cargosSelecionados) . ' selecionado(s)' : '(todos)' }}
+                    </button>
+                    <div x-show="open" x-cloak
+                         class="absolute z-20 mt-1 w-56 bg-white border rounded shadow-lg max-h-56 overflow-y-auto p-2 text-sm">
+                        @foreach($cargos as $cargo)
+                            <label class="flex items-center gap-2 py-1">
+                                <input type="checkbox" name="cargo[]" value="{{ $cargo }}" @checked(in_array($cargo, $cargosSelecionados))>
+                                {{ $cargo }}
+                            </label>
+                        @endforeach
+                    </div>
+                </div>
                 <div>
                     <label class="block text-xs font-medium text-gray-600 mb-1">Confere?</label>
                     <select name="confere" class="w-full border-gray-300 rounded text-sm">
@@ -143,6 +160,9 @@
             @endforeach
             @foreach((array) request('ad_setor', []) as $valor)
                 <input type="hidden" name="ad_setor[]" value="{{ $valor }}">
+            @endforeach
+            @foreach((array) request('cargo', []) as $valor)
+                <input type="hidden" name="cargo[]" value="{{ $valor }}">
             @endforeach
         </form>
 
