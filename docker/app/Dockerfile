@@ -15,8 +15,8 @@ RUN sed -i 's#DocumentRoot /var/www/html#DocumentRoot /var/www/html/intranet-new
 
 RUN { \
     echo "upload_max_filesize = 50M"; \
-    echo "post_max_size = 200M"; \
-    echo "max_file_uploads = 50"; \
+    echo "post_max_size = 2048M"; \
+    echo "max_file_uploads = 500"; \
     echo "memory_limit = 256M"; \
   } > /usr/local/etc/php/conf.d/uploads.ini
 WORKDIR /var/www/html

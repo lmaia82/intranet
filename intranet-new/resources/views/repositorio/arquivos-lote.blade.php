@@ -38,10 +38,29 @@
                     <input type="file" name="csv" accept=".csv,text/csv" required class="mt-1 block w-full">
                     @error('csv') <p class="text-red-600 text-sm">{{ $message }}</p> @enderror
                 </div>
-                <div>
+                <div x-data="{ modo: 'arquivos' }">
                     <label class="block text-sm font-medium">Arquivos</label>
-                    <input type="file" name="arquivos[]" multiple required class="mt-1 block w-full">
-                    <p class="text-xs text-gray-500 mt-1">Selecione todos os arquivos referenciados na coluna "arquivo" do CSV.</p>
+                    <div class="flex gap-4 mt-1 mb-2 text-sm">
+                        <label class="flex items-center gap-1">
+                            <input type="radio" name="modo_selecao" value="arquivos" x-model="modo">
+                            Selecionar arquivos
+                        </label>
+                        <label class="flex items-center gap-1">
+                            <input type="radio" name="modo_selecao" value="pasta" x-model="modo">
+                            Selecionar uma pasta inteira
+                        </label>
+                    </div>
+
+                    <input type="file" name="arquivos[]" multiple class="mt-1 block w-full"
+                            x-show="modo === 'arquivos'" :required="modo === 'arquivos'" :disabled="modo !== 'arquivos'">
+
+                    <input type="file" name="arquivos[]" multiple webkitdirectory directory mozdirectory class="mt-1 block w-full"
+                            x-show="modo === 'pasta'" :required="modo === 'pasta'" :disabled="modo !== 'pasta'">
+
+                    <p class="text-xs text-gray-500 mt-1">
+                        Selecione todos os arquivos referenciados na coluna "arquivo" do CSV, ou escolha uma
+                        pasta inteira (inclusive subpastas) — útil para lotes grandes, com mais de 200 arquivos.
+                    </p>
                     @error('arquivos') <p class="text-red-600 text-sm">{{ $message }}</p> @enderror
                 </div>
                 <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded">Importar</button>
