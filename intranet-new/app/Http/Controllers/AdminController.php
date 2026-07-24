@@ -485,6 +485,7 @@ class AdminController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email',
+            'cargo' => 'nullable|string|max:255',
             'password' => 'required|confirmed|min:8',
             'sector_id' => 'nullable|exists:sectors,id',
             'group_id' => 'nullable|exists:groups,id',
@@ -493,6 +494,7 @@ class AdminController extends Controller
         User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
+            'cargo' => $validated['cargo'] ?? null,
             'password' => Hash::make($validated['password']),
             'is_admin' => $request->boolean('is_admin'),
             'sector_id' => $validated['sector_id'] ?? null,
@@ -514,11 +516,13 @@ class AdminController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $usuario->id,
+            'cargo' => 'nullable|string|max:255',
             'password' => 'nullable|confirmed|min:8',
         ]);
 
         $usuario->name = $validated['name'];
         $usuario->email = $validated['email'];
+        $usuario->cargo = $validated['cargo'] ?? null;
 
         if (!empty($validated['password']) && !$usuario->autenticadoViaAd()) {
             $usuario->password = Hash::make($validated['password']);

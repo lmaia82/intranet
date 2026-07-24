@@ -12,7 +12,7 @@ use Illuminate\Notifications\Notifiable;
 use LdapRecord\Laravel\Auth\LdapAuthenticatable;
 use LdapRecord\Laravel\ImportableFromLdap;
 
-#[Fillable(['name', 'email', 'password', 'is_admin', 'is_active', 'cedido', 'sector_id', 'group_id', 'ad_guid', 'ad_setor', 'ad_expira_em'])]
+#[Fillable(['name', 'email', 'password', 'cargo', 'is_admin', 'is_active', 'cedido', 'sector_id', 'group_id', 'ad_guid', 'ad_setor', 'ad_expira_em'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable implements LdapAuthenticatable
 {

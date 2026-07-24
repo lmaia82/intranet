@@ -16,6 +16,11 @@
                 @error('email') <p class="text-red-600 text-sm">{{ $message }}</p> @enderror
             </div>
             <div>
+                <label class="block text-sm font-medium">Cargo</label>
+                <input type="text" name="cargo" value="{{ old('cargo') }}" class="mt-1 block w-full border-gray-300 rounded">
+                @error('cargo') <p class="text-red-600 text-sm">{{ $message }}</p> @enderror
+            </div>
+            <div>
                 <label class="block text-sm font-medium">Senha</label>
                 <input type="password" name="password" class="mt-1 block w-full border-gray-300 rounded">
                 @error('password') <p class="text-red-600 text-sm">{{ $message }}</p> @enderror

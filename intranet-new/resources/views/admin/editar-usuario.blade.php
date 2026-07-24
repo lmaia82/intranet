@@ -16,6 +16,11 @@
                 <input type="email" name="email" value="{{ old('email', $usuario->email) }}" class="mt-1 block w-full border-gray-300 rounded">
                 @error('email') <p class="text-red-600 text-sm">{{ $message }}</p> @enderror
             </div>
+            <div>
+                <label class="block text-sm font-medium">Cargo</label>
+                <input type="text" name="cargo" value="{{ old('cargo', $usuario->cargo) }}" class="mt-1 block w-full border-gray-300 rounded">
+                @error('cargo') <p class="text-red-600 text-sm">{{ $message }}</p> @enderror
+            </div>
             @if($usuario->autenticadoViaAd())
                 <p class="text-sm text-gray-500">
                     A senha deste usuário é validada no Active Directory e não pode ser alterada pela intranet.

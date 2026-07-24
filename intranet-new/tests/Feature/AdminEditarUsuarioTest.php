@@ -38,6 +38,30 @@ class AdminEditarUsuarioTest extends TestCase
         $this->assertEquals('novo@cetem.gov.br', $usuario->email);
     }
 
+    public function test_admin_atualiza_o_cargo_do_usuario(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true]);
+        $usuario = User::factory()->create(['cargo' => null]);
+
+        $this->actingAs($admin)->put(route('admin.usuarios.update', $usuario), [
+            'name' => $usuario->name,
+            'email' => $usuario->email,
+            'cargo' => 'Analista Administrativo',
+        ]);
+
+        $this->assertEquals('Analista Administrativo', $usuario->fresh()->cargo);
+    }
+
+    public function test_lista_de_usuarios_mostra_o_cargo(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true]);
+        User::factory()->create(['name' => 'Fulano de Tal', 'cargo' => 'Coordenador de TI']);
+
+        $this->actingAs($admin)->get(route('admin.usuarios'))
+            ->assertOk()
+            ->assertSee('Coordenador de TI');
+    }
+
     public function test_admin_troca_a_senha_do_usuario(): void
     {
         $admin = User::factory()->create(['is_admin' => true]);

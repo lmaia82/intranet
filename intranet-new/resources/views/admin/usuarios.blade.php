@@ -194,6 +194,7 @@
                         </th>
                         <th class="p-3">Nome</th>
                         <th class="p-3">E-mail</th>
+                        <th class="p-3">Cargo</th>
                         <th class="p-3">Setor (Intranet)</th>
                         <th class="p-3">Setor (AD)</th>
                         <th class="p-3" title="Compara o setor da intranet com o setor trazido do AD">Confere?</th>
@@ -216,6 +217,7 @@
                             </td>
                             <td class="p-3">{{ $usuario->name }}</td>
                             <td class="p-3">{{ $usuario->email }}</td>
+                            <td class="p-3">{{ $usuario->cargo ?? '—' }}</td>
                             <td class="p-3">
                                 <form action="{{ route('admin.usuarios.setor', $usuario) }}" method="POST">
                                     @csrf
