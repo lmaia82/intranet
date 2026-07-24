@@ -157,4 +157,61 @@ class OrganogramaTest extends TestCase
             ->assertOk()
             ->assertSee('Nenhum usuário vinculado a este setor.');
     }
+
+    public function test_lista_de_colaboradores_separa_chefia_dos_demais_e_mostra_o_cargo(): void
+    {
+        $coordenacao = Sector::create(['sigla' => 'COADM', 'nome' => 'Coordenação de Administração']);
+
+        User::factory()->create(['name' => 'Fulano Coordenador', 'cargo' => 'Coordenador de Administração', 'sector_id' => $coordenacao->id, 'ad_guid' => 'g1']);
+        User::factory()->create(['name' => 'Ciclano Analista', 'cargo' => 'Analista Administrativo', 'sector_id' => $coordenacao->id, 'ad_guid' => 'g2']);
+
+        $user = $this->usuarioComPermissao();
+
+        $this->actingAs($user)->get(route('organograma.index'))
+            ->assertOk()
+            ->assertSeeInOrder(['Chefia', 'Fulano Coordenador', '(Coordenador de Administração)', 'Demais colaboradores', 'Ciclano Analista', '(Analista Administrativo)']);
+    }
+
+    public function test_lista_de_colaboradores_ordena_chefia_com_assistente_sempre_por_ultimo(): void
+    {
+        $coordenacao = Sector::create(['sigla' => 'COADM', 'nome' => 'Coordenação de Administração']);
+
+        User::factory()->create(['name' => 'Ana Assistente', 'cargo' => 'Assistente Administrativo', 'sector_id' => $coordenacao->id, 'ad_guid' => 'g1']);
+        User::factory()->create(['name' => 'Bruno Chefe', 'cargo' => 'Chefe de Setor', 'sector_id' => $coordenacao->id, 'ad_guid' => 'g2']);
+        User::factory()->create(['name' => 'Carlos Coordenador', 'cargo' => 'Coordenador', 'sector_id' => $coordenacao->id, 'ad_guid' => 'g3']);
+        User::factory()->create(['name' => 'Diana Diretora', 'cargo' => 'Diretora', 'sector_id' => $coordenacao->id, 'ad_guid' => 'g4']);
+
+        $user = $this->usuarioComPermissao();
+
+        $this->actingAs($user)->get(route('organograma.index'))
+            ->assertOk()
+            ->assertSeeInOrder(['Diana Diretora', 'Carlos Coordenador', 'Bruno Chefe', 'Ana Assistente']);
+    }
+
+    public function test_email_do_colaborador_e_link_mailto(): void
+    {
+        $coordenacao = Sector::create(['sigla' => 'COADM', 'nome' => 'Coordenação de Administração']);
+
+        User::factory()->create(['name' => 'Fulano', 'email' => 'FULANO@CETEM.GOV.BR', 'sector_id' => $coordenacao->id, 'ad_guid' => 'g1']);
+
+        $user = $this->usuarioComPermissao();
+
+        $this->actingAs($user)->get(route('organograma.index'))
+            ->assertOk()
+            ->assertSee('href="mailto:fulano@cetem.gov.br"', false);
+    }
+
+    public function test_usuario_sem_cargo_de_chefia_aparece_em_demais_colaboradores(): void
+    {
+        $coordenacao = Sector::create(['sigla' => 'COADM', 'nome' => 'Coordenação de Administração']);
+
+        User::factory()->create(['name' => 'Sem Cargo Definido', 'cargo' => null, 'sector_id' => $coordenacao->id, 'ad_guid' => 'g1']);
+
+        $user = $this->usuarioComPermissao();
+
+        $this->actingAs($user)->get(route('organograma.index'))
+            ->assertOk()
+            ->assertSeeInOrder(['Demais colaboradores', 'Sem Cargo Definido'])
+            ->assertDontSee('Chefia');
+    }
 }

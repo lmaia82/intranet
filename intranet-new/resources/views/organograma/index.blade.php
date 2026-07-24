@@ -43,11 +43,7 @@
                                         👥 <span x-text="open ? 'Ocultar' : 'Ver'"></span> ({{ $coordenacao->users->count() }})
                                     </button>
                                     <div x-show="open" x-cloak class="mt-2 text-left bg-white border border-orange-200 rounded p-2 space-y-1 normal-case">
-                                        @forelse($coordenacao->users as $usuario)
-                                            <p class="truncate"><span class="font-medium">{{ $usuario->name }}</span> — {{ \Illuminate\Support\Str::lower($usuario->email) }}</p>
-                                        @empty
-                                            <p class="text-gray-400">Nenhum usuário vinculado a este setor.</p>
-                                        @endforelse
+                                        @include('organograma._lista-colaboradores', ['usuarios' => $coordenacao->users])
                                     </div>
                                 </div>
 
@@ -61,11 +57,7 @@
                                                     👥 <span x-text="open ? 'Ocultar' : 'Ver'"></span> ({{ $servico->users->count() }})
                                                 </button>
                                                 <div x-show="open" x-cloak class="mt-2 text-left bg-white border border-blue-200 rounded p-2 space-y-1 normal-case">
-                                                    @forelse($servico->users as $usuario)
-                                                        <p class="truncate"><span class="font-medium">{{ $usuario->name }}</span> — {{ \Illuminate\Support\Str::lower($usuario->email) }}</p>
-                                                    @empty
-                                                        <p class="text-gray-400">Nenhum usuário vinculado a este setor.</p>
-                                                    @endforelse
+                                                    @include('organograma._lista-colaboradores', ['usuarios' => $servico->users])
                                                 </div>
                                             </div>
                                         @endforeach

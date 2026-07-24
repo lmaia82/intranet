@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Str;
 use LdapRecord\Laravel\Auth\LdapAuthenticatable;
 use LdapRecord\Laravel\ImportableFromLdap;
 
@@ -94,5 +95,29 @@ class User extends Authenticatable implements LdapAuthenticatable
         }
 
         return $this->group?->permissions->contains('key', $key) ?? false;
+    }
+
+    /**
+     * Ordem de exibição da "chefia" no Organograma: diretor(a) e
+     * coordenador(a) primeiro, chefe em seguida, assistente sempre por
+     * último dentro do grupo de chefia. `null` quando o cargo não é de
+     * chefia (ou não está preenchido) — usado para separar o restante dos
+     * colaboradores.
+     */
+    public function prioridadeChefia(): ?int
+    {
+        if (!$this->cargo) {
+            return null;
+        }
+
+        $cargo = Str::lower($this->cargo);
+
+        return match (true) {
+            str_contains($cargo, 'diretor') => 0,
+            str_contains($cargo, 'coordenador') => 1,
+            str_contains($cargo, 'chefe') => 2,
+            str_contains($cargo, 'assistente') => 3,
+            default => null,
+        };
     }
 }
