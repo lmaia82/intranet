@@ -38,22 +38,43 @@
                     <label class="block text-xs font-medium text-gray-600 mb-1">E-mail</label>
                     <input type="text" name="email" value="{{ request('email') }}" class="w-full border-gray-300 rounded text-sm">
                 </div>
-                <div>
+                @php($sectorIdsSelecionados = (array) request('sector_id', []))
+                <div x-data="{ open: false }" class="relative">
                     <label class="block text-xs font-medium text-gray-600 mb-1">Setor (Intranet)</label>
-                    <select name="sector_id[]" multiple size="4" class="w-full border-gray-300 rounded text-sm">
-                        <option value="none" @selected(in_array('none', (array) request('sector_id', [])))>Sem setor</option>
+                    <button type="button" @click="open = !open" @click.outside="open = false"
+                            class="w-full border-gray-300 rounded text-sm text-left px-2 py-1.5 bg-white border truncate">
+                        {{ count($sectorIdsSelecionados) ? count($sectorIdsSelecionados) . ' selecionado(s)' : '(todos)' }}
+                    </button>
+                    <div x-show="open" x-cloak
+                         class="absolute z-20 mt-1 w-56 bg-white border rounded shadow-lg max-h-56 overflow-y-auto p-2 text-sm">
+                        <label class="flex items-center gap-2 py-1">
+                            <input type="checkbox" name="sector_id[]" value="none" @checked(in_array('none', $sectorIdsSelecionados))>
+                            Sem setor
+                        </label>
                         @foreach($setores as $setor)
-                            <option value="{{ $setor->id }}" @selected(in_array((string) $setor->id, (array) request('sector_id', [])))>{{ $setor->sigla }}</option>
+                            <label class="flex items-center gap-2 py-1">
+                                <input type="checkbox" name="sector_id[]" value="{{ $setor->id }}" @checked(in_array((string) $setor->id, $sectorIdsSelecionados))>
+                                {{ $setor->sigla }}
+                            </label>
                         @endforeach
-                    </select>
+                    </div>
                 </div>
-                <div>
+                @php($adSetoresSelecionados = (array) request('ad_setor', []))
+                <div x-data="{ open: false }" class="relative">
                     <label class="block text-xs font-medium text-gray-600 mb-1">Setor (AD)</label>
-                    <select name="ad_setor[]" multiple size="4" class="w-full border-gray-300 rounded text-sm">
+                    <button type="button" @click="open = !open" @click.outside="open = false"
+                            class="w-full border-gray-300 rounded text-sm text-left px-2 py-1.5 bg-white border truncate">
+                        {{ count($adSetoresSelecionados) ? count($adSetoresSelecionados) . ' selecionado(s)' : '(todos)' }}
+                    </button>
+                    <div x-show="open" x-cloak
+                         class="absolute z-20 mt-1 w-56 bg-white border rounded shadow-lg max-h-56 overflow-y-auto p-2 text-sm">
                         @foreach($adSetores as $adSetor)
-                            <option value="{{ $adSetor }}" @selected(in_array($adSetor, (array) request('ad_setor', [])))>{{ $adSetor }}</option>
+                            <label class="flex items-center gap-2 py-1">
+                                <input type="checkbox" name="ad_setor[]" value="{{ $adSetor }}" @checked(in_array($adSetor, $adSetoresSelecionados))>
+                                {{ $adSetor }}
+                            </label>
                         @endforeach
-                    </select>
+                    </div>
                 </div>
                 <div>
                     <label class="block text-xs font-medium text-gray-600 mb-1">Confere?</label>
