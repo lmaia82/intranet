@@ -219,56 +219,11 @@ class ActiveDirectoryAuthenticator
     }
 
     /**
-     * Atualiza, a partir do AD, o "criado em" (whenCreated) e a data de
-     * expiração da conta (accountExpires) dos usuários já vinculados ao AD
-     * (ad_guid preenchido) — útil depois de uma importação em lote. Nem
-     * todo usuário tem accountExpires definido (conta sem expiração), nesse
-     * caso ad_expira_em fica nulo.
-     *
-     * @return int|null Quantidade de usuários atualizados, ou null se a
-     *                   senha do admin não confere no AD.
-     */
-    public function atualizarDatasDoAd(string $emailAdmin, string $senhaAdmin): ?int
-    {
-        if (! $this->autenticarConexao($emailAdmin, $senhaAdmin)) {
-            return null;
-        }
-
-        set_time_limit(300);
-
-        $atualizados = 0;
-
-        foreach ($this->buscarUsuariosAtivos() as $ldapUser) {
-            $email = $ldapUser->getFirstAttribute('mail');
-
-            if (! $email) {
-                continue;
-            }
-
-            $usuario = User::whereNotNull('ad_guid')
-                ->whereRaw('LOWER(email) = ?', [Str::lower($email)])
-                ->first();
-
-            if (! $usuario) {
-                continue;
-            }
-
-            $this->definirDatasDoAd($usuario, $ldapUser);
-            $usuario->save();
-
-            $atualizados++;
-        }
-
-        return $atualizados;
-    }
-
-    /**
      * Aplica no usuário local o "criado em" (whenCreated) e a data de
-     * expiração da conta (accountExpires) trazidos do AD — usado tanto na
-     * importação em lote quanto na atualização pontual de datas.
-     * accountexpires vem como 0, o valor máximo do Windows (sentinela
-     * "nunca expira") ou uma data real — só uma instância de data representa
-     * uma expiração de fato.
+     * expiração da conta (accountExpires) trazidos do AD — usado na
+     * importação em lote. accountexpires vem como 0, o valor máximo do
+     * Windows (sentinela "nunca expira") ou uma data real — só uma
+     * instância de data representa uma expiração de fato.
      */
     private function definirDatasDoAd(User $usuario, LdapUser $ldapUser): void
     {
