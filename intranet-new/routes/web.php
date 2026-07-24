@@ -190,6 +190,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::put('usuarios/{usuario}', [AdminController::class, 'updateUsuario'])->name('usuarios.update');
     Route::post('usuarios/{usuario}/toggle-admin', [AdminController::class, 'toggleAdmin'])->name('usuarios.toggle');
     Route::post('usuarios/{usuario}/toggle-ativo', [AdminController::class, 'toggleAtivo'])->name('usuarios.toggle-ativo');
+    Route::post('usuarios/{usuario}/toggle-cedido', [AdminController::class, 'toggleCedido'])->name('usuarios.toggle-cedido');
     Route::put('usuarios/{usuario}/setor', [AdminController::class, 'updateUsuarioSetor'])->name('usuarios.setor');
     Route::put('usuarios/{usuario}/grupo', [AdminController::class, 'updateUsuarioGrupo'])->name('usuarios.grupo');
     Route::delete('usuarios/{usuario}', [AdminController::class, 'destroyUsuario'])->name('usuarios.destroy');
@@ -197,6 +198,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('usuarios/excluir-em-lote', [AdminController::class, 'destroyUsuariosLote'])->name('usuarios.destroy-lote');
     Route::post('usuarios/desativar-em-lote', [AdminController::class, 'desativarUsuariosLote'])->name('usuarios.desativar-lote');
     Route::post('usuarios/ativar-em-lote', [AdminController::class, 'ativarUsuariosLote'])->name('usuarios.ativar-lote');
+    Route::post('usuarios/cedido-em-lote', [AdminController::class, 'marcarCedidoUsuariosLote'])->name('usuarios.cedido-lote');
     Route::post('usuarios/setor-em-lote', [AdminController::class, 'atualizarSetorUsuariosLote'])->name('usuarios.setor-lote');
 
     Route::get('usuarios-lote', [AdminController::class, 'usuariosLoteForm'])->name('usuarios.lote.form');

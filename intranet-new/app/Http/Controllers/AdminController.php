@@ -427,6 +427,10 @@ class AdminController extends Controller
             $usuarios = $usuarios->where('is_admin', (bool) (int) $request->input('is_admin'));
         }
 
+        if ($request->filled('cedido')) {
+            $usuarios = $usuarios->where('cedido', (bool) (int) $request->input('cedido'));
+        }
+
         if ($request->has('is_active')) {
             if ($request->filled('is_active')) {
                 $usuarios = $usuarios->where('is_active', (bool) (int) $request->input('is_active'));
@@ -601,6 +605,27 @@ class AdminController extends Controller
         return redirect()->route('admin.usuarios')->with('status', $usuario->is_active ? 'Usuário ativado.' : 'Usuário desativado.');
     }
 
+    /**
+     * Ao marcar um usuário como cedido para outro órgão, ele é desativado
+     * automaticamente na mesma ação — desmarcar não reativa sozinho, fica
+     * a critério do admin.
+     */
+    public function toggleCedido(User $usuario)
+    {
+        abort_if($usuario->id === auth()->id(), 403, 'Você não pode marcar a si mesmo como cedido.');
+
+        $cedido = !$usuario->cedido;
+        $usuario->cedido = $cedido;
+
+        if ($cedido) {
+            $usuario->is_active = false;
+        }
+
+        $usuario->save();
+
+        return redirect()->route('admin.usuarios')->with('status', $cedido ? 'Usuário marcado como cedido e desativado.' : 'Usuário desmarcado como cedido.');
+    }
+
     public function destroyUsuario(User $usuario)
     {
         abort_if($usuario->id === auth()->id(), 403, 'Você não pode remover a si mesmo.');
@@ -651,6 +676,25 @@ class AdminController extends Controller
             ->with('status', count($validated['ids']) . ' usuário(s) ativado(s).');
     }
 
+    /**
+     * Marca em lote como cedidos para outro órgão — já desativa junto,
+     * mesma regra do toggle individual (ver toggleCedido).
+     */
+    public function marcarCedidoUsuariosLote(Request $request)
+    {
+        $validated = $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'exists:users,id',
+        ]);
+
+        $ids = collect($validated['ids'])->reject(fn ($id) => (int) $id === auth()->id());
+
+        User::whereIn('id', $ids)->update(['cedido' => true, 'is_active' => false]);
+
+        return redirect()->route('admin.usuarios', $this->filtrosAtuais($request))
+            ->with('status', $ids->count() . ' usuário(s) marcado(s) como cedido(s) e desativado(s).');
+    }
+
     public function atualizarSetorUsuariosLote(Request $request)
     {
         $validated = $request->validate([
@@ -667,7 +711,7 @@ class AdminController extends Controller
 
     private function filtrosAtuais(Request $request): array
     {
-        return $request->only(['nome', 'email', 'sector_id', 'ad_setor', 'confere', 'group_id', 'is_admin', 'is_active', 'dominio_email']);
+        return $request->only(['nome', 'email', 'sector_id', 'ad_setor', 'confere', 'group_id', 'is_admin', 'is_active', 'cedido', 'dominio_email']);
     }
 
     public function usuariosLoteForm()

@@ -92,6 +92,14 @@
                     </select>
                 </div>
                 <div>
+                    <label class="block text-xs font-medium text-gray-600 mb-1">Cedido</label>
+                    <select name="cedido" class="w-full border-gray-300 rounded text-sm">
+                        <option value="">(todos)</option>
+                        <option value="1" @selected(request('cedido') === '1')>Sim</option>
+                        <option value="0" @selected(request('cedido') === '0')>Não</option>
+                    </select>
+                </div>
+                <div>
                     <label class="block text-xs font-medium text-gray-600 mb-1">Domínio do e-mail</label>
                     <select name="dominio_email" class="w-full border-gray-300 rounded text-sm">
                         <option value="">(todos)</option>
@@ -108,7 +116,7 @@
 
         <form id="acao-lote-form" action="{{ route('admin.usuarios.destroy-lote') }}" method="POST">
             @csrf
-            @foreach(request()->only(['nome', 'email', 'sector_id', 'ad_setor', 'confere', 'group_id', 'is_admin', 'is_active', 'dominio_email']) as $chave => $valor)
+            @foreach(request()->only(['nome', 'email', 'sector_id', 'ad_setor', 'confere', 'group_id', 'is_admin', 'is_active', 'cedido', 'dominio_email']) as $chave => $valor)
                 <input type="hidden" name="{{ $chave }}" value="{{ $valor }}">
             @endforeach
         </form>
@@ -139,6 +147,11 @@
                     onclick="return confirm('Ativar os usuários selecionados?')">
                 Ativar selecionados
             </button>
+            <button type="submit" form="acao-lote-form" formaction="{{ route('admin.usuarios.cedido-lote') }}"
+                    class="px-4 py-2 bg-purple-600 text-white rounded text-sm"
+                    onclick="return confirm('Marcar os usuários selecionados como cedidos? Eles serão desativados automaticamente.')">
+                Marcar cedidos
+            </button>
             <button type="submit" form="acao-lote-form" formaction="{{ route('admin.usuarios.destroy-lote') }}"
                     class="px-4 py-2 bg-red-600 text-white rounded text-sm"
                     onclick="return confirm('Remover os usuários selecionados? Esta ação não pode ser desfeita.')">
@@ -162,6 +175,7 @@
                         <th class="p-3">Grupo</th>
                         <th class="p-3">Admin</th>
                         <th class="p-3">Status</th>
+                        <th class="p-3">Cedido</th>
                         <th class="p-3">Criado em</th>
                         <th class="p-3">Expira em (AD)</th>
                         <th class="p-3"></th>
@@ -218,6 +232,11 @@
                                     {{ $usuario->is_active ? 'Ativo' : 'Inativo' }}
                                 </span>
                             </td>
+                            <td class="p-3">
+                                <span class="{{ $usuario->cedido ? 'text-purple-600' : 'text-gray-400' }}">
+                                    {{ $usuario->cedido ? 'Sim' : 'Não' }}
+                                </span>
+                            </td>
                             <td class="p-3">{{ $usuario->created_at->format('d/m/Y') }}</td>
                             <td class="p-3">{{ $usuario->ad_expira_em?->format('d/m/Y') ?? '—' }}</td>
                             <td class="p-3 text-right whitespace-nowrap">
@@ -230,6 +249,11 @@
                                     <form action="{{ route('admin.usuarios.toggle-ativo', $usuario) }}" method="POST" class="inline">
                                         @csrf
                                         <button type="submit" class="{{ $usuario->is_active ? 'text-amber-600' : 'text-green-600' }} ml-2">{{ $usuario->is_active ? 'Desativar' : 'Ativar' }}</button>
+                                    </form>
+                                    <form action="{{ route('admin.usuarios.toggle-cedido', $usuario) }}" method="POST" class="inline"
+                                          onsubmit="{{ $usuario->cedido ? '' : 'return confirm(\'Marcar como cedido? O usuário será desativado automaticamente.\')' }}">
+                                        @csrf
+                                        <button type="submit" class="text-purple-600 ml-2">{{ $usuario->cedido ? 'Desmarcar cedido' : 'Marcar cedido' }}</button>
                                     </form>
                                     <form action="{{ route('admin.usuarios.destroy', $usuario) }}" method="POST" class="inline" onsubmit="return confirm('Remover este usuário?')">
                                         @csrf
