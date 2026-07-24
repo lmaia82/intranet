@@ -21,7 +21,7 @@
     @endif
 
     @if($demais->isNotEmpty())
-        <p class="font-semibold text-[10px] uppercase text-gray-500 mt-2">Demais colaboradores</p>
+        <p class="font-semibold text-[10px] uppercase text-gray-500 mt-2">Colaboradores</p>
         @foreach($demais as $usuario)
             <p class="truncate">
                 <span class="font-medium">{{ $usuario->name }}</span>

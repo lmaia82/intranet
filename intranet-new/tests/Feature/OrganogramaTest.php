@@ -169,7 +169,7 @@ class OrganogramaTest extends TestCase
 
         $this->actingAs($user)->get(route('organograma.index'))
             ->assertOk()
-            ->assertSeeInOrder(['Chefia', 'Fulano Coordenador', '(Coordenador de Administração)', 'Demais colaboradores', 'Ciclano Analista', '(Analista Administrativo)']);
+            ->assertSeeInOrder(['Chefia', 'Fulano Coordenador', '(Coordenador de Administração)', 'Colaboradores', 'Ciclano Analista', '(Analista Administrativo)']);
     }
 
     public function test_lista_de_colaboradores_ordena_chefia_com_assistente_sempre_por_ultimo(): void
@@ -211,7 +211,7 @@ class OrganogramaTest extends TestCase
 
         $this->actingAs($user)->get(route('organograma.index'))
             ->assertOk()
-            ->assertSeeInOrder(['Demais colaboradores', 'Sem Cargo Definido'])
+            ->assertSeeInOrder(['Colaboradores', 'Sem Cargo Definido'])
             ->assertDontSee('Chefia');
     }
 }
