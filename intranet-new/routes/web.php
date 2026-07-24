@@ -194,6 +194,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::put('usuarios/{usuario}/grupo', [AdminController::class, 'updateUsuarioGrupo'])->name('usuarios.grupo');
     Route::delete('usuarios/{usuario}', [AdminController::class, 'destroyUsuario'])->name('usuarios.destroy');
     Route::post('usuarios/importar-do-ad', [AdminController::class, 'importarUsuariosDoAd'])->name('usuarios.importar-do-ad');
+    Route::post('usuarios/atualizar-datas-criacao-do-ad', [AdminController::class, 'atualizarDatasCriacaoDoAd'])->name('usuarios.atualizar-datas-criacao-do-ad');
     Route::post('usuarios/excluir-em-lote', [AdminController::class, 'destroyUsuariosLote'])->name('usuarios.destroy-lote');
     Route::post('usuarios/desativar-em-lote', [AdminController::class, 'desativarUsuariosLote'])->name('usuarios.desativar-lote');
     Route::post('usuarios/ativar-em-lote', [AdminController::class, 'ativarUsuariosLote'])->name('usuarios.ativar-lote');

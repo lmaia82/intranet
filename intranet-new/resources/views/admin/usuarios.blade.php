@@ -22,6 +22,21 @@
                     <button type="submit" class="w-full px-4 py-2 bg-blue-600 text-white rounded">Confirmar importação</button>
                 </form>
             </details>
+            <details class="relative">
+                <summary class="px-4 py-2 bg-gray-200 rounded cursor-pointer select-none list-none">Atualizar data de criação (AD)</summary>
+                <form action="{{ route('admin.usuarios.atualizar-datas-criacao-do-ad') }}" method="POST"
+                      class="absolute right-0 mt-2 z-10 w-80 bg-white shadow-lg rounded p-4 border">
+                    @csrf
+                    <p class="text-sm text-gray-600 mb-2">
+                        Atualiza o "Criado em" dos usuários já vinculados ao AD para a data de criação
+                        real da conta no AD, em vez da data em que foram importados na intranet.
+                        Confirme com sua própria senha do AD.
+                    </p>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Sua senha do AD</label>
+                    <input type="password" name="password" required class="w-full border-gray-300 rounded text-sm mb-3">
+                    <button type="submit" class="w-full px-4 py-2 bg-blue-600 text-white rounded">Confirmar atualização</button>
+                </form>
+            </details>
             <a href="{{ route('admin.usuarios.grupo-lote.form') }}" class="px-4 py-2 bg-gray-200 rounded">Associar grupos em lote</a>
             <a href="{{ route('admin.usuarios.lote.form') }}" class="px-4 py-2 bg-gray-200 rounded">Cadastro em lote</a>
             <a href="{{ route('admin.usuarios.criar') }}" class="px-4 py-2 bg-blue-600 text-white rounded">Novo usuário</a>

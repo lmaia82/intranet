@@ -218,6 +218,50 @@ class ActiveDirectoryAuthenticator
     }
 
     /**
+     * Atualiza o "criado em" dos usuários já vinculados ao AD (ad_guid
+     * preenchido) para refletir a data de criação real da conta no AD
+     * (whenCreated), em vez da data em que foram importados/criados na
+     * intranet — útil depois de uma importação em lote.
+     *
+     * @return int|null Quantidade de usuários atualizados, ou null se a
+     *                   senha do admin não confere no AD.
+     */
+    public function atualizarDatasCriacaoDoAd(string $emailAdmin, string $senhaAdmin): ?int
+    {
+        if (! $this->autenticarConexao($emailAdmin, $senhaAdmin)) {
+            return null;
+        }
+
+        set_time_limit(300);
+
+        $atualizados = 0;
+
+        foreach ($this->buscarUsuariosAtivos() as $ldapUser) {
+            $email = $ldapUser->getFirstAttribute('mail');
+            $criadoEmNoAd = $ldapUser->whencreated;
+
+            if (! $email || ! $criadoEmNoAd) {
+                continue;
+            }
+
+            $usuario = User::whereNotNull('ad_guid')
+                ->whereRaw('LOWER(email) = ?', [Str::lower($email)])
+                ->first();
+
+            if (! $usuario) {
+                continue;
+            }
+
+            $usuario->created_at = $criadoEmNoAd;
+            $usuario->save();
+
+            $atualizados++;
+        }
+
+        return $atualizados;
+    }
+
+    /**
      * @return array<int, string>
      */
     protected function possiveisIdentidadesDeBind(string $email): array
