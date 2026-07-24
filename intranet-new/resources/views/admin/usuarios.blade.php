@@ -15,7 +15,8 @@
                     @csrf
                     <p class="text-sm text-gray-600 mb-2">
                         Importa todos os usuários ativos do AD que ainda não existem na intranet, com o setor
-                        importado e no grupo Leitores. Confirme com sua própria senha do AD.
+                        importado, no grupo Leitores, e já com a data de criação e de expiração (quando
+                        existir) trazidas do AD. Confirme com sua própria senha do AD.
                     </p>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Sua senha do AD</label>
                     <input type="password" name="password" required class="w-full border-gray-300 rounded text-sm mb-3">

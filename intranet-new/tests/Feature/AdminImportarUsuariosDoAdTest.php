@@ -6,6 +6,7 @@ use App\Models\Group;
 use App\Models\Sector;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 use LdapRecord\Laravel\Testing\DirectoryEmulator;
 use LdapRecord\Models\ActiveDirectory\User as LdapUser;
@@ -60,6 +61,37 @@ class AdminImportarUsuariosDoAdTest extends TestCase
         $this->assertSame('TI', $novoUsuario->ad_setor);
         $this->assertSame($setorTi->id, $novoUsuario->sector_id);
         $this->assertSame('Leitores', $novoUsuario->group->name);
+    }
+
+    public function test_importacao_ja_traz_data_de_criacao_e_expiracao_do_ad(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true, 'email' => 'admin@cetem.gov.br']);
+        Sector::create(['sigla' => 'TI']);
+        Group::create(['name' => 'Leitores']);
+
+        $fake = DirectoryEmulator::setup();
+
+        $criadoNoAd = Carbon::parse('2019-05-20 12:00:00', 'UTC');
+        $expiraNoAd = Carbon::parse('2028-01-10 12:00:00', 'UTC');
+
+        $this->criarUsuarioNoAd([
+            'cn' => 'Novo da Silva',
+            'mail' => 'novo@cetem.gov.br',
+            'objectguid' => Str::orderedUuid(),
+            'useraccountcontrol' => 512,
+            'whencreated' => $criadoNoAd->format('YmdHis\Z'),
+            'accountexpires' => (string) (($expiraNoAd->timestamp + 11644473600) * 10000000),
+        ], setor: 'TI');
+
+        $fake->getLdapConnection()->shouldAllowBindWith('admin@cetem.gov.br');
+
+        $this->actingAs($admin)->post(route('admin.usuarios.importar-do-ad'), [
+            'password' => 'senha-do-admin',
+        ]);
+
+        $novoUsuario = User::where('email', 'novo@cetem.gov.br')->firstOrFail();
+        $this->assertEquals($criadoNoAd->toDateString(), $novoUsuario->created_at->toDateString());
+        $this->assertEquals($expiraNoAd->toDateString(), $novoUsuario->ad_expira_em->toDateString());
     }
 
     public function test_nao_reimporta_usuario_que_ja_existe_na_intranet(): void

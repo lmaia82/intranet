@@ -191,6 +191,7 @@ class ActiveDirectoryAuthenticator
                 try {
                     $usuario = $this->synchronizer->run($ldapUser);
                     $this->provisionarPrimeiroLogin($usuario);
+                    $this->definirDatasDoAd($usuario, $ldapUser);
                     $usuario->ad_synced_at = now();
                     $usuario->save();
                 } catch (UniqueConstraintViolationException $e) {
@@ -239,9 +240,8 @@ class ActiveDirectoryAuthenticator
 
         foreach ($this->buscarUsuariosAtivos() as $ldapUser) {
             $email = $ldapUser->getFirstAttribute('mail');
-            $criadoEmNoAd = $ldapUser->whencreated;
 
-            if (! $email || ! $criadoEmNoAd) {
+            if (! $email) {
                 continue;
             }
 
@@ -253,19 +253,32 @@ class ActiveDirectoryAuthenticator
                 continue;
             }
 
-            // accountexpires vem como 0, o valor máximo do Windows (sentinela
-            // "nunca expira") ou uma data real — só uma instância de data
-            // representa uma expiração de fato.
-            $expiraEmNoAd = $ldapUser->accountexpires;
-
-            $usuario->created_at = $criadoEmNoAd;
-            $usuario->ad_expira_em = $expiraEmNoAd instanceof \DateTimeInterface ? $expiraEmNoAd : null;
+            $this->definirDatasDoAd($usuario, $ldapUser);
             $usuario->save();
 
             $atualizados++;
         }
 
         return $atualizados;
+    }
+
+    /**
+     * Aplica no usuário local o "criado em" (whenCreated) e a data de
+     * expiração da conta (accountExpires) trazidos do AD — usado tanto na
+     * importação em lote quanto na atualização pontual de datas.
+     * accountexpires vem como 0, o valor máximo do Windows (sentinela
+     * "nunca expira") ou uma data real — só uma instância de data representa
+     * uma expiração de fato.
+     */
+    private function definirDatasDoAd(User $usuario, LdapUser $ldapUser): void
+    {
+        $criadoEmNoAd = $ldapUser->whencreated;
+        if ($criadoEmNoAd) {
+            $usuario->created_at = $criadoEmNoAd;
+        }
+
+        $expiraEmNoAd = $ldapUser->accountexpires;
+        $usuario->ad_expira_em = $expiraEmNoAd instanceof \DateTimeInterface ? $expiraEmNoAd : null;
     }
 
     /**
