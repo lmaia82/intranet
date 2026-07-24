@@ -37,16 +37,36 @@
                                 </div>
 
                                 <p class="font-bold text-[#166F9E] text-sm">{{ $coordenacao->sigla }}</p>
-                                <div class="bg-orange-100 border border-orange-300 rounded p-2 text-center text-xs w-full mt-1">
+                                <div class="bg-orange-100 border border-orange-300 rounded p-2 text-center text-xs w-full mt-1" x-data="{ open: false }">
                                     {{ $coordenacao->nome ?: $coordenacao->sigla }}
+                                    <button type="button" @click="open = !open" class="block mx-auto mt-1 text-[10px] text-[#166F9E] underline">
+                                        👥 <span x-text="open ? 'Ocultar' : 'Ver'"></span> ({{ $coordenacao->users->count() }})
+                                    </button>
+                                    <div x-show="open" x-cloak class="mt-2 text-left bg-white border border-orange-200 rounded p-2 space-y-1 normal-case">
+                                        @forelse($coordenacao->users as $usuario)
+                                            <p class="truncate"><span class="font-medium">{{ $usuario->name }}</span> — {{ \Illuminate\Support\Str::lower($usuario->email) }}</p>
+                                        @empty
+                                            <p class="text-gray-400">Nenhum usuário vinculado a este setor.</p>
+                                        @endforelse
+                                    </div>
                                 </div>
 
                                 @if($coordenacao->children->isNotEmpty())
                                     <div class="w-px h-6 bg-gray-300"></div>
                                     <div class="w-full space-y-1">
                                         @foreach($coordenacao->children->sortBy('sigla') as $servico)
-                                            <div class="bg-blue-50 border border-blue-200 rounded p-2 text-center text-xs">
+                                            <div class="bg-blue-50 border border-blue-200 rounded p-2 text-center text-xs" x-data="{ open: false }">
                                                 {{ $servico->nome ?: $servico->sigla }} - {{ $servico->sigla }}
+                                                <button type="button" @click="open = !open" class="block mx-auto mt-1 text-[10px] text-blue-700 underline">
+                                                    👥 <span x-text="open ? 'Ocultar' : 'Ver'"></span> ({{ $servico->users->count() }})
+                                                </button>
+                                                <div x-show="open" x-cloak class="mt-2 text-left bg-white border border-blue-200 rounded p-2 space-y-1 normal-case">
+                                                    @forelse($servico->users as $usuario)
+                                                        <p class="truncate"><span class="font-medium">{{ $usuario->name }}</span> — {{ \Illuminate\Support\Str::lower($usuario->email) }}</p>
+                                                    @empty
+                                                        <p class="text-gray-400">Nenhum usuário vinculado a este setor.</p>
+                                                    @endforelse
+                                                </div>
                                             </div>
                                         @endforeach
                                     </div>

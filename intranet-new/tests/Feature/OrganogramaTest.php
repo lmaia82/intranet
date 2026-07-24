@@ -84,4 +84,47 @@ class OrganogramaTest extends TestCase
             ->assertOk()
             ->assertSee('CTC - Conselho Técnico Científico');
     }
+
+    public function test_lista_de_colaboradores_mostra_nome_e_email_em_caixa_baixa(): void
+    {
+        $coordenacao = Sector::create(['sigla' => 'COADM', 'nome' => 'Coordenação de Administração']);
+        $servico = Sector::create(['sigla' => 'SECOF', 'nome' => 'Serviço de Contabilidade', 'parent_id' => $coordenacao->id]);
+
+        $daCoordenacao = User::factory()->create(['name' => 'Fulano da Coordenação', 'email' => 'FULANO@CETEM.GOV.BR', 'sector_id' => $coordenacao->id]);
+        $doServico = User::factory()->create(['name' => 'Ciclano do Serviço', 'email' => 'CICLANO@CETEM.GOV.BR', 'sector_id' => $servico->id]);
+
+        $user = $this->usuarioComPermissao();
+
+        $this->actingAs($user)->get(route('organograma.index'))
+            ->assertOk()
+            ->assertSee('Fulano da Coordenação')
+            ->assertSee('fulano@cetem.gov.br')
+            ->assertDontSee('FULANO@CETEM.GOV.BR')
+            ->assertSee('Ciclano do Serviço')
+            ->assertSee('ciclano@cetem.gov.br');
+    }
+
+    public function test_lista_de_colaboradores_nao_traz_usuario_vinculado_so_pelo_setor_do_ad(): void
+    {
+        $coordenacao = Sector::create(['sigla' => 'COADM', 'nome' => 'Coordenação de Administração']);
+
+        User::factory()->create(['name' => 'Vinculado Via Ad', 'sector_id' => null, 'ad_setor' => 'COADM']);
+
+        $user = $this->usuarioComPermissao();
+
+        $this->actingAs($user)->get(route('organograma.index'))
+            ->assertOk()
+            ->assertDontSee('Vinculado Via Ad');
+    }
+
+    public function test_lista_de_colaboradores_mostra_mensagem_quando_setor_nao_tem_ninguem_vinculado(): void
+    {
+        Sector::create(['sigla' => 'COADM', 'nome' => 'Coordenação de Administração']);
+
+        $user = $this->usuarioComPermissao();
+
+        $this->actingAs($user)->get(route('organograma.index'))
+            ->assertOk()
+            ->assertSee('Nenhum usuário vinculado a este setor.');
+    }
 }
