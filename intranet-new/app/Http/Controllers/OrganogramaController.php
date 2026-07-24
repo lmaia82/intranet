@@ -19,7 +19,10 @@ class OrganogramaController extends Controller
 
         $coordenacoes = Sector::whereNull('parent_id')
             ->where('sigla', '!=', 'DIRETORIA')
-            ->with(['children.users' => fn ($query) => $query->orderBy('name'), 'users' => fn ($query) => $query->orderBy('name')])
+            ->with([
+                'children.users' => fn ($query) => $query->where('is_active', true)->orderBy('name'),
+                'users' => fn ($query) => $query->where('is_active', true)->orderBy('name'),
+            ])
             ->orderBy('sigla')
             ->get();
 

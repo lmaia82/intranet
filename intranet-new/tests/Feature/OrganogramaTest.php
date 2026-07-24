@@ -104,6 +104,21 @@ class OrganogramaTest extends TestCase
             ->assertSee('ciclano@cetem.gov.br');
     }
 
+    public function test_lista_de_colaboradores_nao_traz_usuario_inativo(): void
+    {
+        $coordenacao = Sector::create(['sigla' => 'COADM', 'nome' => 'Coordenação de Administração']);
+
+        User::factory()->create(['name' => 'Usuario Ativo', 'sector_id' => $coordenacao->id, 'is_active' => true]);
+        User::factory()->create(['name' => 'Usuario Inativo', 'sector_id' => $coordenacao->id, 'is_active' => false]);
+
+        $user = $this->usuarioComPermissao();
+
+        $this->actingAs($user)->get(route('organograma.index'))
+            ->assertOk()
+            ->assertSee('Usuario Ativo')
+            ->assertDontSee('Usuario Inativo');
+    }
+
     public function test_lista_de_colaboradores_nao_traz_usuario_vinculado_so_pelo_setor_do_ad(): void
     {
         $coordenacao = Sector::create(['sigla' => 'COADM', 'nome' => 'Coordenação de Administração']);
