@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Services\HealthCheckService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
@@ -120,17 +121,76 @@ class HealthCheckServiceTest extends TestCase
         $this->assertTrue($resultado['disponivel']);
     }
 
-    public function test_verificarTodos_retorna_seis_servicos(): void
+    public function test_verificarScheduler_retorna_true_quando_heartbeat_recente(): void
+    {
+        Cache::put(HealthCheckService::CACHE_KEY_HEARTBEAT_SCHEDULER, now());
+
+        $resultado = app(HealthCheckService::class)->verificarScheduler();
+
+        $this->assertEquals('Agendador (scheduler)', $resultado['nome']);
+        $this->assertTrue($resultado['disponivel']);
+    }
+
+    public function test_verificarScheduler_retorna_false_quando_heartbeat_antigo(): void
+    {
+        Cache::put(HealthCheckService::CACHE_KEY_HEARTBEAT_SCHEDULER, now()->subMinutes(5));
+
+        $resultado = app(HealthCheckService::class)->verificarScheduler();
+
+        $this->assertFalse($resultado['disponivel']);
+    }
+
+    public function test_verificarScheduler_retorna_false_quando_nunca_rodou(): void
+    {
+        Cache::forget(HealthCheckService::CACHE_KEY_HEARTBEAT_SCHEDULER);
+
+        $resultado = app(HealthCheckService::class)->verificarScheduler();
+
+        $this->assertFalse($resultado['disponivel']);
+    }
+
+    public function test_verificarPortainer_retorna_true_quando_responde(): void
+    {
+        Config::set('services.portainer.internal_url', 'https://portainer-teste:9443');
+        Http::fake(['portainer-teste:9443/*' => Http::response(['Version' => '2.33.6'], 200)]);
+
+        $resultado = app(HealthCheckService::class)->verificarPortainer();
+
+        $this->assertEquals('Portainer', $resultado['nome']);
+        $this->assertTrue($resultado['disponivel']);
+    }
+
+    public function test_verificarPortainer_retorna_false_quando_nao_configurado(): void
+    {
+        Config::set('services.portainer.internal_url', null);
+
+        $resultado = app(HealthCheckService::class)->verificarPortainer();
+
+        $this->assertFalse($resultado['disponivel']);
+    }
+
+    public function test_verificarPortainer_retorna_false_quando_falha(): void
+    {
+        Config::set('services.portainer.internal_url', 'https://portainer-teste:9443');
+        Http::fake(['portainer-teste:9443/*' => Http::response('erro', 500)]);
+
+        $resultado = app(HealthCheckService::class)->verificarPortainer();
+
+        $this->assertFalse($resultado['disponivel']);
+    }
+
+    public function test_verificarTodos_retorna_oito_servicos(): void
     {
         Config::set('filesystems.disks.arquivos.endpoint', 'http://minio-teste:9000');
         Config::set('services.onlyoffice.internal_url', 'http://onlyoffice-teste');
         Config::set('services.stirling_pdf.internal_url', 'http://stirling-teste');
         Config::set('services.paperless.internal_url', 'http://paperless-teste');
         Config::set('services.paperless.token', 'token-teste');
+        Config::set('services.portainer.internal_url', 'https://portainer-teste:9443');
         Http::fake(['*' => Http::response(['status' => 'UP', 'results' => []], 200)]);
 
         $servicos = app(HealthCheckService::class)->verificarTodos();
 
-        $this->assertCount(6, $servicos);
+        $this->assertCount(8, $servicos);
     }
 }

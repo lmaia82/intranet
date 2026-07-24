@@ -53,4 +53,11 @@ return [
         'webhook_secret' => env('PAPERLESS_WEBHOOK_SECRET'),
     ],
 
+    // Portainer roda fora do docker-compose desta aplicação (gerencia todos
+    // os containers do host) — só é acessível pelo container via o host,
+    // daí o host.docker.internal.
+    'portainer' => [
+        'internal_url' => env('PORTAINER_INTERNAL_URL', 'https://host.docker.internal:9443'),
+    ],
+
 ];
