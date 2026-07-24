@@ -90,8 +90,8 @@ class OrganogramaTest extends TestCase
         $coordenacao = Sector::create(['sigla' => 'COADM', 'nome' => 'Coordenação de Administração']);
         $servico = Sector::create(['sigla' => 'SECOF', 'nome' => 'Serviço de Contabilidade', 'parent_id' => $coordenacao->id]);
 
-        $daCoordenacao = User::factory()->create(['name' => 'Fulano da Coordenação', 'email' => 'FULANO@CETEM.GOV.BR', 'sector_id' => $coordenacao->id]);
-        $doServico = User::factory()->create(['name' => 'Ciclano do Serviço', 'email' => 'CICLANO@CETEM.GOV.BR', 'sector_id' => $servico->id]);
+        $daCoordenacao = User::factory()->create(['name' => 'Fulano da Coordenação', 'email' => 'FULANO@CETEM.GOV.BR', 'sector_id' => $coordenacao->id, 'ad_guid' => 'guid-1']);
+        $doServico = User::factory()->create(['name' => 'Ciclano do Serviço', 'email' => 'CICLANO@CETEM.GOV.BR', 'sector_id' => $servico->id, 'ad_guid' => 'guid-2']);
 
         $user = $this->usuarioComPermissao();
 
@@ -108,8 +108,8 @@ class OrganogramaTest extends TestCase
     {
         $coordenacao = Sector::create(['sigla' => 'COADM', 'nome' => 'Coordenação de Administração']);
 
-        User::factory()->create(['name' => 'Usuario Ativo', 'sector_id' => $coordenacao->id, 'is_active' => true]);
-        User::factory()->create(['name' => 'Usuario Inativo', 'sector_id' => $coordenacao->id, 'is_active' => false]);
+        User::factory()->create(['name' => 'Usuario Ativo', 'sector_id' => $coordenacao->id, 'is_active' => true, 'ad_guid' => 'guid-ativo']);
+        User::factory()->create(['name' => 'Usuario Inativo', 'sector_id' => $coordenacao->id, 'is_active' => false, 'ad_guid' => 'guid-inativo']);
 
         $user = $this->usuarioComPermissao();
 
@@ -117,6 +117,21 @@ class OrganogramaTest extends TestCase
             ->assertOk()
             ->assertSee('Usuario Ativo')
             ->assertDontSee('Usuario Inativo');
+    }
+
+    public function test_lista_de_colaboradores_nao_traz_usuario_somente_da_intranet(): void
+    {
+        $coordenacao = Sector::create(['sigla' => 'COADM', 'nome' => 'Coordenação de Administração']);
+
+        User::factory()->create(['name' => 'Usuario Do Ad', 'sector_id' => $coordenacao->id, 'ad_guid' => 'guid-1']);
+        User::factory()->create(['name' => 'Usuario So Intranet', 'sector_id' => $coordenacao->id, 'ad_guid' => null]);
+
+        $user = $this->usuarioComPermissao();
+
+        $this->actingAs($user)->get(route('organograma.index'))
+            ->assertOk()
+            ->assertSee('Usuario Do Ad')
+            ->assertDontSee('Usuario So Intranet');
     }
 
     public function test_lista_de_colaboradores_nao_traz_usuario_vinculado_so_pelo_setor_do_ad(): void
