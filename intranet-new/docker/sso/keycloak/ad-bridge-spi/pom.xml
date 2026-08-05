@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>br.gov.cetem.intranet</groupId>
+  <artifactId>ad-bridge-spi</artifactId>
+  <version>1.0.0</version>
+  <packaging>jar</packaging>
+
+  <name>ad-bridge-spi</name>
+  <description>
+    Custom User Storage Provider do Keycloak que delega a validação de senha
+    para o endpoint interno /internal/ad-auth do intranet-new, em vez de
+    fazer bind LDAP com uma conta de serviço própria. Ver README.md.
+  </description>
+
+  <properties>
+    <maven.compiler.source>21</maven.compiler.source>
+    <maven.compiler.target>21</maven.compiler.target>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <!-- Precisa acompanhar a tag da imagem quay.io/keycloak/keycloak usada
+         em ../docker-compose.yml — versões diferentes podem mudar a API do SPI. -->
+    <keycloak.version>26.7.1</keycloak.version>
+  </properties>
+
+  <dependencies>
+    <!-- Fornecidas em runtime pelo próprio Keycloak (via /opt/keycloak/providers) —
+         "provided" para não duplicar/conflitar classes no classpath do servidor. -->
+    <dependency>
+      <groupId>org.keycloak</groupId>
+      <artifactId>keycloak-server-spi</artifactId>
+      <version>${keycloak.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.keycloak</groupId>
+      <artifactId>keycloak-server-spi-private</artifactId>
+      <version>${keycloak.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.keycloak</groupId>
+      <artifactId>keycloak-core</artifactId>
+      <version>${keycloak.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.keycloak</groupId>
+      <artifactId>keycloak-services</artifactId>
+      <version>${keycloak.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <!-- Também já presente no runtime do Keycloak — só usada aqui para
+         montar/ler o JSON trocado com a ponte do intranet-new. -->
+    <dependency>
+      <groupId>jakarta.json</groupId>
+      <artifactId>jakarta.json-api</artifactId>
+      <version>2.1.3</version>
+      <scope>provided</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <finalName>ad-bridge-spi</finalName>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.13.0</version>
+      </plugin>
+    </plugins>
+  </build>
+</project>

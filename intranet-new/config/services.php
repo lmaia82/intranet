@@ -60,4 +60,11 @@ return [
         'internal_url' => env('PORTAINER_INTERNAL_URL', 'https://host.docker.internal:9443'),
     ],
 
+    // Segredo compartilhado com o SPI customizado do Keycloak (ver
+    // docker/sso/keycloak/ad-bridge-spi/) para autorizar chamadas ao
+    // endpoint interno que verifica login/senha no AD.
+    'sso_bridge' => [
+        'secret' => env('SSO_BRIDGE_SECRET'),
+    ],
+
 ];

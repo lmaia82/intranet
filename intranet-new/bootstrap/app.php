@@ -5,6 +5,7 @@ use App\Http\Middleware\EnsureTutoriaisAtivo;
 use App\Http\Middleware\EnsureUserHasPermission;
 use App\Http\Middleware\EnsureUserIsAdmin;
 use App\Http\Middleware\RegistrarAcesso;
+use App\Http\Middleware\VerifySsoBridgeSecret;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -14,6 +15,9 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
         commands: __DIR__.'/../routes/console.php',
+        then: function (): void {
+            require __DIR__.'/../routes/internal.php';
+        },
         health: '/up',
     )
     // Sem importação agendada: o CETEM optou por não configurar uma conta de
@@ -35,6 +39,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'permission' => EnsureUserHasPermission::class,
             'registrar.acesso' => RegistrarAcesso::class,
             'tutoriais.ativo' => EnsureTutoriaisAtivo::class,
+            'sso-bridge-secret' => VerifySsoBridgeSecret::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

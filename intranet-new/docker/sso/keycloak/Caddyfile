@@ -1,0 +1,10 @@
+{
+	# Usa a CA interna (step-ca) como emissora ACME em vez do Let's Encrypt.
+	acme_ca https://step-ca:9000/acme/acme/directory
+	acme_ca_root /stepca/certs/root_ca.crt
+}
+
+# Ajuste para o hostname real do Keycloak (mesmo valor de KC_HOSTNAME).
+sso.intranet.local {
+	reverse_proxy keycloak:8080
+}
