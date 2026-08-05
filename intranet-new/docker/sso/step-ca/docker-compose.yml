@@ -5,7 +5,8 @@ services:
     restart: unless-stopped
     ports:
       # API/ACME da CA. Mantenha atrás de firewall/rede interna — não exponha à internet.
-      - "9000:9000"
+      # Porta 9000 do host já é usada pelo MinIO (intranet-minio-1) — CA fica na 9099.
+      - "9099:9000"
     volumes:
       - step-ca-data:/home/step
     environment:
@@ -16,12 +17,27 @@ services:
       DOCKER_STEPCA_INIT_PROVISIONER_NAME: "admin"
       DOCKER_STEPCA_INIT_ACME: "true"
       DOCKER_STEPCA_INIT_PASSWORD_FILE: "/home/step/secrets/password"
-    entrypoint: >
-      /bin/sh -c "
+      # A imagem espera essa var definida — ao final do "step ca init" ela faz
+      # "mv $STEPPATH/password $PWDPATH", e sem PWDPATH esse mv falha (destino
+      # vazio) e mata o entrypoint em loop de restart. Aponta pro mesmo local
+      # que o CMD da imagem usa como --password-file.
+      PWDPATH: "/home/step/secrets/password"
+    # Sobrescrever "entrypoint:" sem também declarar "command:" faz o Compose
+    # descartar o CMD da imagem (fica null) — sem isso, o "$@" abaixo chega
+    # vazio e o "exec" final do /entrypoint.sh vira um no-op (sai com 0).
+    command: ["/usr/local/bin/step-ca", "--password-file", "/home/step/secrets/password", "/home/step/config/ca.json"]
+    # /entrypoint.sh na imagem não tem bit de execução (a imagem roda como
+    # "bash /entrypoint.sh", nunca direto) — daí o "exec /bin/bash /entrypoint.sh".
+    # O "sh" extra no fim é só um $0 dummy pra "$@" carregar corretamente o
+    # CMD acima.
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
         mkdir -p /home/step/secrets &&
         cp -n /run/secrets/ca_password /home/step/secrets/password &&
-        exec /entrypoint.sh
-      "
+        exec /bin/bash /entrypoint.sh "$@"
+      - sh
     secrets:
       - ca_password
     healthcheck:
