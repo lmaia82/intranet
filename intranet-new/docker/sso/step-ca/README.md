@@ -14,6 +14,33 @@ intranet, etc.) sem depender de CA pública.
    (já está no `.gitignore`) — guarde uma cópia da senha em um cofre
    (Vault/Bitwarden/1Password) caso precise reinicializar a CA depois.
 
+## Porta
+
+A CA publica a 9000 do container na **9099 do host** (não 9000) — a 9000 já
+é usada pelo MinIO (`intranet-minio-1`) nesta máquina.
+
+## Troubleshooting: container em loop de restart
+
+Se `docker compose up -d` deixar o `step-ca` reiniciando sem parar (verifique
+com `docker inspect --format='{{.RestartCount}}' step-ca`), são três bugs já
+resolvidos no `docker-compose.yml` atual — documentando pra não perder se
+precisar recriar isso do zero:
+
+1. **`/entrypoint.sh` da imagem não tem bit de execução** — a imagem espera
+   ser chamada como `bash /entrypoint.sh`, nunca `./entrypoint.sh` direto.
+2. **`PWDPATH` precisa estar definida** — o script da imagem faz
+   `mv $STEPPATH/password $PWDPATH` no final do `step ca init`; sem essa env
+   var o `mv` falha (destino vazio) e o script morre ali, silenciosamente
+   (saída 0, sem erro visível no log). Precisa apontar pro mesmo caminho que
+   o `--password-file` do CMD usa (`/home/step/secrets/password`).
+3. **Sobrescrever `entrypoint:` sem também declarar `command:` zera o CMD da
+   imagem** (`Cmd=null` — confirmável com `docker inspect --format
+   '{{json .Config.Cmd}}' step-ca`). Sem o CMD chegando como argumento, o
+   `"$@"` do wrapper fica vazio e o `exec "${@}"` final do `/entrypoint.sh`
+   vira um no-op — o processo "termina" com sucesso (código 0) sem nunca
+   subir o servidor. Por isso o `command:` do serviço reproduz o CMD
+   original da imagem explicitamente.
+
 ## Subir o container
 
 ```bash
