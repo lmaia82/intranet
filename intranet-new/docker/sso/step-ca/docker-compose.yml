@@ -1,0 +1,50 @@
+services:
+  step-ca:
+    image: smallstep/step-ca:latest
+    container_name: step-ca
+    restart: unless-stopped
+    ports:
+      # API/ACME da CA. Mantenha atrás de firewall/rede interna — não exponha à internet.
+      - "9000:9000"
+    volumes:
+      - step-ca-data:/home/step
+    environment:
+      # --- Bootstrap automático no primeiro start (smallstep cuida da inicialização) ---
+      DOCKER_STEPCA_INIT_NAME: "Intranet Internal CA"
+      # Ajuste para o(s) hostname(s) reais pelos quais a CA será acessada na rede interna.
+      DOCKER_STEPCA_INIT_DNS_NAMES: "ca.intranet.local,step-ca,localhost,127.0.0.1"
+      DOCKER_STEPCA_INIT_PROVISIONER_NAME: "admin"
+      DOCKER_STEPCA_INIT_ACME: "true"
+      DOCKER_STEPCA_INIT_PASSWORD_FILE: "/home/step/secrets/password"
+    entrypoint: >
+      /bin/sh -c "
+        mkdir -p /home/step/secrets &&
+        cp -n /run/secrets/ca_password /home/step/secrets/password &&
+        exec /entrypoint.sh
+      "
+    secrets:
+      - ca_password
+    healthcheck:
+      test: ["CMD", "step", "ca", "health", "--ca-url", "https://127.0.0.1:9000"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+    networks:
+      - sso-net
+
+secrets:
+  ca_password:
+    file: ./secrets/ca_password.txt
+
+volumes:
+  step-ca-data:
+    # Nome explícito para permitir montagem (read-only) por outros stacks,
+    # ex: o Caddy do Keycloak lendo o root_ca.crt em /home/step/certs/.
+    name: intranet-ca-data
+
+networks:
+  sso-net:
+    driver: bridge
+    # Nome explícito para o Keycloak/Caddy poderem entrar nessa mesma rede
+    # via "external: true" em outro docker-compose.yml.
+    name: intranet-sso-net

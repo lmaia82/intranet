@@ -40,4 +40,11 @@ return [
         'jwt_secret' => env('ONLYOFFICE_JWT_SECRET'),
     ],
 
+    // Segredo compartilhado com o SPI customizado do Keycloak (ver
+    // docker/sso/keycloak/ad-bridge-spi/) para autorizar chamadas ao
+    // endpoint interno que verifica login/senha no AD.
+    'sso_bridge' => [
+        'secret' => env('SSO_BRIDGE_SECRET'),
+    ],
+
 ];
