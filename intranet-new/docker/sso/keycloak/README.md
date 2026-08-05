@@ -86,15 +86,74 @@ do secret e exporta a variável "de verdade" antes de chamar o `kc.sh` real.
 | Realm | `intranet` |
 | Provider `ad-bridge` | aponta pra `http://app/internal/ad-auth`, segredo = `SSO_BRIDGE_SECRET` |
 | Client OIDC | `intranet-php` (confidential, Authorization Code, `directAccessGrantsEnabled=false`) |
+| Client `account-console` | redirectUris ajustado pra incluir `/sso-test/realms/intranet/account/*` (ver seção de teste abaixo) |
+| Required action `VERIFY_PROFILE` | **desabilitado no realm** (decisão permanente, não só do teste — ver por quê abaixo) |
 
-Validado ponta a ponta: um Direct Grant de teste (temporário, revertido
-depois) contra `POST /realms/intranet/protocol/openid-connect/token` com
-credenciais falsas voltou `{"error":"invalid_grant","error_description":
-"Invalid user credentials"}` — prova que Keycloak → SPI `ad-bridge` →
-`/internal/ad-auth` → `ActiveDirectoryAuthenticator` → bind real no AD
-funcionam de ponta a ponta.
+### ✅ Validado ponta a ponta com usuário real do AD
 
-Pra recriar do zero (ex: depois de um `docker compose down -v`):
+Testado via Direct Grant (`grant_type=password`, temporário, já revertido)
+com e-mail e senha reais de um usuário do CETEM — voltou um `access_token`
+de verdade. Prova que Keycloak → SPI `ad-bridge` → `/internal/ad-auth` →
+`ActiveDirectoryAuthenticator` → bind real no AD funcionam de ponta a
+ponta, com credencial genuína (não só o caminho de erro).
+
+No caminho, dois problemas de configuração do realm apareceram e foram
+corrigidos (nenhum dos dois é bug do SPI/ponte):
+
+1. **`account-console` com redirect URI errado.** O client automático do
+   Keycloak só tinha `/realms/intranet/account/*` — sem o prefixo
+   `/sso-test` usado no proxy de teste (ver abaixo). Corrigido adicionando
+   a variante com prefixo.
+2. **`VERIFY_PROFILE` bloqueando o Direct Grant** com
+   `{"error":"invalid_grant","error_description":"Account is not fully set up"}`.
+   Esse required action do Keycloak (parte do "User Profile" declarativo)
+   não faz sentido pra usuários federados via `ad-bridge`: o perfil "de
+   verdade" é o AD, e os atributos (nome, e-mail) só ficam disponíveis
+   *depois* da validação de senha, não antes — então o Keycloak nunca vai
+   considerar o perfil "completo" antes do primeiro login. Desabilitado
+   permanentemente pro realm `intranet`.
+
+### Proxy `/sso-test` — só existe no container ao vivo, não em código
+
+A SPA nova (React) do Account Console do Keycloak **não funciona** direito
+atrás de um path prefix como `/sso-test` (fica carregando pra sempre —
+problema conhecido do Keycloak com apps React sob subpath). Pra testar o
+login mesmo assim, sem depender da porta 8090 (bloqueada por firewall de
+rede, fora do meu alcance resolver), montei um proxy reverso **direto no
+container `intranet-app-1` já rodando** (`a2enmod proxy proxy_http` +
+`/etc/apache2/conf-available/sso-test-proxy.conf` + `apache2ctl graceful`).
+
+**Isso não está em nenhum Dockerfile nem arquivo versionado** — foi feito
+com `docker exec` num container que já estava de pé há 12 dias. Se esse
+container for recriado (não só reiniciado), o proxy some. Pra refazer:
+
+```bash
+docker exec intranet-app-1 a2enmod proxy proxy_http
+docker exec intranet-app-1 sh -c "cat > /etc/apache2/conf-available/sso-test-proxy.conf << 'EOF'
+ProxyPreserveHost On
+ProxyPass /sso-test http://keycloak:8080/sso-test
+ProxyPassReverse /sso-test http://keycloak:8080/sso-test
+EOF
+a2enconf sso-test-proxy"
+docker exec intranet-app-1 apache2ctl graceful
+```
+
+Pra testar login via linha de comando (recomendado — a SPA não funciona
+sob o prefixo, use isso em vez da URL do navegador):
+
+```bash
+curl -s -X POST http://<host>/sso-test/realms/intranet/protocol/openid-connect/token \
+  -d "client_id=intranet-php" \
+  -d "client_secret=<client secret>" \
+  -d "grant_type=password" \
+  --data-urlencode "username=<email>" \
+  --data-urlencode "password=<senha>"
+```
+
+(Precisa reativar `directAccessGrantsEnabled=true` no client pra isso
+funcionar — reverta depois do teste, não é pra ficar ligado.)
+
+### Recriar do zero (ex: depois de um `docker compose down -v`)
 
 ```bash
 KC=/opt/keycloak/bin/kcadm.sh
@@ -113,6 +172,9 @@ docker exec keycloak $KC create clients -r intranet \
   -s clientId=intranet-php -s enabled=true -s publicClient=false -s standardFlowEnabled=true \
   -s 'redirectUris=["https://intranet.intranet.local/auth/callback"]' \
   -s 'webOrigins=["https://intranet.intranet.local"]'
+
+# Necessário pra usuários federados via ad-bridge (ver explicação acima).
+docker exec keycloak $KC update authentication/required-actions/VERIFY_PROFILE -r intranet -s enabled=false
 ```
 
 ## Outros sistemas da intranet

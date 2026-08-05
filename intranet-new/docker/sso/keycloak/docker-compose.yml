@@ -29,6 +29,11 @@ services:
     # "start" (não "--optimized") — o Keycloak reaugmenta a config (incluindo
     # o provider customizado ad-bridge-spi.jar) automaticamente no start.
     command: start
+    ports:
+      # TEMPORÁRIO — só pra testar login direto sem precisar do Caddy/hostname
+      # (KC_HOSTNAME_STRICT=false aceita qualquer Host). Remover antes de
+      # produção — Keycloak não deveria ficar exposto sem TLS na frente.
+      - "8090:8080"
     environment:
       KC_DB: postgres
       KC_DB_URL: jdbc:postgresql://keycloak-db:5432/keycloak
@@ -38,6 +43,10 @@ services:
       KC_HOSTNAME: sso.intranet.local
       KC_HOSTNAME_STRICT: "false"
       KC_HTTP_ENABLED: "true"
+      # TEMPORÁRIO — pra dar proxy via Apache do intranet-app-1 em /sso-test
+      # (porta 8090 direta está bloqueada por firewall de rede). Sem isso o
+      # Keycloak gera links/redirects na raiz e quebra atrás do proxy.
+      KC_HTTP_RELATIVE_PATH: /sso-test
       # Caddy termina o TLS na frente e repassa como HTTP + cabeçalhos X-Forwarded-*.
       KC_PROXY_HEADERS: xforwarded
       KEYCLOAK_ADMIN: admin
