@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
@@ -136,12 +137,15 @@ class HealthCheckService
      */
     public function verificarScheduler(): array
     {
-        $ultimoHeartbeat = Cache::get(self::CACHE_KEY_HEARTBEAT_SCHEDULER);
+        $timestampHeartbeat = Cache::get(self::CACHE_KEY_HEARTBEAT_SCHEDULER);
 
-        if (!$ultimoHeartbeat) {
+        if (!$timestampHeartbeat) {
             return $this->resultado('Agendador (scheduler)', false, 'Nenhum heartbeat registrado ainda.');
         }
 
+        // Guardado como timestamp (int), não como objeto Carbon — ver o
+        // comentário em routes/console.php sobre 'serializable_classes'.
+        $ultimoHeartbeat = Carbon::createFromTimestamp($timestampHeartbeat);
         $ok = $ultimoHeartbeat->diffInMinutes(now()) < 2;
 
         return $this->resultado('Agendador (scheduler)', $ok, $ok ? null : "Último heartbeat: {$ultimoHeartbeat->diffForHumans()}.");
