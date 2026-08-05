@@ -44,10 +44,11 @@ public class AdBridgeUserStorageProviderFactory implements UserStorageProviderFa
                 .property()
                     .name(CONFIG_BRIDGE_URL)
                     .label("URL da ponte AD")
-                    .helpText("Endpoint interno do intranet-new, ex: http://intranet-new/internal/ad-auth "
-                            + "— só a rede interna do Keycloak deve alcançar esse endereço.")
+                    .helpText("Endpoint interno do container \"app\" (rede intranet_default), "
+                            + "ex: http://app/internal/ad-auth — só a rede interna do Keycloak "
+                            + "deve alcançar esse endereço.")
                     .type(ProviderConfigProperty.STRING_TYPE)
-                    .defaultValue("http://intranet-new/internal/ad-auth")
+                    .defaultValue("http://app/internal/ad-auth")
                     .add()
                 .property()
                     .name(CONFIG_BRIDGE_SECRET)

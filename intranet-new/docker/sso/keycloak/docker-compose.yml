@@ -29,11 +29,6 @@ services:
     # "start" (não "--optimized") — o Keycloak reaugmenta a config (incluindo
     # o provider customizado ad-bridge-spi.jar) automaticamente no start.
     command: start
-    extra_hosts:
-      # O intranet-new roda direto no host (sem Docker) — o SPI ad-bridge
-      # precisa alcançar http://host.docker.internal/internal/ad-auth
-      # (ajuste a porta/vhost real ao configurar o provider no Admin Console).
-      - "host.docker.internal:host-gateway"
     environment:
       KC_DB: postgres
       KC_DB_URL: jdbc:postgresql://keycloak-db:5432/keycloak
@@ -60,14 +55,22 @@ services:
       retries: 10
     networks:
       - sso-net
+      # O app do intranet-new roda no projeto compose "intranet" (raiz do
+      # repo), rede "intranet_default" — o SPI ad-bridge chama
+      # http://app/internal/ad-auth por aí (container-a-container).
+      - intranet_default
 
   caddy:
     image: caddy:2-alpine
     container_name: caddy
     restart: unless-stopped
     ports:
-      - "80:80"
-      - "443:443"
+      # 80/443 do host já são do intranet-app-1 (docker-compose.yml na raiz
+      # do repo) — Caddy fica em 8080/8443 por enquanto. Isso é provisório:
+      # a topologia real de proxy (subdomínio dedicado, portas, etc.) ainda
+      # depende do hostname de produção, que só será definido depois.
+      - "8080:80"
+      - "8443:443"
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy-data:/data
@@ -99,3 +102,7 @@ networks:
   sso-net:
     external: true
     name: intranet-sso-net
+  # Rede default criada pelo docker-compose.yml da raiz do repo (projeto
+  # "intranet"), onde roda o container "app" do intranet-new.
+  intranet_default:
+    external: true

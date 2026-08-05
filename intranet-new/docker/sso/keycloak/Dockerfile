@@ -11,3 +11,11 @@ RUN mvn -B -q package
 
 FROM quay.io/keycloak/keycloak:26.7.1
 COPY --from=spi-build /build/target/ad-bridge-spi.jar /opt/keycloak/providers/ad-bridge-spi.jar
+# A imagem oficial não lê KC_DB_PASSWORD_FILE/KEYCLOAK_ADMIN_PASSWORD_FILE
+# sozinha (só a convenção "_FILE" do Postgres, não é genérica) — ver o
+# comentário dentro do script.
+USER root
+COPY docker-entrypoint-secrets.sh /opt/keycloak/bin/docker-entrypoint-secrets.sh
+RUN chmod +x /opt/keycloak/bin/docker-entrypoint-secrets.sh
+USER 1000
+ENTRYPOINT ["/opt/keycloak/bin/docker-entrypoint-secrets.sh"]
