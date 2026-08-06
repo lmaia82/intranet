@@ -1,18 +1,73 @@
-/* Reproduz o visual de resources/views/layouts/login.blade.php da intranet
-   (fundo, cabeçalho CETEM/Intranet, barra azul, card branco) — o cabeçalho
-   em si vem de template.ftl (sobrescrito), aqui só o restante do layout. */
+/* Reproduz o visual de resources/views/layouts/login.blade.php (variante
+   as-modal=true, a que a intranet usa de verdade) com a maior fidelidade
+   possível — inclusive breakpoints responsivos do Tailwind (sm=640px,
+   lg=1024px) e a estrutura exata do fundo (camada fixed separada, não
+   background no body, que renderiza sutilmente diferente). */
 
-body#keycloak-bg {
+html, body {
+    margin: 0;
+    padding: 0;
+}
+
+/* Fundo — mesma estrutura do original: <div class="fixed inset-0 bg-cover
+   bg-center" style="background-image:url(...)"> como camada isolada,
+   não background-attachment no body. */
+#kc-intranet-bg {
+    position: fixed;
+    inset: 0;
     background-image: url("../img/frente_cr.png");
     background-size: cover;
     background-position: center;
-    background-attachment: fixed;
-    background-repeat: no-repeat;
+    z-index: 0;
 }
 
-.pf-v5-c-login {
+body#keycloak-bg {
     background: none;
-    min-height: 100vh;
+}
+
+/* Cabeçalho — gradiente + sombra idênticos ao Tailwind "shadow" padrão. */
+#kc-intranet-header {
+    position: relative;
+    z-index: 1;
+    background: linear-gradient(to bottom, #B9DBF7, #ffffff);
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, .1), 0 1px 2px -1px rgba(0, 0, 0, .1);
+}
+
+/* max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex justify-between items-center */
+.kc-intranet-header-inner {
+    max-width: 80rem;
+    margin: 0 auto;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    height: 4rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+@media (min-width: 640px) {
+    .kc-intranet-header-inner { padding-left: 1.5rem; padding-right: 1.5rem; }
+}
+@media (min-width: 1024px) {
+    .kc-intranet-header-inner { padding-left: 2rem; padding-right: 2rem; }
+}
+
+/* Barra azul — w-full h-14 bg-[#166F9E] (variante com popup/as-modal) */
+#kc-intranet-bluebar {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    height: 3.5rem;
+    background: #166F9E;
+}
+
+/* O restante da página (fundo por trás) fica acima do #kc-intranet-bg
+   graças ao z-index — sem isso o card de login ficaria escondido atrás
+   da imagem de fundo. */
+.pf-v5-c-login {
+    position: relative;
+    z-index: 1;
+    background: none;
+    min-height: 0;
     padding-top: 0;
     display: flex;
     flex-direction: column;
@@ -23,7 +78,7 @@ body#keycloak-bg {
     display: flex;
     align-items: flex-start;
     justify-content: center;
-    padding: 2rem 1rem;
+    padding: 1.5rem 1rem;
     margin: 0;
     max-width: none;
 }
@@ -31,11 +86,11 @@ body#keycloak-bg {
 .pf-v5-c-login__main {
     background: #ffffff;
     border-radius: 0.5rem;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.15), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, .15), 0 8px 10px -6px rgba(0, 0, 0, .1);
     max-width: 28rem;
     width: 100%;
     padding: 2rem 1.5rem;
-    margin-top: 1.5rem;
+    margin-top: 0;
 }
 
 .pf-v5-c-login__main-header {

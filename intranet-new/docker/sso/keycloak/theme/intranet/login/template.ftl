@@ -149,15 +149,16 @@
 </head>
 
 <body id="keycloak-bg" class="${properties.kcBodyClass!}" data-page-id="login-${pageId}">
-<div id="kc-intranet-header" style="background:linear-gradient(to bottom,#B9DBF7,#ffffff);box-shadow:0 1px 3px 0 rgba(0,0,0,.1),0 1px 2px -1px rgba(0,0,0,.1);">
-  <div style="max-width:80rem;margin:0 auto;padding:0 1rem;height:4rem;display:flex;align-items:center;justify-content:space-between;">
+<div id="kc-intranet-bg"></div>
+<div id="kc-intranet-header">
+  <div class="kc-intranet-header-inner">
     <a href="https://cetem.gov.br" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;">
       <img src="${url.resourcesPath}/img/logo-cetem.png" alt="CETEM - Centro de Tecnologia Mineral" style="height:2rem;width:auto;">
     </a>
     <img src="${url.resourcesPath}/img/logo-intra.png" alt="Intranet" style="height:2rem;width:auto;">
   </div>
 </div>
-<div id="kc-intranet-bluebar" style="width:100%;height:3.5rem;background:#166F9E;"></div>
+<div id="kc-intranet-bluebar"></div>
 <div class="${properties.kcLogin!}">
   <div class="${properties.kcLoginContainer!}">
     <main class="${properties.kcLoginMain!}">
