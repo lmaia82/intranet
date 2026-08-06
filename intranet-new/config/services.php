@@ -67,4 +67,16 @@ return [
         'secret' => env('SSO_BRIDGE_SECRET'),
     ],
 
+    // Login via SSO (Keycloak) — ver App\Http\Controllers\Auth\SsoController.
+    // base_url ainda é provisório (proxy /sso-test no Apache do próprio
+    // container, contornando a porta do Keycloak bloqueada por firewall de
+    // rede) — trocar por um hostname/porta definitivos em produção.
+    'keycloak' => [
+        'client_id' => env('KEYCLOAK_CLIENT_ID', 'intranet-php'),
+        'client_secret' => env('KEYCLOAK_CLIENT_SECRET'),
+        'redirect' => env('KEYCLOAK_REDIRECT_URI'),
+        'base_url' => env('KEYCLOAK_BASE_URL'),
+        'realms' => env('KEYCLOAK_REALM', 'intranet'),
+    ],
+
 ];

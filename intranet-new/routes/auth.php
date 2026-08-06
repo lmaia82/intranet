@@ -8,6 +8,7 @@ use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\Auth\SsoController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use Illuminate\Support\Facades\Route;
 
@@ -21,6 +22,17 @@ Route::middleware('guest')->group(function () {
         ->name('login');
 
     Route::post('login', [AuthenticatedSessionController::class, 'store']);
+
+    // Login via SSO (Keycloak) — o botão "Entrar" principal usa este fluxo;
+    // o formulário usuário/senha (rotas acima) continua existindo só como
+    // alternativa, pro fallback local já coberto por
+    // ActiveDirectoryAuthenticationTest (contas administradas só na
+    // intranet, sem conta no AD).
+    Route::get('auth/redirect', [SsoController::class, 'redirect'])
+        ->name('sso.redirect');
+
+    Route::get('auth/callback', [SsoController::class, 'callback'])
+        ->name('sso.callback');
 
     Route::get('forgot-password', [PasswordResetLinkController::class, 'create'])
         ->name('password.request');

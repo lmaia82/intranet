@@ -34,14 +34,12 @@
                 @if($asModal)
                     <div class="w-full h-14 bg-[#166F9E] flex items-center">
                         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full flex justify-end">
-                            <button
-                                type="button"
-                                x-data
-                                x-on:click="$dispatch('open-modal', 'login')"
+                            <a
+                                href="{{ route('sso.redirect') }}"
                                 class="px-4 py-1.5 bg-white text-[#166F9E] text-sm font-semibold rounded hover:bg-blue-50 transition"
                             >
                                 Entrar
-                            </button>
+                            </a>
                         </div>
                     </div>
 
@@ -49,12 +47,28 @@
                         {{ $preview ?? '' }}
                     </main>
 
+                    {{-- Formulário local: não é mais o caminho principal (o botão "Entrar"
+                    acima vai direto pro SSO) — continua existindo só para o fallback já
+                    coberto em ActiveDirectoryAuthenticationTest (contas administradas
+                    somente na intranet, sem conta no AD). Abre sozinho quando há erro
+                    de validação vindo de uma tentativa nesse formulário. --}}
                     <x-modal name="login" :show="$errors->any() || session('status')" maxWidth="md" sync-store="loginModal">
                         <div class="px-6 py-8">
                             <p class="text-center text-gray-700 font-medium mb-4">Entre para acessar as funcionalidades</p>
                             {{ $slot }}
                         </div>
                     </x-modal>
+
+                    <div class="text-center pb-6">
+                        <button
+                            type="button"
+                            x-data
+                            x-on:click="$dispatch('open-modal', 'login')"
+                            class="text-xs text-gray-400 hover:text-gray-600 underline"
+                        >
+                            Problemas para entrar com o SSO? Login alternativo
+                        </button>
+                    </div>
                 @else
                     <div class="w-full h-[0.7cm] bg-[#166F9E]"></div>
 

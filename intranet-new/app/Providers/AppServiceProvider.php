@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\ServiceProvider;
 use LdapRecord\Laravel\Events\Import\Saved;
 use LdapRecord\Laravel\Import\UserSynchronizer;
+use SocialiteProviders\Manager\SocialiteWasCalled;
 use Symfony\Component\Mailer\Transport\Smtp\EsmtpTransport;
 use Symfony\Component\Mailer\Transport\Smtp\Stream\SocketStream;
 
@@ -38,6 +39,12 @@ class AppServiceProvider extends ServiceProvider
         // seja por login (bind direto) ou por `php artisan ldap:import`.
         Event::listen(Saved::class, function (Saved $event) {
             $event->eloquent->forceFill(['ad_synced_at' => now()])->saveQuietly();
+        });
+
+        // Registra o driver "keycloak" no Socialite — ver
+        // App\Http\Controllers\Auth\SsoController.
+        Event::listen(function (SocialiteWasCalled $event) {
+            $event->extendSocialite('keycloak', \SocialiteProviders\Keycloak\Provider::class);
         });
 
         $this->desabilitarVerificacaoTlsSmtpSeNecessario();
