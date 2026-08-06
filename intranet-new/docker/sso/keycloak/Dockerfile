@@ -11,6 +11,11 @@ RUN mvn -B -q package
 
 FROM quay.io/keycloak/keycloak:26.7.1
 COPY --from=spi-build /build/target/ad-bridge-spi.jar /opt/keycloak/providers/ad-bridge-spi.jar
+# Tema de login com a cara da intranet (fundo, cabeçalho CETEM/Intranet,
+# barra azul, textos em português) — estende o tema padrão keycloak.v2,
+# não reimplementa a lógica do formulário. Ativado via loginTheme=intranet
+# no realm (feito por fora, com kcadm).
+COPY theme/intranet /opt/keycloak/themes/intranet
 # A imagem oficial não lê KC_DB_PASSWORD_FILE/KEYCLOAK_ADMIN_PASSWORD_FILE
 # sozinha (só a convenção "_FILE" do Postgres, não é genérica) — ver o
 # comentário dentro do script.

@@ -1,0 +1,70 @@
+/* Reproduz o visual de resources/views/layouts/login.blade.php da intranet
+   (fundo, cabeçalho CETEM/Intranet, barra azul, card branco) — o cabeçalho
+   em si vem de template.ftl (sobrescrito), aqui só o restante do layout. */
+
+body#keycloak-bg {
+    background-image: url("../img/frente_cr.png");
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+}
+
+.pf-v5-c-login {
+    background: none;
+    min-height: 100vh;
+    padding-top: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.pf-v5-c-login__container {
+    flex: 1;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 2rem 1rem;
+    margin: 0;
+    max-width: none;
+}
+
+.pf-v5-c-login__main {
+    background: #ffffff;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.15), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+    max-width: 28rem;
+    width: 100%;
+    padding: 2rem 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.pf-v5-c-login__main-header {
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+#kc-page-title {
+    font-size: 1.05rem;
+    font-weight: 500;
+    color: #374151;
+}
+
+/* Botão principal — cinza escuro, igual ao x-primary-button da intranet */
+.pf-v5-c-button.pf-m-primary {
+    background-color: #1f2937;
+    border-radius: 0.375rem;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+}
+
+.pf-v5-c-button.pf-m-primary:hover,
+.pf-v5-c-button.pf-m-primary:focus {
+    background-color: #374151;
+}
+
+.pf-v5-c-form__label-text {
+    color: #374151;
+    font-weight: 500;
+}
