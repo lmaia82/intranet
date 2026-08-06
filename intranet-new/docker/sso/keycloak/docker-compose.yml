@@ -39,8 +39,13 @@ services:
       KC_DB_URL: jdbc:postgresql://keycloak-db:5432/keycloak
       KC_DB_USERNAME: keycloak
       KC_DB_PASSWORD_FILE: /run/secrets/kc_db_password
-      # Ajuste para o hostname real pelo qual o Keycloak será acessado.
-      KC_HOSTNAME: sso.intranet.local
+      # TEMPORÁRIO: sem KC_HOSTNAME fixo, pra testar via IP direto — com ele
+      # definido, o Keycloak gera todo link/action (inclusive o form de
+      # login) usando esse hostname fixo, mesmo que o navegador tenha usado
+      # outro — quebra a submissão do login se o hostname não resolver
+      # (foi exatamente o que aconteceu com sso.intranet.local sem DNS).
+      # Reative com o hostname real assim que ele existir de verdade.
+      # KC_HOSTNAME: sso.intranet.local
       KC_HOSTNAME_STRICT: "false"
       KC_HTTP_ENABLED: "true"
       # TEMPORÁRIO — pra dar proxy via Apache do intranet-app-1 em /sso-test
