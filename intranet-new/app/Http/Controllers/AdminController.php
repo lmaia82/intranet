@@ -17,6 +17,7 @@ use App\Models\Telefone;
 use App\Models\User;
 use App\Services\ActiveDirectoryAuthenticator;
 use App\Services\HealthCheckService;
+use App\Services\KeycloakRealmSettingsSyncer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -236,6 +237,26 @@ class AdminController extends Controller
         Configuracao::atual()->update($validated);
 
         return redirect()->route('admin.configuracoes')->with('status', 'Tempo de inatividade atualizado.');
+    }
+
+    public function atualizarSso(Request $request, KeycloakRealmSettingsSyncer $syncer)
+    {
+        $validated = $request->validate([
+            'sso_inatividade_minutos' => 'required|integer|min:1|max:1440',
+            'sso_duracao_maxima_horas' => 'required|integer|min:1|max:168',
+            'sso_exigir_login_ao_fechar_navegador' => 'sometimes|boolean',
+        ]);
+
+        $validated['sso_exigir_login_ao_fechar_navegador'] = $request->boolean('sso_exigir_login_ao_fechar_navegador');
+
+        $configuracao = Configuracao::atual();
+        $configuracao->update($validated);
+
+        // Aplica de verdade no Keycloak — sem isso, os campos salvos aqui
+        // não teriam efeito nenhum na sessão real do SSO.
+        $syncer->sincronizar($configuracao);
+
+        return redirect()->route('admin.configuracoes')->with('status', 'Configuração de SSO atualizada.');
     }
 
     public function storeSetor(Request $request)

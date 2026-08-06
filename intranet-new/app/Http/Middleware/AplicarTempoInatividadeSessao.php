@@ -22,7 +22,15 @@ class AplicarTempoInatividadeSessao
         // migrations, ou testes que não usam RefreshDatabase) — nesse caso
         // mantém o valor padrão do config/session.php.
         if (Schema::hasTable('configuracoes')) {
-            config(['session.lifetime' => Configuracao::atual()->tempo_inatividade_minutos]);
+            $configuracao = Configuracao::atual();
+
+            config(['session.lifetime' => $configuracao->tempo_inatividade_minutos]);
+
+            // "Exigir login ao fechar o navegador" (Admin > Configurações >
+            // SSO) — sem isso, mesmo sem usar "Lembrar-se", o cookie de
+            // sessão do Laravel carrega uma data de expiração própria e
+            // sobrevive ao navegador fechar/abrir de novo.
+            config(['session.expire_on_close' => $configuracao->sso_exigir_login_ao_fechar_navegador]);
         }
 
         return $next($request);

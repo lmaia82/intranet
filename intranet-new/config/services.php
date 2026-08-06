@@ -77,6 +77,13 @@ return [
         'redirect' => env('KEYCLOAK_REDIRECT_URI'),
         'base_url' => env('KEYCLOAK_BASE_URL'),
         'realms' => env('KEYCLOAK_REALM', 'intranet'),
+        // Client de serviço separado, com a role mínima "manage-realm" (só
+        // no realm "intranet", não no master) — usado só por
+        // App\Services\KeycloakRealmSettingsSyncer para aplicar os tempos
+        // de sessão configurados em Admin > Configurações. Sem acesso a
+        // usuários/senhas, só às configurações do realm.
+        'admin_sync_client_id' => env('KEYCLOAK_ADMIN_SYNC_CLIENT_ID', 'intranet-admin-sync'),
+        'admin_sync_client_secret' => env('KEYCLOAK_ADMIN_SYNC_CLIENT_SECRET'),
     ],
 
 ];

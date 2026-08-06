@@ -123,7 +123,10 @@ class HealthCheckServiceTest extends TestCase
 
     public function test_verificarScheduler_retorna_true_quando_heartbeat_recente(): void
     {
-        Cache::put(HealthCheckService::CACHE_KEY_HEARTBEAT_SCHEDULER, now());
+        // Guardado como timestamp (int), não como objeto Carbon — ver o
+        // comentário em routes/console.php sobre 'serializable_classes'
+        // (config/cache.php bloqueia desserializar objetos por padrão).
+        Cache::put(HealthCheckService::CACHE_KEY_HEARTBEAT_SCHEDULER, now()->timestamp);
 
         $resultado = app(HealthCheckService::class)->verificarScheduler();
 
@@ -133,7 +136,7 @@ class HealthCheckServiceTest extends TestCase
 
     public function test_verificarScheduler_retorna_false_quando_heartbeat_antigo(): void
     {
-        Cache::put(HealthCheckService::CACHE_KEY_HEARTBEAT_SCHEDULER, now()->subMinutes(5));
+        Cache::put(HealthCheckService::CACHE_KEY_HEARTBEAT_SCHEDULER, now()->subMinutes(5)->timestamp);
 
         $resultado = app(HealthCheckService::class)->verificarScheduler();
 

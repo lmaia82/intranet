@@ -50,6 +50,67 @@
         </div>
 
         <div class="bg-white shadow rounded p-4 mt-4">
+            <p class="font-semibold mb-1">Sessão do SSO (login único)</p>
+            <p class="text-sm text-gray-500 mb-4">
+                Controla a sessão do Keycloak, que é o que permite entrar em
+                outros sistemas da intranet sem digitar a senha de novo.
+                Aplicado direto no Keycloak ao salvar.
+            </p>
+
+            <form method="POST" action="{{ route('admin.configuracoes.sso') }}" class="space-y-4">
+                @csrf
+
+                <div class="flex items-center justify-between gap-4">
+                    <div>
+                        <p class="text-sm font-medium">Inatividade</p>
+                        <p class="text-xs text-gray-500">Tempo sem uso até pedir login de novo.</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <input type="number" name="sso_inatividade_minutos" min="1" max="1440"
+                               value="{{ old('sso_inatividade_minutos', $configuracao->sso_inatividade_minutos) }}"
+                               class="w-24 border-gray-300 rounded text-sm">
+                        <span class="text-sm text-gray-500">minutos</span>
+                    </div>
+                </div>
+                @error('sso_inatividade_minutos')
+                    <p class="text-sm text-red-600">{{ $message }}</p>
+                @enderror
+
+                <div class="flex items-center justify-between gap-4">
+                    <div>
+                        <p class="text-sm font-medium">Duração máxima</p>
+                        <p class="text-xs text-gray-500">Tempo total, mesmo usando sem parar, até precisar logar de novo.</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <input type="number" name="sso_duracao_maxima_horas" min="1" max="168"
+                               value="{{ old('sso_duracao_maxima_horas', $configuracao->sso_duracao_maxima_horas) }}"
+                               class="w-24 border-gray-300 rounded text-sm">
+                        <span class="text-sm text-gray-500">horas</span>
+                    </div>
+                </div>
+                @error('sso_duracao_maxima_horas')
+                    <p class="text-sm text-red-600">{{ $message }}</p>
+                @enderror
+
+                <div class="flex items-center justify-between gap-4">
+                    <div>
+                        <p class="text-sm font-medium">Exigir login ao fechar o navegador</p>
+                        <p class="text-xs text-gray-500">Fechou o navegador, precisa entrar de novo — mesmo antes do tempo de inatividade acabar.</p>
+                    </div>
+                    <label class="inline-flex items-center">
+                        <input type="checkbox" name="sso_exigir_login_ao_fechar_navegador" value="1"
+                               {{ old('sso_exigir_login_ao_fechar_navegador', $configuracao->sso_exigir_login_ao_fechar_navegador) ? 'checked' : '' }}
+                               class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500">
+                    </label>
+                </div>
+
+                <div class="text-right">
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded">Salvar</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="bg-white shadow rounded p-4 mt-4">
             <div class="flex justify-between items-center gap-4">
                 <div>
                     <p class="font-semibold">Aba Tutoriais</p>

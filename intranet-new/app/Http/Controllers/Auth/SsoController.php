@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\Configuracao;
 use App\Models\Group;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
@@ -49,7 +50,11 @@ class SsoController extends Controller
             ]);
         }
 
-        Auth::login($usuario, remember: true);
+        // "Lembrar-se" mantém a sessão viva mesmo fechando o navegador —
+        // contraria a config de Admin > Configurações > SSO quando ligada
+        // (ver também AplicarTempoInatividadeSessao, que cuida do cookie de
+        // sessão em si).
+        Auth::login($usuario, remember: ! Configuracao::atual()->sso_exigir_login_ao_fechar_navegador);
 
         return redirect()->intended(route('dashboard', absolute: false));
     }
