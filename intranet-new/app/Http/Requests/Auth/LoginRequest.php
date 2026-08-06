@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Auth;
 
+use App\Models\User;
 use App\Services\ActiveDirectoryAuthenticator;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Contracts\Validation\ValidationRule;
@@ -29,7 +30,10 @@ class LoginRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email' => ['required', 'string', 'email'],
+            // Não valida formato de e-mail: o login é só o usuário, sem
+            // "@dominio" (ex: "lgoncalves"), igual ao padrão de rede do
+            // CETEM — um e-mail completo também é aceito.
+            'email' => ['required', 'string'],
             'password' => ['required', 'string'],
         ];
     }
@@ -43,18 +47,18 @@ class LoginRequest extends FormRequest
     {
         $this->ensureIsNotRateLimited();
 
-        $email = $this->string('email')->value();
+        $login = $this->string('email')->value();
         $password = $this->string('password')->value();
 
         // Tenta autenticar via bind direto no AD (sem conta de serviço: o
         // CETEM optou por autenticar cada usuário com a própria credencial).
         // Se a senha não conferir no AD — inclusive para quem não tem conta
         // lá — cai no fallback local (usuários administrados só na intranet).
-        $usuario = app(ActiveDirectoryAuthenticator::class)->autenticar($email, $password);
+        $usuario = app(ActiveDirectoryAuthenticator::class)->autenticar($login, $password);
 
         if ($usuario) {
             Auth::login($usuario, $this->boolean('remember'));
-        } elseif (! Auth::attempt(['email' => $email, 'password' => $password, 'is_active' => true], $this->boolean('remember'))) {
+        } elseif (! Auth::attempt(['email' => $this->resolverEmailLocal($login), 'password' => $password, 'is_active' => true], $this->boolean('remember'))) {
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([
@@ -63,6 +67,26 @@ class LoginRequest extends FormRequest
         }
 
         RateLimiter::clear($this->throttleKey());
+    }
+
+    /**
+     * Contas administradas só na intranet (sem conta no AD) são guardadas
+     * com o e-mail completo em `users.email` — se o login veio sem
+     * "@dominio", acha o e-mail completo pela parte antes do "@", pra não
+     * quebrar o fallback local. Se não achar (ou já veio com "@"), devolve
+     * o login como veio — Auth::attempt() só falha normalmente.
+     */
+    private function resolverEmailLocal(string $login): string
+    {
+        if (str_contains($login, '@')) {
+            return $login;
+        }
+
+        // LIKE em vez de SUBSTRING_INDEX (específico do MySQL) — os testes
+        // rodam em sqlite, e LIKE funciona igual nos dois bancos.
+        return User::query()
+            ->where('email', 'like', $login.'@%')
+            ->value('email') ?? $login;
     }
 
     /**

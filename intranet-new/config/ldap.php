@@ -73,6 +73,21 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Domínio do UPN (login só com o usuário, sem o "@dominio")
+    |--------------------------------------------------------------------------
+    |
+    | O login (intranet e SSO) aceita só a parte antes do "@" — igual ao
+    | padrão de rede do CETEM (ex: "lgoncalves" em vez de
+    | "lgoncalves@cetem.gov.br"). Usado por
+    | App\Services\ActiveDirectoryAuthenticator pra montar o UPN completo
+    | na hora do bind.
+    |
+    */
+
+    'upn_domain' => env('LDAP_UPN_DOMAIN', 'cetem.gov.br'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Sincronização de atributos do usuário local
     |--------------------------------------------------------------------------
     |

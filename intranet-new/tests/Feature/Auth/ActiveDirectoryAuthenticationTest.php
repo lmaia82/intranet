@@ -48,6 +48,7 @@ class ActiveDirectoryAuthenticationTest extends TestCase
         $this->criarUsuarioNoAd([
             'cn' => 'Fulano da Silva',
             'mail' => 'fulano@cetem.gov.br',
+            'samaccountname' => 'fulano',
             'objectguid' => Str::orderedUuid(),
         ], setor: 'TI');
 
@@ -77,6 +78,38 @@ class ActiveDirectoryAuthenticationTest extends TestCase
         $this->assertSame('Leitores', $usuario->group->name);
     }
 
+    public function test_usuario_do_ad_autentica_so_com_o_login_sem_dominio(): void
+    {
+        // Padrão de rede do CETEM: digita só "fulano", não
+        // "fulano@cetem.gov.br" — o UPN completo é montado por dentro
+        // (config('ldap.upn_domain')) pro bind, e a busca no AD depois é
+        // por samaccountname, não mail.
+        Group::create(['name' => 'Leitores']);
+
+        $fake = DirectoryEmulator::setup();
+
+        $this->criarUsuarioNoAd([
+            'cn' => 'Fulano da Silva',
+            'mail' => 'fulano@cetem.gov.br',
+            'samaccountname' => 'fulano',
+            'objectguid' => Str::orderedUuid(),
+        ], setor: 'TI');
+
+        $fake->getLdapConnection()->shouldAllowBindWith('fulano@cetem.gov.br');
+
+        $response = $this->post('/login', [
+            'email' => 'fulano',
+            'password' => 'senha-do-ad',
+        ]);
+
+        $response->assertRedirect(route('dashboard', absolute: false));
+        $this->assertAuthenticated();
+
+        $usuario = User::where('email', 'fulano@cetem.gov.br')->first();
+        $this->assertNotNull($usuario);
+        $this->assertSame('Fulano da Silva', $usuario->name);
+    }
+
     public function test_primeiro_login_entra_no_grupo_leitor_mesmo_quando_setor_do_ad_nao_corresponde_a_nenhum_cadastrado(): void
     {
         Group::create(['name' => 'Leitores']);
@@ -86,6 +119,7 @@ class ActiveDirectoryAuthenticationTest extends TestCase
         $this->criarUsuarioNoAd([
             'cn' => 'Fulano da Silva',
             'mail' => 'fulano@cetem.gov.br',
+            'samaccountname' => 'fulano',
             'objectguid' => Str::orderedUuid(),
         ], setor: 'SETOR-INEXISTENTE-NA-INTRANET');
 
@@ -109,6 +143,7 @@ class ActiveDirectoryAuthenticationTest extends TestCase
         $this->criarUsuarioNoAd([
             'cn' => 'Fulano da Silva',
             'mail' => 'fulano@cetem.gov.br',
+            'samaccountname' => 'fulano',
             'objectguid' => Str::orderedUuid(),
         ], setor: 'TI');
 
@@ -132,6 +167,7 @@ class ActiveDirectoryAuthenticationTest extends TestCase
         $this->criarUsuarioNoAd([
             'cn' => 'Fulano da Silva',
             'mail' => 'fulano@cetem.gov.br',
+            'samaccountname' => 'fulano',
             'objectguid' => Str::orderedUuid(),
         ], setor: 'TI');
 
@@ -194,6 +230,30 @@ class ActiveDirectoryAuthenticationTest extends TestCase
         $this->assertAuthenticatedAs($usuario);
     }
 
+    public function test_usuario_administrado_so_na_intranet_autentica_so_com_o_login_sem_dominio(): void
+    {
+        // Mesmo fallback local, mas digitando só "manutencao" — acha o
+        // e-mail completo pela parte antes do "@" (LoginRequest::resolverEmailLocal).
+        $fake = DirectoryEmulator::setup();
+        $fake->getLdapConnection()->expect(
+            LdapFake::operation('bind')->andReturnErrorResponse()
+        );
+
+        $usuario = User::factory()->create([
+            'email' => 'manutencao@cetem.gov.br',
+            'password' => bcrypt('senha-local'),
+            'ad_guid' => null,
+        ]);
+
+        $response = $this->post('/login', [
+            'email' => 'manutencao',
+            'password' => 'senha-local',
+        ]);
+
+        $response->assertRedirect(route('dashboard', absolute: false));
+        $this->assertAuthenticatedAs($usuario);
+    }
+
     public function test_usuario_ja_cadastrado_na_intranet_e_vinculado_ao_ad_pelo_email_no_primeiro_login(): void
     {
         $setorJaDefinido = Sector::create(['sigla' => 'RH']);
@@ -211,6 +271,7 @@ class ActiveDirectoryAuthenticationTest extends TestCase
         $this->criarUsuarioNoAd([
             'cn' => 'Nome Atualizado Pelo AD',
             'mail' => 'existente@cetem.gov.br',
+            'samaccountname' => 'existente',
             'objectguid' => Str::orderedUuid(),
         ], setor: 'ADM');
 
@@ -246,6 +307,7 @@ class ActiveDirectoryAuthenticationTest extends TestCase
         $this->criarUsuarioNoAd([
             'cn' => 'Fulano Desativado',
             'mail' => 'desativado@cetem.gov.br',
+            'samaccountname' => 'desativado',
             'objectguid' => Str::orderedUuid(),
         ], setor: 'TI');
 
