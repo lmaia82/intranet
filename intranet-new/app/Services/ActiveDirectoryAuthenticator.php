@@ -27,14 +27,16 @@ class ActiveDirectoryAuthenticator
     }
 
     /**
-     * Tenta autenticar e sincronizar o usuário a partir do e-mail e senha
-     * informados na tela de login. Retorna o usuário local (já salvo) em
-     * caso de sucesso, ou null se a senha não confere no AD ou a conta
-     * estiver desativada na intranet.
+     * Tenta autenticar e sincronizar o usuário a partir do login e senha
+     * informados na tela de login. O login é só a parte antes do "@" (ex:
+     * "lgoncalves"), no padrão de rede do CETEM — mas um e-mail completo
+     * também é aceito, por compatibilidade. Retorna o usuário local (já
+     * salvo) em caso de sucesso, ou null se a senha não confere no AD ou a
+     * conta estiver desativada na intranet.
      */
-    public function autenticar(string $email, string $password): ?User
+    public function autenticar(string $login, string $password): ?User
     {
-        $ldapUser = $this->bindarEBuscarUsuario($email, $password);
+        $ldapUser = $this->bindarEBuscarUsuario($login, $password);
 
         if (! $ldapUser) {
             return null;
@@ -85,19 +87,23 @@ class ActiveDirectoryAuthenticator
 
     /**
      * Tenta o bind direto no AD usando os formatos de identidade aceitos
-     * pelo Active Directory, sem precisar de uma conta de serviço:
-     * o e-mail como UPN, e o formato down-level "NETBIOS\usuario" (mesmo
-     * padrão usado pela integração já em produção no GLPI do CETEM).
+     * pelo Active Directory, sem precisar de uma conta de serviço: o UPN
+     * (montado a partir do login, se só o usuário for informado), e o
+     * formato down-level "NETBIOS\usuario" (mesmo padrão usado pela
+     * integração já em produção no GLPI do CETEM).
      */
-    protected function bindarEBuscarUsuario(string $email, string $password): ?LdapUser
+    protected function bindarEBuscarUsuario(string $login, string $password): ?LdapUser
     {
-        if (! $this->autenticarConexao($email, $password)) {
+        if (! $this->autenticarConexao($login, $password)) {
             return null;
         }
 
         // O bind confirmou a senha; a mesma conexão (agora autenticada como
-        // o próprio usuário) é usada para buscar seus atributos.
-        return LdapUser::where('mail', $email)->first();
+        // o próprio usuário) é usada para buscar seus atributos. Busca por
+        // sAMAccountName (o "usuario" de "usuario@dominio"), não por
+        // mail — é o identificador de verdade no AD, funciona
+        // independente do login ter vindo com ou sem o "@dominio".
+        return LdapUser::where('samaccountname', Str::before($login, '@'))->first();
     }
 
     /**
@@ -237,15 +243,24 @@ class ActiveDirectoryAuthenticator
     }
 
     /**
+     * Monta os formatos de identidade que o AD aceita pra bind, a partir do
+     * login informado — que pode ser só o usuário ("lgoncalves", padrão de
+     * rede do CETEM) ou um e-mail completo ("lgoncalves@cetem.gov.br").
+     *
      * @return array<int, string>
      */
-    protected function possiveisIdentidadesDeBind(string $email): array
+    protected function possiveisIdentidadesDeBind(string $login): array
     {
-        $usuario = Str::before($email, '@');
+        $usuario = Str::before($login, '@');
         $dominioNetbios = config('ldap.netbios_domain', 'MINERAL');
+        $dominioUpn = config('ldap.upn_domain', 'cetem.gov.br');
+
+        // Se já veio com "@" (e-mail completo, ou até de outro domínio),
+        // usa como está pro UPN — não força trocar o domínio informado.
+        $upn = str_contains($login, '@') ? $login : "{$usuario}@{$dominioUpn}";
 
         return [
-            $email,
+            $upn,
             "{$dominioNetbios}\\{$usuario}",
         ];
     }

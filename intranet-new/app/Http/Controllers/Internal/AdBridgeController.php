@@ -26,8 +26,11 @@ class AdBridgeController extends Controller
 
     public function authenticate(Request $request): JsonResponse
     {
+        // Sem validação de formato de e-mail: o Keycloak encaminha o que o
+        // usuário digitou, que agora é só o login sem "@dominio" (ex:
+        // "lgoncalves") — um e-mail completo também chega aqui sem problema.
         $data = $request->validate([
-            'email' => ['required', 'string', 'email'],
+            'email' => ['required', 'string'],
             'password' => ['required', 'string'],
         ]);
 
