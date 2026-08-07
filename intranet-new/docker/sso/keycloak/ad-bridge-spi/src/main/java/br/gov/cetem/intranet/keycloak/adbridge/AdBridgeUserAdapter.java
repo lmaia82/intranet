@@ -21,7 +21,14 @@ public class AdBridgeUserAdapter extends AbstractUserAdapterFederatedStorage {
     public AdBridgeUserAdapter(KeycloakSession session, RealmModel realm, ComponentModel model, String username) {
         super(session, realm, model);
         this.username = username;
-        setSingleAttribute("email", username);
+        // NÃO define "email" aqui (setEmail() usa o mesmo storage attribute
+        // "email" por baixo) — esse construtor roda de novo a cada
+        // getUserByUsername(), inclusive DEPOIS de um login bem-sucedido
+        // (ex: quando o endpoint /userinfo resolve o usuário de novo).
+        // Definir aqui sobrescreveria o e-mail real (setado em
+        // applyBridgeAttributes) de volta pro username bruto digitado —
+        // foi exatamente isso que causou uma conta fantasma no Laravel
+        // com email="lgoncalves" (sem @dominio) em vez do e-mail real.
     }
 
     @Override
