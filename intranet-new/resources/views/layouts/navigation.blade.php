@@ -41,6 +41,11 @@
                             {{ __('Agenda') }}
                         </x-nav-link>
                     @endif
+                    @if(auth()->user()->hasPermission('salas.ver'))
+                        <x-nav-link :href="route('reservas-sala.index')" :active="request()->routeIs('reservas-sala.*')">
+                            {{ __('Reserva de Sala') }}
+                        </x-nav-link>
+                    @endif
                     @if($tutoriaisAtivo && auth()->user()->hasPermission('tutoriais.ver'))
                         <x-nav-link :href="route('tutoriais.index')" :active="request()->routeIs('tutoriais.*')">
                             {{ __('Tutoriais') }}
@@ -140,6 +145,11 @@
             @if(auth()->user()->hasPermission('eventos.ver'))
                 <x-responsive-nav-link :href="route('eventos.index')" :active="request()->routeIs('eventos.*')">
                     {{ __('Agenda') }}
+                </x-responsive-nav-link>
+            @endif
+            @if(auth()->user()->hasPermission('salas.ver'))
+                <x-responsive-nav-link :href="route('reservas-sala.index')" :active="request()->routeIs('reservas-sala.*')">
+                    {{ __('Reserva de Sala') }}
                 </x-responsive-nav-link>
             @endif
             @if($tutoriaisAtivo && auth()->user()->hasPermission('tutoriais.ver'))
