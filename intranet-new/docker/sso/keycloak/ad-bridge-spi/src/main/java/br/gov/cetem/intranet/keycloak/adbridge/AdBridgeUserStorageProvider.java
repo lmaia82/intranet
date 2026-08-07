@@ -10,6 +10,7 @@ import org.keycloak.credential.CredentialInputValidator;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
+import org.keycloak.models.cache.CachedUserModel;
 import org.keycloak.models.credential.PasswordCredentialModel;
 import org.keycloak.storage.StorageId;
 import org.keycloak.storage.UserStorageProvider;
@@ -105,6 +106,8 @@ public class AdBridgeUserStorageProvider implements
             return false;
         }
 
+        log.infof("ad-bridge isValid() para username=%s, classe recebida=%s", user.getUsername(), user.getClass().getName());
+
         try {
             JsonObject result = callBridge(user.getUsername(), password);
 
@@ -112,8 +115,23 @@ public class AdBridgeUserStorageProvider implements
                 return false;
             }
 
-            if (user instanceof AdBridgeUserAdapter adapter) {
+            // O Keycloak pode ter envolvido nosso UserModel numa camada de
+            // cache (CachedUserModel) antes de chamar isValid() — nesse
+            // caso "user instanceof AdBridgeUserAdapter" falha e os
+            // atributos (nome, e-mail) nunca seriam aplicados de verdade.
+            // getDelegateForUpdate() devolve o objeto real por trás do
+            // cache, já invalidando o cache dele.
+            UserModel alvo = user;
+            if (user instanceof CachedUserModel cached) {
+                alvo = cached.getDelegateForUpdate();
+                log.infof("Desembrulhado de CachedUserModel — delegate classe=%s", alvo.getClass().getName());
+            }
+
+            if (alvo instanceof AdBridgeUserAdapter adapter) {
                 adapter.applyBridgeAttributes(result);
+                log.infof("Atributos do bridge aplicados. email agora: %s", adapter.getEmail());
+            } else {
+                log.warnf("UserModel não é AdBridgeUserAdapter (nem delegate) — classe real: %s. Atributos do bridge NÃO foram aplicados.", alvo.getClass().getName());
             }
 
             return true;
