@@ -321,4 +321,46 @@ class ActiveDirectoryAuthenticationTest extends TestCase
         $response->assertSessionHasErrors('email');
         $this->assertGuest();
     }
+
+    public function test_ad_com_objeto_duplicado_da_migracao_reaproveita_a_conta_existente_em_vez_de_duplicar(): void
+    {
+        // Cenário real observado em produção: o AD (em migração) tem dois
+        // objetos pro mesmo sAMAccountName — um com "mail" correto (já
+        // vinculado à conta certa na intranet) e outro, mais novo/GUID
+        // diferente, com "mail" incompleto (só o usuário, sem "@dominio").
+        // A busca por samaccountname pode achar esse segundo — sem a
+        // recuperação, isso criava um usuário fantasma sem privilégios.
+        Group::create(['name' => 'Leitores']);
+
+        $usuarioExistente = User::factory()->create([
+            'email' => 'fulano@cetem.gov.br',
+            'is_admin' => true,
+            'ad_guid' => (string) Str::orderedUuid(),
+        ]);
+
+        $fake = DirectoryEmulator::setup();
+
+        // Objeto "duplicado" com mail quebrado — é o que a busca por
+        // samaccountname acha dessa vez (GUID diferente do já vinculado).
+        $this->criarUsuarioNoAd([
+            'cn' => 'Fulano da Silva',
+            'mail' => 'fulano',
+            'samaccountname' => 'fulano',
+            'objectguid' => Str::orderedUuid(),
+        ], setor: 'TI');
+
+        $fake->getLdapConnection()->shouldAllowBindWith('MINERAL\\fulano');
+
+        $response = $this->post('/login', [
+            'email' => 'fulano',
+            'password' => 'senha-do-ad',
+        ]);
+
+        $response->assertRedirect(route('dashboard', absolute: false));
+        $this->assertAuthenticatedAs($usuarioExistente);
+
+        // Não duplicou, e o admin da conta original não foi perdido.
+        $this->assertSame(1, User::where('email', 'fulano@cetem.gov.br')->count());
+        $this->assertTrue($usuarioExistente->fresh()->is_admin);
+    }
 }

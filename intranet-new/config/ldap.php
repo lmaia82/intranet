@@ -100,13 +100,21 @@ return [
 
     'sync_attributes' => [
         'name' => 'cn',
-        'email' => 'mail',
+        // Não confia no atributo "mail" do AD puro — a migração já
+        // deixou objetos com esse campo incompleto/errado pra pessoas
+        // que já tinham conta certa na intranet. Monta a partir do
+        // sAMAccountName (o mesmo identificador usado pro bind/busca) —
+        // ver App\Services\ActiveDirectoryEmailHydrator.
+        'email' => \App\Services\ActiveDirectoryEmailHydrator::class,
         'ad_setor' => \App\Services\ActiveDirectorySetorHydrator::class,
     ],
 
     // Vincula pelo e-mail, no primeiro login, usuários já cadastrados
     // manualmente na intranet antes da integração — evita duplicar em vez
-    // de criar um segundo registro.
+    // de criar um segundo registro. Só aceita mapeamento pra um atributo
+    // LDAP puro (não dá pra usar o hydrator acima aqui) — por isso
+    // ActiveDirectoryAuthenticator tem uma recuperação própria pro caso
+    // desse "mail" bruto não bater com o e-mail canônico (guid duplicado).
     'sync_existing' => [
         'email' => 'mail',
     ],

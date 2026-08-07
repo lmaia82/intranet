@@ -42,6 +42,33 @@ class ActiveDirectoryAuthenticator
             return null;
         }
 
+        $usuario = $this->sincronizarESalvar($ldapUser);
+
+        // Mesmo com a senha correta no AD, uma conta desativada na intranet
+        // (ver Admin > Usuários) não deve conseguir logar — os dados ainda
+        // são sincronizados acima, só o acesso é negado.
+        if (! $usuario->is_active) {
+            return null;
+        }
+
+        return $usuario;
+    }
+
+    /**
+     * O AD do CETEM está em migração e tem objetos duplicados/desatualizados
+     * pra uma mesma pessoa (mesmo sAMAccountName, GUIDs diferentes) — o
+     * LdapRecord decide se o usuário "já existe" comparando o atributo
+     * "mail" bruto do AD (não passa pelo ActiveDirectoryEmailHydrator), que
+     * pode estar incompleto/errado num desses objetos duplicados. Nesse
+     * caso ele tenta CRIAR um novo usuário local com o e-mail canônico
+     * (montado corretamente pelo hydrator) — que já existe, e o save()
+     * bate na constraint de unicidade (o synchronizer->run() sozinho só
+     * monta os dados em memória, não salva — por isso o try precisa
+     * envolver o save() também, não só o run()). Em vez de deixar isso
+     * virar erro 500, reaproveita o usuário existente.
+     */
+    private function sincronizarESalvar(LdapUser $ldapUser): User
+    {
         $usuario = $this->synchronizer->run($ldapUser);
 
         // Só no primeiro login (usuário recém-criado pelo sync acima) — se
@@ -53,13 +80,27 @@ class ActiveDirectoryAuthenticator
         }
 
         $usuario->ad_synced_at = now();
-        $usuario->save();
 
-        // Mesmo com a senha correta no AD, uma conta desativada na intranet
-        // (ver Admin > Usuários) não deve conseguir logar — os dados ainda
-        // são sincronizados acima, só o acesso é negado.
-        if (! $usuario->is_active) {
-            return null;
+        try {
+            $usuario->save();
+        } catch (UniqueConstraintViolationException $e) {
+            $email = ActiveDirectoryEmailHydrator::montar($ldapUser);
+            $usuarioExistente = $email ? User::where('email', $email)->first() : null;
+
+            if (! $usuarioExistente) {
+                throw $e;
+            }
+
+            Log::warning('AD com objeto duplicado para o mesmo usuário — reaproveitando conta existente em vez de criar duplicata', [
+                'email' => $email,
+                'guid_do_objeto_encontrado_agora' => $ldapUser->getConvertedGuid(),
+                'guid_ja_vinculado' => $usuarioExistente->ad_guid,
+            ]);
+
+            $usuarioExistente->ad_synced_at = now();
+            $usuarioExistente->save();
+
+            return $usuarioExistente;
         }
 
         return $usuario;
