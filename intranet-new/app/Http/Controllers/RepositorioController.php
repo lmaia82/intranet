@@ -125,6 +125,13 @@ class RepositorioController extends Controller
     {
         $parentId = $pasta->parent_id;
 
+        $emUso = $pasta->todosArquivosDescendentes()->first(fn ($arquivo) => $arquivo->emUso());
+
+        if ($emUso) {
+            return redirect()->route('repositorio.index', $parentId ? ['pasta' => $parentId] : [])
+                ->with('erro', "Não é possível excluir esta pasta: o arquivo \"{$emUso->nome_original}\" está sendo usado como imagem de um destaque ou informativo. Exclua o destaque/informativo primeiro pra poder excluir a pasta.");
+        }
+
         foreach ($pasta->todosArquivosDescendentes() as $arquivo) {
             Storage::disk('arquivos')->delete($arquivo->caminho);
         }
@@ -279,6 +286,11 @@ class RepositorioController extends Controller
     public function destroyArquivo(Arquivo $arquivo)
     {
         $pastaId = $arquivo->pasta_id;
+
+        if ($arquivo->emUso()) {
+            return redirect()->route('repositorio.index', $pastaId ? ['pasta' => $pastaId] : [])
+                ->with('erro', "Não é possível excluir o arquivo \"{$arquivo->nome_original}\": ele está sendo usado como imagem de um destaque ou informativo. Exclua o destaque/informativo primeiro pra poder excluir o arquivo.");
+        }
 
         Storage::disk('arquivos')->delete($arquivo->caminho);
         $arquivo->delete();

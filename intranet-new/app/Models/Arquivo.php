@@ -41,6 +41,26 @@ class Arquivo extends Model
         return $this->belongsTo(Sector::class);
     }
 
+    public function destaques()
+    {
+        return $this->hasMany(Destaque::class);
+    }
+
+    public function informativos()
+    {
+        return $this->hasMany(Informativo::class);
+    }
+
+    /**
+     * Um arquivo usado como imagem de um destaque ou informativo não pode
+     * ser excluído do repositório sem quebrar essa referência — ver
+     * RepositorioController::destroyArquivo().
+     */
+    public function emUso(): bool
+    {
+        return $this->destaques()->exists() || $this->informativos()->exists();
+    }
+
     public function tamanhoFormatado()
     {
         $bytes = $this->tamanho;

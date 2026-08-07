@@ -7,6 +7,10 @@
             <div class="mb-4 p-4 bg-green-100 text-green-800 rounded">{{ session('status') }}</div>
         @endif
 
+        @if(session('erro'))
+            <div class="mb-4 p-4 bg-red-100 text-red-800 rounded">{{ session('erro') }}</div>
+        @endif
+
         <nav class="text-sm mb-4">
             <a href="{{ route('repositorio.index') }}" class="text-blue-600">Raiz</a>
             @foreach($breadcrumb as $item)
