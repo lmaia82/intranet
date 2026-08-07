@@ -41,6 +41,74 @@ Alpine.data('ocrStatus', (status, erro, url) => ({
 
 Alpine.store('loginModal', { aberto: false });
 
+// Menu superior "priority nav": mostra quantos itens couberem na barra e
+// joga o restante (na ordem de prioridade) dentro do dropdown "Mais",
+// recalculando ao redimensionar a janela — em vez de uma lista fixa de
+// itens visíveis, que ou deixa espaço vazio ou quebra linha dependendo da
+// largura real da tela.
+Alpine.data('priorityNav', (items) => ({
+    items,
+    visibleCount: items.length,
+    maisOpen: false,
+
+    get hasOverflow() {
+        return this.visibleCount < this.items.length;
+    },
+    get itensVisiveis() {
+        return this.items.slice(0, this.visibleCount);
+    },
+    get itensOverflow() {
+        return this.items.slice(this.visibleCount);
+    },
+
+    init() {
+        this.$nextTick(() => this.recalcular());
+
+        let debounce;
+        window.addEventListener('resize', () => {
+            clearTimeout(debounce);
+            debounce = setTimeout(() => this.recalcular(), 100);
+        });
+    },
+
+    // Mede num "clone" invisível (visibility:hidden, fora do fluxo) que
+    // sempre renderiza TODOS os itens em tamanho real — assim dá pra
+    // medir a largura de cada um mesmo depois de ele ter saído da lista
+    // visível (um item com display:none, ao contrário de invisible, mede
+    // largura zero e a gente nunca mais conseguiria "devolvê-lo" pra
+    // barra quando a tela crescesse de novo).
+    recalcular() {
+        const caixa = this.$refs.itemsBox;
+        const medidor = this.$refs.medidor;
+        if (!caixa || !medidor) {
+            return;
+        }
+
+        // O botão "Mais" já reserva espaço no layout (sempre renderizado,
+        // só fica "invisible" quando não precisa) — então caixa.clientWidth
+        // já reflete o espaço realmente disponível pros itens, sem o
+        // vaivém de recalcular de novo depois de mostrar o botão.
+        const larguraDisponivel = caixa.clientWidth;
+        const elementos = Array.from(medidor.querySelectorAll('[data-nav-item]'));
+
+        let larguraAcumulada = 0;
+        let contagem = 0;
+        const espacamento = 16; // gap-4
+
+        for (let i = 0; i < elementos.length; i++) {
+            const larguraItem = elementos[i].offsetWidth;
+            const proximaLargura = larguraAcumulada + larguraItem + (i > 0 ? espacamento : 0);
+            if (proximaLargura > larguraDisponivel) {
+                break;
+            }
+            larguraAcumulada = proximaLargura;
+            contagem++;
+        }
+
+        this.visibleCount = Math.max(1, contagem);
+    },
+}));
+
 // Formulário de Reserva de Sala — reproduz as regras de negócio do
 // formulário original (SEIN): sala restrita exige confirmação de
 // autorização; grupos de checkbox com "Nenhum" são mutuamente exclusivos;

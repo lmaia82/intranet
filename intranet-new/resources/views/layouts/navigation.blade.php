@@ -1,12 +1,30 @@
 @php
     $tutoriaisAtivo = \App\Models\Configuracao::atual()->tutoriais_ativo;
-    $maisAtivo = request()->routeIs(['organograma.*', 'telefones.*', 'destaques.*', 'tutoriais.*', 'artigos.*', 'onlyoffice.aplicacoes']);
+    $usuario = auth()->user();
+
+    // Ordem de prioridade: quando não couber tudo numa linha só, os
+    // últimos da lista são os primeiros a ir pro dropdown "Mais" — ver
+    // Alpine.data('priorityNav', ...) em resources/js/app.js.
+    $navItems = collect([
+        ['label' => __('Início'), 'href' => route('dashboard'), 'active' => request()->routeIs('dashboard')],
+        $usuario->hasPermission('informativos.ver') ? ['label' => __('Informativos'), 'href' => route('informativos.index'), 'active' => request()->routeIs('informativos.*')] : null,
+        $usuario->hasPermission('eventos.ver') ? ['label' => __('Agenda'), 'href' => route('eventos.index'), 'active' => request()->routeIs('eventos.*')] : null,
+        $usuario->hasPermission('salas.ver') ? ['label' => __('Reserva de Sala'), 'href' => route('reservas-sala.index'), 'active' => request()->routeIs('reservas-sala.*')] : null,
+        $usuario->hasPermission('repositorio.ver') ? ['label' => __('Repositório'), 'href' => route('repositorio.index'), 'active' => request()->routeIs('repositorio.*')] : null,
+        $usuario->hasPermission('organograma.ver') ? ['label' => __('Organograma'), 'href' => route('organograma.index'), 'active' => request()->routeIs('organograma.*')] : null,
+        $usuario->hasPermission('ramais.ver') ? ['label' => __('Ramais'), 'href' => route('telefones.index'), 'active' => request()->routeIs('telefones.*')] : null,
+        $usuario->hasPermission('destaques.ver') ? ['label' => __('Destaques'), 'href' => route('destaques.index'), 'active' => request()->routeIs('destaques.*')] : null,
+        ($tutoriaisAtivo && $usuario->hasPermission('tutoriais.ver')) ? ['label' => __('Tutoriais'), 'href' => route('tutoriais.index'), 'active' => request()->routeIs('tutoriais.*')] : null,
+        ['label' => __('Publicações'), 'href' => route('artigos.index'), 'active' => request()->routeIs('artigos.*')],
+        ['label' => __('Aplicações'), 'href' => route('onlyoffice.aplicacoes'), 'active' => request()->routeIs('onlyoffice.aplicacoes')],
+        $usuario->is_admin ? ['label' => __('Administração'), 'href' => route('admin.index'), 'active' => request()->routeIs('admin.*')] : null,
+    ])->filter()->values();
 @endphp
 <nav x-data="{ open: false }" class="bg-gradient-to-b from-[#B9DBF7] to-white border-b border-gray-100">
     <!-- Primary Navigation Menu -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
-            <div class="flex">
+            <div class="flex flex-1 min-w-0">
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
                     <a href="{{ route('dashboard') }}">
@@ -14,70 +32,44 @@
                     </a>
                 </div>
 
-                <!-- Navigation Links -->
-                <div class="hidden space-x-4 xl:-my-px xl:ms-8 xl:flex">
-                    <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" class="whitespace-nowrap">
-                        {{ __('Início') }}
-                    </x-nav-link>
-                    @if(auth()->user()->hasPermission('informativos.ver'))
-                        <x-nav-link :href="route('informativos.index')" :active="request()->routeIs('informativos.*')" class="whitespace-nowrap">
-                            {{ __('Informativos') }}
-                        </x-nav-link>
-                    @endif
-                    @if(auth()->user()->hasPermission('eventos.ver'))
-                        <x-nav-link :href="route('eventos.index')" :active="request()->routeIs('eventos.*')" class="whitespace-nowrap">
-                            {{ __('Agenda') }}
-                        </x-nav-link>
-                    @endif
-                    @if(auth()->user()->hasPermission('salas.ver'))
-                        <x-nav-link :href="route('reservas-sala.index')" :active="request()->routeIs('reservas-sala.*')" class="whitespace-nowrap">
-                            {{ __('Reserva de Sala') }}
-                        </x-nav-link>
-                    @endif
-                    @if(auth()->user()->hasPermission('repositorio.ver'))
-                        <x-nav-link :href="route('repositorio.index')" :active="request()->routeIs('repositorio.*')" class="whitespace-nowrap">
-                            {{ __('Repositório') }}
-                        </x-nav-link>
-                    @endif
+                <!-- Navigation Links: preenche a barra com quantos itens couberem, o resto vai pro "Mais" -->
+                <div class="hidden xl:flex xl:items-center xl:ms-8 flex-1 min-w-0" x-data="priorityNav(@js($navItems))">
+                    <!-- Clone de medição: fora da tela, mede a largura real de cada item em tamanho normal -->
+                    <div class="fixed flex items-center gap-4 invisible pointer-events-none" style="top: -9999px; left: -9999px;" aria-hidden="true" x-ref="medidor">
+                        <template x-for="item in items" :key="'medidor-' + item.href">
+                            <span class="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-bold leading-5 whitespace-nowrap" x-text="item.label" data-nav-item></span>
+                        </template>
+                    </div>
 
-                    <!-- Mais: itens usados com menos frequência, agrupados para o menu sempre caber numa linha só -->
-                    <div class="relative flex items-center" x-data="{ open: false }" @click.outside="open = false">
-                        <button @click="open = ! open" type="button"
-                            class="inline-flex items-center gap-1 px-1 pt-1 border-b-2 text-sm font-bold leading-5 whitespace-nowrap transition duration-150 ease-in-out focus:outline-none
-                                {{ $maisAtivo ? 'border-[#166F9E] text-[#166F9E]' : 'border-transparent text-[#166F9E] hover:opacity-75 hover:border-gray-300' }}">
+                    <div class="flex flex-1 items-center gap-4 overflow-hidden min-w-0" x-ref="itemsBox">
+                        <template x-for="item in itensVisiveis" :key="item.href">
+                            <a :href="item.href" x-text="item.label"
+                                class="inline-flex items-center px-1 pt-1 border-b-2 text-sm font-bold leading-5 whitespace-nowrap transition duration-150 ease-in-out focus:outline-none"
+                                :class="item.active ? 'border-[#166F9E] text-[#166F9E]' : 'border-transparent text-[#166F9E] hover:opacity-75 hover:border-gray-300'">
+                            </a>
+                        </template>
+                    </div>
+
+                    <!-- Mais: sempre reserva o espaço no layout (só fica "invisible" quando não há overflow), pra medição não entrar em vaivém -->
+                    <div class="relative flex items-center shrink-0 ms-4" :class="hasOverflow ? '' : 'invisible pointer-events-none'" x-data="{ maisAberto: false }" @click.outside="maisAberto = false">
+                        <button @click="maisAberto = ! maisAberto" type="button" :tabindex="hasOverflow ? 0 : -1"
+                            class="inline-flex items-center gap-1 px-1 pt-1 border-b-2 border-transparent text-sm font-bold leading-5 text-[#166F9E] whitespace-nowrap hover:opacity-75 hover:border-gray-300 transition duration-150 ease-in-out focus:outline-none">
                             {{ __('Mais') }}
-                            <svg class="h-4 w-4 shrink-0 transition-transform" :class="{ 'rotate-180': open }" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                            <svg class="h-4 w-4 shrink-0 transition-transform" :class="{ 'rotate-180': maisAberto }" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                                 <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
                             </svg>
                         </button>
 
-                        <div x-show="open" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
+                        <div x-show="maisAberto" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
                             x-transition:leave="transition ease-in duration-75" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95"
-                            class="absolute z-50 top-full mt-2 start-0 w-48 rounded-md shadow-lg" style="display: none;" @click="open = false">
+                            class="absolute z-50 top-full mt-2 start-0 w-48 rounded-md shadow-lg" style="display: none;" @click="maisAberto = false">
                             <div class="rounded-md ring-1 ring-black ring-opacity-5 py-1 bg-white">
-                                @if(auth()->user()->hasPermission('organograma.ver'))
-                                    <x-dropdown-link :href="route('organograma.index')">{{ __('Organograma') }}</x-dropdown-link>
-                                @endif
-                                @if(auth()->user()->hasPermission('ramais.ver'))
-                                    <x-dropdown-link :href="route('telefones.index')">{{ __('Ramais') }}</x-dropdown-link>
-                                @endif
-                                @if(auth()->user()->hasPermission('destaques.ver'))
-                                    <x-dropdown-link :href="route('destaques.index')">{{ __('Destaques') }}</x-dropdown-link>
-                                @endif
-                                @if($tutoriaisAtivo && auth()->user()->hasPermission('tutoriais.ver'))
-                                    <x-dropdown-link :href="route('tutoriais.index')">{{ __('Tutoriais') }}</x-dropdown-link>
-                                @endif
-                                <x-dropdown-link :href="route('artigos.index')">{{ __('Publicações') }}</x-dropdown-link>
-                                <x-dropdown-link :href="route('onlyoffice.aplicacoes')">{{ __('Aplicações') }}</x-dropdown-link>
+                                <template x-for="item in itensOverflow" :key="item.href">
+                                    <a :href="item.href" x-text="item.label" class="block w-full px-4 py-2 text-start text-sm leading-5 text-gray-700 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 transition duration-150 ease-in-out"></a>
+                                </template>
                             </div>
                         </div>
                     </div>
-
-                    @if(auth()->user()->is_admin)
-                        <x-nav-link :href="route('admin.index')" :active="request()->routeIs('admin.*')" class="whitespace-nowrap">
-                            {{ __('Administração') }}
-                        </x-nav-link>
-                    @endif
                 </div>
             </div>
 
