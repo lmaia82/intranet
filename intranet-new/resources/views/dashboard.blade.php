@@ -128,38 +128,61 @@
                             @php
                                 $chave = $diaInfo['data']->toDateString();
                                 $eventosDoDia = $eventosPorDia->get($chave, collect());
+                                $reservasDoDia = $reservasSalaPorDia->get($chave, collect());
+                                $temAlgo = $eventosDoDia->isNotEmpty() || $reservasDoDia->isNotEmpty();
                             @endphp
                             <button
                                 type="button"
-                                @if($eventosDoDia->isNotEmpty())
+                                @if($temAlgo)
                                     @click="selecionado = (selecionado === '{{ $chave }}' ? null : '{{ $chave }}')"
                                 @endif
                                 class="aspect-square rounded flex flex-col items-center justify-center text-xs
                                     {{ $diaInfo['foraDoMes'] ? 'text-gray-300' : 'text-gray-700' }}
                                     {{ $diaInfo['hoje'] ? 'ring-2 ring-blue-500 font-bold' : '' }}
-                                    {{ $eventosDoDia->isNotEmpty() ? 'hover:bg-blue-50 cursor-pointer' : 'cursor-default' }}"
+                                    {{ $temAlgo ? 'hover:bg-blue-50 cursor-pointer' : 'cursor-default' }}"
                             >
                                 <span>{{ $diaInfo['data']->day }}</span>
-                                @if($eventosDoDia->isNotEmpty())
-                                    <span class="w-1 h-1 rounded-full bg-blue-600 mt-0.5"></span>
+                                @if($temAlgo)
+                                    <span class="flex gap-0.5 mt-0.5">
+                                        @if($eventosDoDia->isNotEmpty())
+                                            <span class="w-1 h-1 rounded-full bg-blue-600"></span>
+                                        @endif
+                                        @if($reservasDoDia->isNotEmpty())
+                                            <span class="w-1 h-1 rounded-full bg-orange-500"></span>
+                                        @endif
+                                    </span>
                                 @endif
                             </button>
                         @endforeach
                     </div>
 
-                    @foreach($eventosPorDia as $chave => $eventosDoDia)
-                        <div x-show="selecionado === '{{ $chave }}'" x-cloak class="mt-3 p-3 bg-blue-50 rounded text-sm">
-                            <p class="font-semibold mb-1">{{ \Carbon\Carbon::parse($chave)->format('d/m/Y') }}</p>
-                            <ul class="space-y-1">
-                                @foreach($eventosDoDia as $evento)
-                                    <li>
-                                        <a href="{{ route('eventos.index') }}#evento-{{ $evento->id }}" class="text-blue-700 hover:underline">
-                                            {{ $evento->title }}@if($evento->local) — {{ $evento->local }}@endif
-                                        </a>
-                                    </li>
-                                @endforeach
-                            </ul>
-                        </div>
+                    @foreach($diasCalendario as $diaInfo)
+                        @php
+                            $chave = $diaInfo['data']->toDateString();
+                            $eventosDoDia = $eventosPorDia->get($chave, collect());
+                            $reservasDoDia = $reservasSalaPorDia->get($chave, collect());
+                        @endphp
+                        @if($eventosDoDia->isNotEmpty() || $reservasDoDia->isNotEmpty())
+                            <div x-show="selecionado === '{{ $chave }}'" x-cloak class="mt-3 p-3 bg-blue-50 rounded text-sm">
+                                <p class="font-semibold mb-1">{{ $diaInfo['data']->format('d/m/Y') }}</p>
+                                <ul class="space-y-1">
+                                    @foreach($eventosDoDia as $evento)
+                                        <li>
+                                            <a href="{{ route('eventos.index') }}#evento-{{ $evento->id }}" class="text-blue-700 hover:underline">
+                                                {{ $evento->title }}@if($evento->local) — {{ $evento->local }}@endif
+                                            </a>
+                                        </li>
+                                    @endforeach
+                                    @foreach($reservasDoDia as $reserva)
+                                        <li>
+                                            <a href="{{ route('reservas-sala.show', $reserva) }}" class="text-orange-700 hover:underline">
+                                                🏢 {{ $reserva->titulo }} — {{ $reserva->sala->nome }} ({{ $reserva->horaInicioFormatada() }})
+                                            </a>
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
                     @endforeach
                 </div>
 

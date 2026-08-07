@@ -96,6 +96,18 @@ Route::middleware('auth')->group(function () {
         ->middlewareFor(['create', 'store', 'edit', 'update', 'destroy'], 'permission:destaques.criar');
 });
 
+use App\Http\Controllers\ReservaSalaController;
+
+Route::middleware('auth')->group(function () {
+    Route::resource('reservas-sala', ReservaSalaController::class)
+        ->parameters(['reservas-sala' => 'reserva_sala'])
+        ->middlewareFor(['index'], ['permission:salas.ver', 'registrar.acesso:salas'])
+        ->middlewareFor(['show'], 'permission:salas.ver')
+        ->middlewareFor(['create', 'store', 'edit', 'update', 'destroy'], 'permission:salas.criar');
+    Route::get('reservas-sala-relatorios', [ReservaSalaController::class, 'relatorios'])->name('reservas-sala.relatorios')->middleware('permission:salas.ver');
+    Route::get('reservas-sala-imprimir-semana', [ReservaSalaController::class, 'imprimirSemana'])->name('reservas-sala.imprimir-semana')->middleware('permission:salas.ver');
+});
+
 use App\Http\Controllers\BuscaController;
 
 Route::get('busca', [BuscaController::class, 'index'])->name('busca.index')->middleware('auth');

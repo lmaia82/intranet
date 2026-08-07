@@ -8,6 +8,7 @@ use App\Models\Destaque;
 use App\Models\Evento;
 use App\Models\EventoGravado;
 use App\Models\Informativo;
+use App\Models\ReservaSala;
 use App\Models\Tutorial;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -74,11 +75,23 @@ class DashboardController extends Controller
             ->get()
             ->groupBy(fn ($evento) => $evento->dt_start->toDateString());
 
+        // Só entram aqui as reservas do próprio usuário (como organizador) —
+        // o calendário da página inicial destaca a reserva apenas para quem
+        // reservou, não para os demais colaboradores.
+        $reservasSalaPorDia = $user->hasPermission('salas.ver')
+            ? ReservaSala::with('sala')
+                ->where('user_id', $user->id)
+                ->whereBetween('data', [$inicioGrade->toDateString(), $fimGrade->toDateString()])
+                ->orderBy('horario_inicio')
+                ->get()
+                ->groupBy(fn ($reserva) => $reserva->data->toDateString())
+            : collect();
+
         return view('dashboard', compact(
             'destaques', 'informativos', 'eventos',
             'tutoriais', 'eventosGravados', 'documentosPublicos',
             'mesReferencia', 'nomeMesAno', 'mesAnterior', 'mesProximo',
-            'diasCalendario', 'eventosPorDia'
+            'diasCalendario', 'eventosPorDia', 'reservasSalaPorDia'
         ));
     }
 }

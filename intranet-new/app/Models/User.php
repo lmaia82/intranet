@@ -88,6 +88,11 @@ class User extends Authenticatable implements LdapAuthenticatable
         return $this->belongsTo(Group::class);
     }
 
+    public function reservasSala()
+    {
+        return $this->hasMany(ReservaSala::class);
+    }
+
     public function hasPermission(string $key): bool
     {
         if ($this->is_admin) {
